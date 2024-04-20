@@ -48,7 +48,7 @@ type DirectiveRoot struct {
 type ComplexityRoot struct {
 	Mutation struct {
 		CreateShelfCategory func(childComplexity int, name string) int
-		CreateShelfItem     func(childComplexity int, name string, categoryUlid string, tags []string, locationUlid string, description string) int
+		CreateShelfItem     func(childComplexity int, name string, categoryUlid string, tagsUlid []string, locationUlid string, description string) int
 		CreateShelfLocation func(childComplexity int, name string) int
 		CreateShelfTag      func(childComplexity int, name string) int
 		DeleteShelfCategory func(childComplexity int, ulid string) int
@@ -98,18 +98,18 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateShelfItem(ctx context.Context, name string, categoryUlid string, tags []string, locationUlid string, description string) (*ShelfItem, error)
+	CreateShelfItem(ctx context.Context, name string, categoryUlid string, tagsUlid []string, locationUlid string, description string) (*ShelfItem, error)
 	UpdateShelfItem(ctx context.Context, ulid string, name *string, categoryUlid *string, tags []string, locationUlid *string, description *string) (*ShelfItem, error)
-	DeleteShelfItem(ctx context.Context, ulid string) (*ShelfItem, error)
+	DeleteShelfItem(ctx context.Context, ulid string) (bool, error)
 	CreateShelfCategory(ctx context.Context, name string) (*ShelfCategory, error)
 	UpdateShelfCategory(ctx context.Context, ulid string, name *string) (*ShelfCategory, error)
-	DeleteShelfCategory(ctx context.Context, ulid string) (*ShelfCategory, error)
+	DeleteShelfCategory(ctx context.Context, ulid string) (bool, error)
 	CreateShelfTag(ctx context.Context, name string) (*ShelfTag, error)
 	UpdateShelfTag(ctx context.Context, ulid string, name *string) (*ShelfTag, error)
-	DeleteShelfTag(ctx context.Context, ulid string) (*ShelfTag, error)
+	DeleteShelfTag(ctx context.Context, ulid string) (bool, error)
 	CreateShelfLocation(ctx context.Context, name string) (*ShelfLocation, error)
 	UpdateShelfLocation(ctx context.Context, ulid string, name *string) (*ShelfLocation, error)
-	DeleteShelfLocation(ctx context.Context, ulid string) (*ShelfLocation, error)
+	DeleteShelfLocation(ctx context.Context, ulid string) (bool, error)
 }
 type QueryResolver interface {
 	ShelfItems(ctx context.Context) ([]*ShelfItem, error)
@@ -163,7 +163,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateShelfItem(childComplexity, args["name"].(string), args["categoryUlid"].(string), args["tags"].([]string), args["locationUlid"].(string), args["description"].(string)), true
+		return e.complexity.Mutation.CreateShelfItem(childComplexity, args["name"].(string), args["categoryUlid"].(string), args["tagsUlid"].([]string), args["locationUlid"].(string), args["description"].(string)), true
 
 	case "Mutation.createShelfLocation":
 		if e.complexity.Mutation.CreateShelfLocation == nil {
@@ -605,14 +605,14 @@ func (ec *executionContext) field_Mutation_createShelfItem_args(ctx context.Cont
 	}
 	args["categoryUlid"] = arg1
 	var arg2 []string
-	if tmp, ok := rawArgs["tags"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+	if tmp, ok := rawArgs["tagsUlid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tagsUlid"))
 		arg2, err = ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["tags"] = arg2
+	args["tagsUlid"] = arg2
 	var arg3 string
 	if tmp, ok := rawArgs["locationUlid"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationUlid"))
@@ -983,7 +983,7 @@ func (ec *executionContext) _Mutation_createShelfItem(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateShelfItem(rctx, fc.Args["name"].(string), fc.Args["categoryUlid"].(string), fc.Args["tags"].([]string), fc.Args["locationUlid"].(string), fc.Args["description"].(string))
+		return ec.resolvers.Mutation().CreateShelfItem(rctx, fc.Args["name"].(string), fc.Args["categoryUlid"].(string), fc.Args["tagsUlid"].([]string), fc.Args["locationUlid"].(string), fc.Args["description"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1122,11 +1122,14 @@ func (ec *executionContext) _Mutation_deleteShelfItem(ctx context.Context, field
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*ShelfItem)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOShelfItem2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItem(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteShelfItem(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1136,21 +1139,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteShelfItem(ctx context.Co
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "ulid":
-				return ec.fieldContext_ShelfItem_ulid(ctx, field)
-			case "name":
-				return ec.fieldContext_ShelfItem_name(ctx, field)
-			case "category":
-				return ec.fieldContext_ShelfItem_category(ctx, field)
-			case "tags":
-				return ec.fieldContext_ShelfItem_tags(ctx, field)
-			case "location":
-				return ec.fieldContext_ShelfItem_location(ctx, field)
-			case "description":
-				return ec.fieldContext_ShelfItem_description(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -1304,11 +1293,14 @@ func (ec *executionContext) _Mutation_deleteShelfCategory(ctx context.Context, f
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*ShelfCategory)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOShelfCategory2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfCategory(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteShelfCategory(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1318,13 +1310,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteShelfCategory(ctx contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "ulid":
-				return ec.fieldContext_ShelfCategory_ulid(ctx, field)
-			case "name":
-				return ec.fieldContext_ShelfCategory_name(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfCategory", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -1478,11 +1464,14 @@ func (ec *executionContext) _Mutation_deleteShelfTag(ctx context.Context, field 
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*ShelfTag)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOShelfTag2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfTag(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteShelfTag(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1492,13 +1481,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteShelfTag(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "ulid":
-				return ec.fieldContext_ShelfTag_ulid(ctx, field)
-			case "name":
-				return ec.fieldContext_ShelfTag_name(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfTag", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -1652,11 +1635,14 @@ func (ec *executionContext) _Mutation_deleteShelfLocation(ctx context.Context, f
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*ShelfLocation)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOShelfLocation2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfLocation(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_deleteShelfLocation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1666,13 +1652,7 @@ func (ec *executionContext) fieldContext_Mutation_deleteShelfLocation(ctx contex
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "ulid":
-				return ec.fieldContext_ShelfLocation_ulid(ctx, field)
-			case "name":
-				return ec.fieldContext_ShelfLocation_name(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfLocation", field.Name)
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	defer func() {
@@ -4624,6 +4604,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteShelfItem(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createShelfCategory":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createShelfCategory(ctx, field)
@@ -4636,6 +4619,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteShelfCategory(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createShelfTag":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createShelfTag(ctx, field)
@@ -4648,6 +4634,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteShelfTag(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createShelfLocation":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createShelfLocation(ctx, field)
@@ -4660,6 +4649,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteShelfLocation(ctx, field)
 			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

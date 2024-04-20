@@ -40,7 +40,7 @@ type Mutation {
   createShelfItem(
     name: String!
     categoryUlid: String!
-    tags: [String!]!
+    tagsUlid: [String!]!
     locationUlid: String!
     description: String!
   ): ShelfItem
@@ -52,14 +52,14 @@ type Mutation {
     locationUlid: String
     description: String
   ): ShelfItem
-  deleteShelfItem(ulid: String!): ShelfItem
+  deleteShelfItem(ulid: String!): Boolean!
   createShelfCategory(name: String!): ShelfCategory
   updateShelfCategory(ulid: String!, name: String): ShelfCategory
-  deleteShelfCategory(ulid: String!): ShelfCategory
+  deleteShelfCategory(ulid: String!): Boolean!
   createShelfTag(name: String!): ShelfTag
   updateShelfTag(ulid: String!, name: String): ShelfTag
-  deleteShelfTag(ulid: String!): ShelfTag
+  deleteShelfTag(ulid: String!): Boolean!
   createShelfLocation(name: String!): ShelfLocation
   updateShelfLocation(ulid: String!, name: String): ShelfLocation
-  deleteShelfLocation(ulid: String!): ShelfLocation
+  deleteShelfLocation(ulid: String!): Boolean!
 }

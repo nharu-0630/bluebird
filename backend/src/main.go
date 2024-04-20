@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 	"github.com/xyzyxJP/bluebird/src/graphql"
+	"github.com/xyzyxJP/bluebird/src/mock"
 	"github.com/xyzyxJP/bluebird/src/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -24,7 +25,9 @@ func main() {
 		log.Fatal(err)
 	}
 	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{})
-	// db.Create(config.DefaultHandlers())
+	db.Create(mock.MockShelfCategory())
+	db.Create(mock.MockShelfTag())
+	db.Create(mock.MockShelfLocation())
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -40,8 +43,8 @@ func main() {
 		AllowCredentials: true})
 	handler := c.Handler(http.DefaultServeMux)
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/"))
-	http.Handle("/graphql", srv)
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))

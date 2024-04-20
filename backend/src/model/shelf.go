@@ -6,7 +6,7 @@ import (
 
 type ShelfItem struct {
 	gorm.Model
-	ULID        string        `gorm:"uniqueIndex;not null"`
+	Ulid        string        `gorm:"uniqueIndex;not null"`
 	Name        string        `gorm:"not null"`
 	CategoryID  uint          `gorm:"not null"`
 	Category    ShelfCategory `gorm:"foreignKey:CategoryID"`
@@ -18,18 +18,18 @@ type ShelfItem struct {
 
 type ShelfCategory struct {
 	gorm.Model
-	ULID string `gorm:"uniqueIndex;not null"`
+	Ulid string `gorm:"uniqueIndex;not null"`
 	Name string `gorm:"not null"`
 }
 
 type ShelfTag struct {
 	gorm.Model
-	ULID string `gorm:"uniqueIndex;not null"`
+	Ulid string `gorm:"uniqueIndex;not null"`
 	Name string `gorm:"not null"`
 }
 
 type ShelfLocation struct {
 	gorm.Model
-	ULID string `gorm:"uniqueIndex;not null"`
+	Ulid string `gorm:"uniqueIndex;not null"`
 	Name string `gorm:"not null"`
 }
