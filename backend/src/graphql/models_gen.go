@@ -2,5 +2,32 @@
 
 package graphql
 
+type Mutation struct {
+}
+
 type Query struct {
+}
+
+type ShelfCategory struct {
+	Ulid string `json:"ulid"`
+	Name string `json:"name"`
+}
+
+type ShelfItem struct {
+	Ulid        string         `json:"ulid"`
+	Name        string         `json:"name"`
+	Category    *ShelfCategory `json:"category"`
+	Tags        []*ShelfTag    `json:"tags"`
+	Location    *ShelfLocation `json:"location"`
+	Description string         `json:"description"`
+}
+
+type ShelfLocation struct {
+	Ulid string `json:"ulid"`
+	Name string `json:"name"`
+}
+
+type ShelfTag struct {
+	Ulid string `json:"ulid"`
+	Name string `json:"name"`
 }

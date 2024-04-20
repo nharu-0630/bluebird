@@ -1,0 +1,65 @@
+scalar DateTime
+scalar Uint
+
+type ShelfItem {
+  ulid: String!
+  name: String!
+  category: ShelfCategory!
+  tags: [ShelfTag!]!
+  location: ShelfLocation!
+  description: String!
+}
+
+type ShelfCategory {
+  ulid: String!
+  name: String!
+}
+
+type ShelfTag {
+  ulid: String!
+  name: String!
+}
+
+type ShelfLocation {
+  ulid: String!
+  name: String!
+}
+
+type Query {
+  shelfItems: [ShelfItem!]!
+  shelfItem(ulid: String!): ShelfItem
+  shelfCategories: [ShelfCategory!]!
+  shelfCategory(ulid: String!): ShelfCategory
+  shelfTags: [ShelfTag!]!
+  shelfTag(ulid: String!): ShelfTag
+  shelfLocations: [ShelfLocation!]!
+  shelfLocation(ulid: String!): ShelfLocation
+}
+
+type Mutation {
+  createShelfItem(
+    name: String!
+    categoryUlid: String!
+    tags: [String!]!
+    locationUlid: String!
+    description: String!
+  ): ShelfItem
+  updateShelfItem(
+    ulid: String!
+    name: String
+    categoryUlid: String
+    tags: [String!]
+    locationUlid: String
+    description: String
+  ): ShelfItem
+  deleteShelfItem(ulid: String!): ShelfItem
+  createShelfCategory(name: String!): ShelfCategory
+  updateShelfCategory(ulid: String!, name: String): ShelfCategory
+  deleteShelfCategory(ulid: String!): ShelfCategory
+  createShelfTag(name: String!): ShelfTag
+  updateShelfTag(ulid: String!, name: String): ShelfTag
+  deleteShelfTag(ulid: String!): ShelfTag
+  createShelfLocation(name: String!): ShelfLocation
+  updateShelfLocation(ulid: String!, name: String): ShelfLocation
+  deleteShelfLocation(ulid: String!): ShelfLocation
+}

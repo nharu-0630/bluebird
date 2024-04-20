@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 	"github.com/xyzyxJP/bluebird/src/graphql"
+	"github.com/xyzyxJP/bluebird/src/model"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -22,7 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// db.AutoMigrate(&model.Handler{}, &model.Service{}, &model.Arg{}, &model.Task{})
+	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{})
 	// db.Create(config.DefaultHandlers())
 
 	port := os.Getenv("PORT")
