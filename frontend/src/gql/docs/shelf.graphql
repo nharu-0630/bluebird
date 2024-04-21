@@ -1,0 +1,39 @@
+query GetShelfItems {
+  shelfItems {
+    ulid
+    name
+    category {
+      ulid
+      name
+    }
+    tags {
+      ulid
+      name
+    }
+    location {
+      ulid
+      name
+    }
+    description
+  }
+}
+
+query GetShelfItem($ulid: String!) {
+  shelfItem(ulid: $ulid) {
+    ulid
+    name
+    category {
+      ulid
+      name
+    }
+    tags {
+      ulid
+      name
+    }
+    location {
+      ulid
+      name
+    }
+    description
+  }
+}
