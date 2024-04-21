@@ -1,7 +1,9 @@
 FROM node:20-alpine
 WORKDIR /app
 
-COPY package.json yarn.lock* ./
+COPY package.json .
+COPY yarn.lock .
+COPY .yarnrc.yml .
 
 COPY tsconfig.json .
 COPY next.config.mjs .
