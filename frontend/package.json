@@ -10,8 +10,7 @@
     "codegen": "graphql-code-generator"
   },
   "dependencies": {
-    "@apollo/client": "^3.10.0-rc.1",
-    "@apollo/server": "^4.10.4",
+    "@apollo/client": "^3.9.11",
     "@as-integrations/next": "^3.0.0",
     "@egoist/tailwindcss-icons": "^1.7.4",
     "@tanstack/react-table": "^8.16.0",
