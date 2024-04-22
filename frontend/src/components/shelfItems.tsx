@@ -8,23 +8,13 @@ import { mockShelfItems } from "@/mock/shelf";
 import { useQuery } from "@apollo/client";
 import {
   ColumnDef,
-  SortDirection,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-
-const getSortedIcon = (sortDirection: false | SortDirection) => {
-  if (sortDirection === "asc") {
-    return "i-tabler-sort-ascending";
-  }
-  if (sortDirection === "desc") {
-    return "i-tabler-sort-descending";
-  }
-  return "i-tabler-arrows-sort";
-};
+import { Checkbox } from "./ui/checkbox";
 
 export const ShelfItems = () => {
   const { data, loading, error } = useQuery<GetShelfItemsQuery>(
@@ -34,6 +24,20 @@ export const ShelfItems = () => {
   const shelfItems = mockShelfItems;
 
   const columns: ColumnDef<any>[] = [
+    {
+      id: "select",
+      header: ({ table }) => {
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomeRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />;
+      },
+      cell: 
+    },
     {
       header: ({ column }) => {
         return (
@@ -149,79 +153,13 @@ export const ShelfItems = () => {
 
   return (
     <div className="w-full">
-      <button
-        id="dropdownDefaultButton"
-        data-dropdown-toggle="dropdown"
-        className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-        type="button"
-      >
-        Dropdown button{" "}
-        <svg
-          className="w-2.5 h-2.5 ms-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 10 6"
-        >
-          <path
-            stroke="currentColor"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="m1 1 4 4 4-4"
-          />
-        </svg>
-      </button>
-
-      <div
-        id="dropdown"
-        className="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
-      >
-        <ul
-          className="py-2 text-sm text-gray-700 dark:text-gray-200"
-          aria-labelledby="dropdownDefaultButton"
-        >
-          <li>
-            <a
-              href="#"
-              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-            >
-              Dashboard
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-            >
-              Settings
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-            >
-              Earnings
-            </a>
-          </li>
-          <li>
-            <a
-              href="#"
-              className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-            >
-              Sign out
-            </a>
-          </li>
-        </ul>
-      </div>
       <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
         📦 ShelfItems
       </h1>
       <p className="text-lg font-normal text-gray-500 lg:text-xl dark:text-gray-400">
         {shelfItems.length} items
       </p>
-      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+      <div className="relative overflow-x-auto sm:rounded-lg">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             {table.getHeaderGroups().map((headerGroup) => (
@@ -348,16 +286,6 @@ export const ShelfItems = () => {
             </li>
           </ul>
         </nav>
-      </div>
-
-      <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-        <ul>
-          {shelfItems.map((item) => (
-            <li key={item.ulid}>
-              <pre>{JSON.stringify(item, null, 2)}</pre>
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );
