@@ -1,5 +1,5 @@
-import { ShelfItems } from "../../components/shelfItems";
 import WithApollo from "../../components/withApollo";
+import ShelfItems from "./shelf-items";
 
 export default function ShelfPage() {
   return (
