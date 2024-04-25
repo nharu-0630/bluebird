@@ -19,17 +19,17 @@ type ShelfItem struct {
 type ShelfCategory struct {
 	gorm.Model
 	Ulid string `gorm:"uniqueIndex;not null"`
-	Name string `gorm:"not null"`
+	Name string `gorm:"not null,unique"`
 }
 
 type ShelfTag struct {
 	gorm.Model
 	Ulid string `gorm:"uniqueIndex;not null"`
-	Name string `gorm:"not null"`
+	Name string `gorm:"not null,unique"`
 }
 
 type ShelfLocation struct {
 	gorm.Model
 	Ulid string `gorm:"uniqueIndex;not null"`
-	Name string `gorm:"not null"`
+	Name string `gorm:"not null,unique"`
 }
