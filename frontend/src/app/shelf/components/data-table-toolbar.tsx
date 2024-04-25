@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
-import { categories, tags } from "../data/data";
+import { category, location, tags } from "../data/data";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
 import { DataTableViewOptions } from "./data-table-view-options";
 
@@ -28,11 +28,11 @@ export function DataTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("category.name") && (
+        {table.getColumn("category") && (
           <DataTableFacetedFilter
-            column={table.getColumn("category.name")}
+            column={table.getColumn("category")}
             title="Category"
-            options={categories}
+            options={category}
           />
         )}
         {table.getColumn("tags") && (
@@ -40,6 +40,13 @@ export function DataTableToolbar<TData>({
             column={table.getColumn("tags")}
             title="Tags"
             options={tags}
+          />
+        )}
+        {table.getColumn("location") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("location")}
+            title="Location"
+            options={location}
           />
         )}
         {isFiltered && (

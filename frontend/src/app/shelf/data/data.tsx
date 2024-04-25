@@ -7,22 +7,7 @@ import {
   StopwatchIcon,
 } from "@radix-ui/react-icons";
 
-export const labels = [
-  {
-    value: "bug",
-    label: "Bug",
-  },
-  {
-    value: "feature",
-    label: "Feature",
-  },
-  {
-    value: "documentation",
-    label: "Documentation",
-  },
-];
-
-export const categories = [
+export const category = [
   {
     value: "Category1",
     label: "Category1",
@@ -55,5 +40,20 @@ export const tags = [
     label: "Tag3",
     value: "Tag3",
     icon: ArrowUpIcon,
+  },
+];
+
+export const location = [
+  {
+    value: "Location1",
+    label: "Location1",
+  },
+  {
+    value: "Location2",
+    label: "Location2",
+  },
+  {
+    value: "Location3",
+    label: "Location3",
   },
 ];

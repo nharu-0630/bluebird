@@ -36,6 +36,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "name",
+    id: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🖊️ Name" />
     ),
@@ -49,6 +50,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "category.name",
+    id: "category",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🧰 Category" />
     ),
@@ -65,18 +67,15 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "tags",
+    id: "tags",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🏷️ Tags" />
     ),
     cell: ({ row }) => {
       const tags = row.getValue("tags") as any;
-      const displayTags = tags.map((tag: any) => {
-        const foundTag = tags.find((tag: any) => tag.ulid === tag);
-        return foundTag ? foundTag.name : tag;
-      });
       return (
         <div className="flex max-w-[500px] space-x-2">
-          {displayTags.map((tag: any) => (
+          {tags.map((tag: any) => (
             <Badge key={tag.ulid} variant="outline" className="h-8 rounded-md">
               {tag.name}
             </Badge>
@@ -85,11 +84,15 @@ export const columns: ColumnDef<ShelfItem>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
+      const tags = row.getValue(id) as any;
+      return value.every((selectedTag: any) =>
+        tags.some((tag: any) => tag.name === selectedTag)
+      );
     },
   },
   {
     accessorKey: "location.name",
+    id: "location",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🌏 Location" />
     ),
@@ -106,6 +109,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "ulid",
+    id: "ulid",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🆔 ULID" />
     ),
