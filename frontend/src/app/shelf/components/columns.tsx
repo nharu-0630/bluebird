@@ -18,7 +18,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
             (table.getIsSomePageRowsSelected() && "indeterminate")
           }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
+          aria-label="すべてのアイテムを選択"
         />
       </div>
     ),
@@ -27,7 +27,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
+          aria-label="アイテムを選択"
         />
       </div>
     ),
@@ -36,9 +36,9 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "name",
-    id: "name",
+    id: "名前",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🖊️ Name" />
+      <DataTableColumnHeader column={column} title="🖊️ 名前" />
     ),
     cell: ({ row }) => {
       return (
@@ -50,9 +50,9 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "category.name",
-    id: "category",
+    id: "カテゴリ",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🧰 Category" />
+      <DataTableColumnHeader column={column} title="🧰 カテゴリ" />
     ),
     cell: (cell) => {
       return (
@@ -67,9 +67,9 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "tags",
-    id: "tags",
+    id: "タグ",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🏷️ Tags" />
+      <DataTableColumnHeader column={column} title="🏷️ タグ" />
     ),
     cell: ({ row }) => {
       const tags = row.getValue("tags") as any;
@@ -92,9 +92,9 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "location.name",
-    id: "location",
+    id: "保管場所",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🌏 Location" />
+      <DataTableColumnHeader column={column} title="🌏 保管場所" />
     ),
     cell: (cell) => {
       return (
@@ -109,7 +109,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     accessorKey: "ulid",
-    id: "ulid",
+    id: "ULID",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🆔 ULID" />
     ),

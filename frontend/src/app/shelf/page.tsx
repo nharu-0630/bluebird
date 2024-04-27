@@ -8,7 +8,7 @@ export default function ShelfPage() {
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
         <div className="w-full">
           <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-            📦 Items
+            📦 アイテム
           </h1>
           <div className="space-y-4">
             <ShelfTableButtons />

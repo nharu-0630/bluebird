@@ -1,13 +1,6 @@
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ShelfItemForm } from "./shelf-item-form";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ShelfItemAddForm } from "./shelf-item-add-form";
 
 export function ShelfTableButtons() {
   return (
@@ -15,16 +8,29 @@ export function ShelfTableButtons() {
       <div className="flex flex-1 items-center space-x-2">
         <Dialog>
           <DialogTrigger asChild>
-            <Button>Add Item</Button>
+            <Button>アイテムを追加</Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Item</DialogTitle>
-              <DialogDescription>
-                <ShelfItemForm />
-              </DialogDescription>
-            </DialogHeader>
+            <ShelfItemAddForm />
           </DialogContent>
+        </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant={"outline"}>カテゴリを追加</Button>
+          </DialogTrigger>
+          <DialogContent>{/* <ShelfItemAddForm /> */}</DialogContent>
+        </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant={"outline"}>タグを追加</Button>
+          </DialogTrigger>
+          <DialogContent>{/* <ShelfItemAddForm /> */}</DialogContent>
+        </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant={"outline"}>保管場所を追加</Button>
+          </DialogTrigger>
+          <DialogContent>{/* <ShelfItemAddForm /> */}</DialogContent>
         </Dialog>
       </div>
     </div>

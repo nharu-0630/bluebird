@@ -1,4 +1,4 @@
-import { z } from "zod"
+import { z } from "zod";
 
 export const shelfItemSchema = z.object({
     ulid: z.string(),

@@ -21,7 +21,6 @@ import React, {
 
 type MultiSelectorProps = {
   values: string[];
-  displayValues: string[];
   onValuesChange: (value: string[]) => void;
   loop?: boolean;
 } & React.ComponentPropsWithoutRef<typeof CommandPrimitive>;
@@ -75,7 +74,7 @@ const MultiSelector = ({
         onDisplayValueChange([...displayValue, displayVal]);
       }
     },
-    [value, displayValue]
+    [value, onValueChange, displayValue]
   );
 
   // TODO : change from else if use to switch case statement
@@ -131,7 +130,15 @@ const MultiSelector = ({
         }
       }
     },
-    [value, displayValue, inputValue, activeIndex, loop]
+    [
+      value,
+      dir,
+      activeIndex,
+      loop,
+      inputValue.length,
+      onValueChange,
+      displayValue,
+    ]
   );
 
   return (

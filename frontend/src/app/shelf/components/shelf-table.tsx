@@ -18,7 +18,7 @@ export default function ShelfTable() {
   if (error) return <p>Error: {error.message}</p>;
   const shelfItems = z.array(shelfItemSchema).parse(data?.shelfItems ?? []);
   return (
-    <div className="mb-4 ">
+    <div className="mb-4">
       <DataTable columns={columns} data={shelfItems} />
     </div>
   );

@@ -45,18 +45,17 @@ export function DataTableRowActions<TData>({
           <DropdownMenuItem
             onClick={() => navigator.clipboard.writeText(shelf.ulid)}
           >
-            Copy Shelf ULID
+            ULIDをコピー
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DialogTrigger>
-            <DropdownMenuItem>View Shelf QR</DropdownMenuItem>
+            <DropdownMenuItem>QRコードを表示</DropdownMenuItem>
           </DialogTrigger>
-          <DropdownMenuItem>View QR</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
+          <DialogTitle>QRコード</DialogTitle>
           <DialogDescription>
             This action cannot be undone. This will permanently delete your
             account and remove your data from our servers.

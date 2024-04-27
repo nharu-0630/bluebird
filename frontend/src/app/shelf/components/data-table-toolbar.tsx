@@ -64,31 +64,31 @@ export function DataTableToolbar<TData>({
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter name..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          placeholder=""
+          value={(table.getColumn("名前")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("名前")?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        {table.getColumn("category") && (
+        {table.getColumn("カテゴリ") && (
           <DataTableFacetedFilter
-            column={table.getColumn("category")}
-            title="Category"
+            column={table.getColumn("カテゴリ")}
+            title="カテゴリ"
             options={category}
           />
         )}
-        {table.getColumn("tags") && (
+        {table.getColumn("タグ") && (
           <DataTableFacetedFilter
-            column={table.getColumn("tags")}
-            title="Tags"
+            column={table.getColumn("タグ")}
+            title="タグ"
             options={tags}
           />
         )}
-        {table.getColumn("location") && (
+        {table.getColumn("保管場所") && (
           <DataTableFacetedFilter
-            column={table.getColumn("location")}
-            title="Location"
+            column={table.getColumn("保管場所")}
+            title="保管場所"
             options={location}
           />
         )}
@@ -98,7 +98,7 @@ export function DataTableToolbar<TData>({
             onClick={() => table.resetColumnFilters()}
             className="h-8 px-2 lg:px-3"
           >
-            Reset
+            リセット
             <Cross2Icon className="ml-2 h-4 w-4" />
           </Button>
         )}
