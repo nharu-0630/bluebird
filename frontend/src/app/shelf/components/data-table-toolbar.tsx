@@ -24,6 +24,7 @@ export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
+
   const {
     data: categoryData,
     loading: categoryLoading,
@@ -39,6 +40,7 @@ export function DataTableToolbar<TData>({
     loading: locationLoading,
     error: locationError,
   } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
+
   if (categoryLoading || tagsLoading || locationLoading) return null;
   if (categoryError || tagsError || locationError) return null;
 

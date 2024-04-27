@@ -19,7 +19,7 @@ export function ShelfTableButtons() {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Item</DialogTitle>
+              <DialogTitle>Item</DialogTitle>
               <DialogDescription>
                 <ShelfItemForm />
               </DialogDescription>
