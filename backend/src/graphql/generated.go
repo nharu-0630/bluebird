@@ -56,7 +56,7 @@ type ComplexityRoot struct {
 		DeleteShelfLocation func(childComplexity int, ulid string) int
 		DeleteShelfTag      func(childComplexity int, ulid string) int
 		UpdateShelfCategory func(childComplexity int, ulid string, name *string) int
-		UpdateShelfItem     func(childComplexity int, ulid string, name *string, categoryUlid *string, tags []string, locationUlid *string, description *string) int
+		UpdateShelfItem     func(childComplexity int, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) int
 		UpdateShelfLocation func(childComplexity int, ulid string, name *string) int
 		UpdateShelfTag      func(childComplexity int, ulid string, name *string) int
 	}
@@ -99,7 +99,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	CreateShelfItem(ctx context.Context, name string, categoryUlid string, tagsUlid []string, locationUlid string, description string) (*ShelfItem, error)
-	UpdateShelfItem(ctx context.Context, ulid string, name *string, categoryUlid *string, tags []string, locationUlid *string, description *string) (*ShelfItem, error)
+	UpdateShelfItem(ctx context.Context, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) (*ShelfItem, error)
 	DeleteShelfItem(ctx context.Context, ulid string) (bool, error)
 	CreateShelfCategory(ctx context.Context, name string) (*ShelfCategory, error)
 	UpdateShelfCategory(ctx context.Context, ulid string, name *string) (*ShelfCategory, error)
@@ -259,7 +259,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateShelfItem(childComplexity, args["ulid"].(string), args["name"].(*string), args["categoryUlid"].(*string), args["tags"].([]string), args["locationUlid"].(*string), args["description"].(*string)), true
+		return e.complexity.Mutation.UpdateShelfItem(childComplexity, args["ulid"].(string), args["name"].(*string), args["categoryUlid"].(*string), args["tagsUlid"].([]string), args["locationUlid"].(*string), args["description"].(*string)), true
 
 	case "Mutation.updateShelfLocation":
 		if e.complexity.Mutation.UpdateShelfLocation == nil {
@@ -779,14 +779,14 @@ func (ec *executionContext) field_Mutation_updateShelfItem_args(ctx context.Cont
 	}
 	args["categoryUlid"] = arg2
 	var arg3 []string
-	if tmp, ok := rawArgs["tags"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tags"))
+	if tmp, ok := rawArgs["tagsUlid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tagsUlid"))
 		arg3, err = ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["tags"] = arg3
+	args["tagsUlid"] = arg3
 	var arg4 *string
 	if tmp, ok := rawArgs["locationUlid"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("locationUlid"))
@@ -1049,7 +1049,7 @@ func (ec *executionContext) _Mutation_updateShelfItem(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateShelfItem(rctx, fc.Args["ulid"].(string), fc.Args["name"].(*string), fc.Args["categoryUlid"].(*string), fc.Args["tags"].([]string), fc.Args["locationUlid"].(*string), fc.Args["description"].(*string))
+		return ec.resolvers.Mutation().UpdateShelfItem(rctx, fc.Args["ulid"].(string), fc.Args["name"].(*string), fc.Args["categoryUlid"].(*string), fc.Args["tagsUlid"].([]string), fc.Args["locationUlid"].(*string), fc.Args["description"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

@@ -6,7 +6,6 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 
 	ulid "github.com/oklog/ulid/v2"
 	"github.com/xyzyxJP/bluebird/src/model"
@@ -54,8 +53,73 @@ func (r *mutationResolver) CreateShelfItem(ctx context.Context, name string, cat
 }
 
 // UpdateShelfItem is the resolver for the updateShelfItem field.
-func (r *mutationResolver) UpdateShelfItem(ctx context.Context, ulid string, name *string, categoryUlid *string, tags []string, locationUlid *string, description *string) (*ShelfItem, error) {
-	panic(fmt.Errorf("not implemented: UpdateShelfItem - updateShelfItem"))
+func (r *mutationResolver) UpdateShelfItem(ctx context.Context, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) (*ShelfItem, error) {
+	var shelfItem model.ShelfItem
+	if err := r.DB.Where("ulid = ?", ulid).First(&shelfItem).Error; err != nil {
+		return nil, err
+	}
+	if name != nil {
+		shelfItem.Name = *name
+	}
+	if categoryUlid != nil {
+		var shelfCategory model.ShelfCategory
+		if err := r.DB.Where("ulid = ?", *categoryUlid).First(&shelfCategory).Error; err != nil {
+			return nil, err
+		}
+		shelfItem.CategoryID = shelfCategory.ID
+	}
+	if tagsUlid != nil {
+		var shelfTags []model.ShelfTag
+		// var parsedShelfTags []*ShelfTag
+		for _, tagUlid := range tagsUlid {
+			var shelfTag model.ShelfTag
+			if err := r.DB.Where("ulid = ?", tagUlid).First(&shelfTag).Error; err != nil {
+				return nil, err
+			}
+			shelfTags = append(shelfTags, shelfTag)
+			// parsedShelfTags = append(parsedShelfTags, &ShelfTag{Ulid: shelfTag.Ulid, Name: shelfTag.Name})
+		}
+		if err := r.DB.Model(&shelfItem).Association("Tags").Replace(&shelfTags); err != nil {
+			return nil, err
+		}
+	}
+	if locationUlid != nil {
+		var shelfLocation model.ShelfLocation
+		if err := r.DB.Where("ulid = ?", *locationUlid).First(&shelfLocation).Error; err != nil {
+			return nil, err
+		}
+		shelfItem.LocationID = shelfLocation.ID
+	}
+	if description != nil {
+		shelfItem.Description = *description
+	}
+	if err := r.DB.Save(&shelfItem).Error; err != nil {
+		return nil, err
+	}
+	var category model.ShelfCategory
+	if err := r.DB.Where("id = ?", shelfItem.CategoryID).First(&category).Error; err != nil {
+		return nil, err
+	}
+	var tags []model.ShelfTag
+	if err := r.DB.Model(&shelfItem).Association("Tags").Find(&tags); err != nil {
+		return nil, err
+	}
+	var parsedTags []*ShelfTag
+	for _, tag := range tags {
+		parsedTags = append(parsedTags, &ShelfTag{Ulid: tag.Ulid, Name: tag.Name})
+	}
+	var location model.ShelfLocation
+	if err := r.DB.Where("id = ?", shelfItem.LocationID).First(&location).Error; err != nil {
+		return nil, err
+	}
+	return &ShelfItem{
+		Ulid:        ulid,
+		Name:        shelfItem.Name,
+		Category:    &ShelfCategory{Ulid: category.Ulid, Name: category.Name},
+		Tags:        parsedTags,
+		Location:    &ShelfLocation{Ulid: location.Ulid, Name: location.Name},
+		Description: shelfItem.Description,
+	}, nil
 }
 
 // DeleteShelfItem is the resolver for the deleteShelfItem field.

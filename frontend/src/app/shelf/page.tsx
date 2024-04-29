@@ -1,4 +1,4 @@
-import WithApollo from "../../components/withApollo";
+import WithApollo from "../../components/with-apollo";
 import ShelfTable from "./components/shelf-table";
 import { ShelfTableButtons } from "./components/shelf-table-buttons";
 

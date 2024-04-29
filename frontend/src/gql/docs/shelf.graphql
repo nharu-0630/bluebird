@@ -90,3 +90,41 @@ mutation CreateShelfItem(
     description
   }
 }
+
+mutation UpdateShelfItem(
+  $ulid: String!
+  $name: String
+  $categoryUlid: String
+  $tagsUlid: [String!]
+  $locationUlid: String
+  $description: String
+) {
+  updateShelfItem(
+    ulid: $ulid
+    name: $name
+    categoryUlid: $categoryUlid
+    tagsUlid: $tagsUlid
+    locationUlid: $locationUlid
+    description: $description
+  ) {
+    ulid
+    name
+    category {
+      ulid
+      name
+    }
+    tags {
+      ulid
+      name
+    }
+    location {
+      ulid
+      name
+    }
+    description
+  }
+}
+
+mutation DeleteShelfItem($ulid: String!) {
+  deleteShelfItem(ulid: $ulid)
+}

@@ -64,7 +64,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
     },
   },
   {
-    accessorKey: "tags.name",
+    accessorKey: "tags",
     id: "タグ",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🏷️ タグ" />

@@ -52,7 +52,11 @@ const shelfItemCreateFormSchema = z.object({
 
 type ShelfItemCreateForm = z.infer<typeof shelfItemCreateFormSchema>;
 
-export function ShelfItemCreateForm() {
+interface ShelfItemCreateDialogProps {
+  onOpenChange: (value: boolean) => void;
+}
+
+export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
   const form = useForm<ShelfItemCreateForm>({
     resolver: zodResolver(shelfItemCreateFormSchema),
     mode: "onBlur",
@@ -101,6 +105,9 @@ export function ShelfItemCreateForm() {
         description: data.description ?? "",
       },
     });
+    if (!createShelfItemLoading) {
+      props.onOpenChange(false);
+    }
   }
 
   return (
@@ -156,6 +163,18 @@ export function ShelfItemCreateForm() {
                 <MultiSelector
                   onValuesChange={field.onChange}
                   values={field.value ?? []}
+                  displayValues={
+                    field.value
+                      .map(
+                        (tag) =>
+                          tagsData?.shelfTags.find((t) => t.ulid === tag)?.name
+                      )
+                      .filter(
+                        (item): item is Exclude<typeof item, undefined> =>
+                          item !== undefined
+                      ) ?? []
+                  }
+                  onDisplayValuesChange={() => {}}
                   loop
                   className="w-full"
                 >

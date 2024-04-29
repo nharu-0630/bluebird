@@ -21,7 +21,9 @@ import React, {
 
 type MultiSelectorProps = {
   values: string[];
+  displayValues: string[];
   onValuesChange: (value: string[]) => void;
+  onDisplayValuesChange: (value: string[]) => void;
   loop?: boolean;
 } & React.ComponentPropsWithoutRef<typeof CommandPrimitive>;
 
@@ -49,7 +51,9 @@ const useMultiSelect = () => {
 
 const MultiSelector = ({
   values: value,
+  displayValues: displayValue,
   onValuesChange: onValueChange,
+  onDisplayValuesChange: onDisplayValueChange,
   loop = false,
   className,
   children,
@@ -60,7 +64,7 @@ const MultiSelector = ({
   const [open, setOpen] = useState<boolean>(false);
   const [activeIndex, setActiveIndex] = useState<number>(-1);
 
-  const [displayValue, onDisplayValueChange] = useState<string[]>([]);
+  // const [displayValue, onDisplayValueChange] = useState<string[]>([]);
 
   const onValueChangeHandler = useCallback(
     (val: string, displayVal: string) => {
@@ -74,7 +78,7 @@ const MultiSelector = ({
         onDisplayValueChange([...displayValue, displayVal]);
       }
     },
-    [value, onValueChange, displayValue]
+    [value, onValueChange, displayValue, onDisplayValueChange]
   );
 
   // TODO : change from else if use to switch case statement
@@ -138,6 +142,7 @@ const MultiSelector = ({
       inputValue.length,
       onValueChange,
       displayValue,
+      onDisplayValueChange,
     ]
   );
 

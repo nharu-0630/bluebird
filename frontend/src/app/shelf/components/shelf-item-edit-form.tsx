@@ -27,20 +27,21 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CreateShelfItemDocument,
-  CreateShelfItemMutation,
-  CreateShelfItemMutationVariables,
   GetShelfCategoriesDocument,
   GetShelfCategoriesQuery,
   GetShelfLocationsDocument,
   GetShelfLocationsQuery,
   GetShelfTagsDocument,
   GetShelfTagsQuery,
+  UpdateShelfItemDocument,
+  UpdateShelfItemMutation,
+  UpdateShelfItemMutationVariables,
 } from "@/gql/gen/graphql";
 import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { ShelfItem } from "../data/schema";
 
 const shelfItemEditFormSchema = z.object({
   ulid: z.string().length(26, { message: "Must be 26 characters" }),
@@ -51,19 +52,24 @@ const shelfItemEditFormSchema = z.object({
   description: z.string().optional(),
 });
 
-type ShelfItemCreateForm = z.infer<typeof shelfItemEditFormSchema>;
+type ShelfItemEditForm = z.infer<typeof shelfItemEditFormSchema>;
 
-export function ShelfItemEditForm() {
-  const form = useForm<ShelfItemCreateForm>({
+interface ShelfItemEditDialogProps {
+  shelfItem: ShelfItem;
+  onOpenChange: (value: boolean) => void;
+}
+
+export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
+  const form = useForm<ShelfItemEditForm>({
     resolver: zodResolver(shelfItemEditFormSchema),
     mode: "onBlur",
     defaultValues: {
-      ulid: "",
-      name: "",
-      category: "",
-      tags: [],
-      location: "",
-      description: "",
+      ulid: props.shelfItem.ulid,
+      name: props.shelfItem.name,
+      category: props.shelfItem.category.ulid,
+      tags: props.shelfItem.tags.map((tag) => tag.ulid),
+      location: props.shelfItem.location.ulid,
+      description: props.shelfItem.description,
     },
   });
 
@@ -84,18 +90,19 @@ export function ShelfItemEditForm() {
   } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
 
   const [
-    createShelfItem,
-    { loading: createShelfItemLoading, error: createShelfItemError },
-  ] = useMutation<CreateShelfItemMutation, CreateShelfItemMutationVariables>(
-    CreateShelfItemDocument
+    updateShelfItem,
+    { loading: updateShelfItemLoading, error: updateShelfItemError },
+  ] = useMutation<UpdateShelfItemMutation, UpdateShelfItemMutationVariables>(
+    UpdateShelfItemDocument
   );
 
   if (categoryLoading || tagsLoading || locationLoading) return null;
   if (categoryError || tagsError || locationError) return null;
 
-  function onSubmit(data: ShelfItemCreateForm) {
-    createShelfItem({
+  function onSubmit(data: ShelfItemEditForm) {
+    updateShelfItem({
       variables: {
+        ulid: data.ulid,
         name: data.name,
         categoryUlid: data.category,
         tagsUlid: data.tags,
@@ -103,6 +110,9 @@ export function ShelfItemEditForm() {
         description: data.description ?? "",
       },
     });
+    if (!updateShelfItemLoading) {
+      props.onOpenChange(false);
+    }
   }
 
   return (
@@ -115,7 +125,7 @@ export function ShelfItemEditForm() {
             <FormItem>
               <FormLabel>ULID</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} readOnly />
               </FormControl>
             </FormItem>
           )}
@@ -169,7 +179,19 @@ export function ShelfItemEditForm() {
               <FormControl>
                 <MultiSelector
                   onValuesChange={field.onChange}
-                  values={field.value ?? []}
+                  values={field.value}
+                  displayValues={
+                    field.value
+                      .map(
+                        (tag) =>
+                          tagsData?.shelfTags.find((t) => t.ulid === tag)?.name
+                      )
+                      .filter(
+                        (item): item is Exclude<typeof item, undefined> =>
+                          item !== undefined
+                      ) ?? []
+                  }
+                  onDisplayValuesChange={() => {}}
                   loop
                   className="w-full"
                 >
@@ -234,7 +256,7 @@ export function ShelfItemEditForm() {
             </FormItem>
           )}
         />
-        <Button type="submit">追加</Button>
+        <Button type="submit">変更</Button>
       </form>
     </Form>
   );

@@ -45,7 +45,7 @@ type Mutation {
     ulid: String!
     name: String
     categoryUlid: String
-    tags: [String!]
+    tagsUlid: [String!]
     locationUlid: String
     description: String
   ): ShelfItem
