@@ -9,7 +9,7 @@ import {
   GetShelfLocationsQuery,
   GetShelfTagsDocument,
   GetShelfTagsQuery,
-} from "@/gql/gen/client/graphql";
+} from "@/gql/gen/graphql";
 import { useQuery } from "@apollo/client";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";

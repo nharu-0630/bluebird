@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ShelfItemAddForm } from "./shelf-item-add-form";
+import { ShelfItemCreateForm } from "./shelf-item-create-form";
 
 export function ShelfTableButtons() {
   return (
@@ -11,7 +11,7 @@ export function ShelfTableButtons() {
             <Button>アイテムを追加</Button>
           </DialogTrigger>
           <DialogContent>
-            <ShelfItemAddForm />
+            <ShelfItemCreateForm />
           </DialogContent>
         </Dialog>
         <Dialog>

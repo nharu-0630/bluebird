@@ -42,9 +42,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="flex items-center space-x-2">
-          {row.getValue("name")}
-        </div>
+        <div className="flex items-center space-x-2">{row.original.name}</div>
       );
     },
   },
@@ -54,10 +52,10 @@ export const columns: ColumnDef<ShelfItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🧰 カテゴリ" />
     ),
-    cell: (cell) => {
+    cell: ({ row }) => {
       return (
         <div className="flex items-center space-x-2">
-          {cell.getValue() as any}
+          {row.original.category.name}
         </div>
       );
     },
@@ -66,13 +64,13 @@ export const columns: ColumnDef<ShelfItem>[] = [
     },
   },
   {
-    accessorKey: "tags",
+    accessorKey: "tags.name",
     id: "タグ",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🏷️ タグ" />
     ),
     cell: ({ row }) => {
-      const tags = row.getValue("tags") as any;
+      const tags = row.original.tags;
       return (
         <div className="flex max-w-[500px] space-x-2">
           {tags.map((tag: any) => (
@@ -84,9 +82,9 @@ export const columns: ColumnDef<ShelfItem>[] = [
       );
     },
     filterFn: (row, id, value) => {
-      const tags = row.getValue(id) as any;
+      const tags = row.original.tags;
       return value.every((selectedTag: any) =>
-        tags.some((tag: any) => tag.name === selectedTag)
+        tags.some((tag) => tag.name === selectedTag)
       );
     },
   },
@@ -96,10 +94,10 @@ export const columns: ColumnDef<ShelfItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🌏 保管場所" />
     ),
-    cell: (cell) => {
+    cell: ({ row }) => {
       return (
         <div className="flex items-center space-x-2">
-          {cell.getValue() as any}
+          {row.original.location.name}
         </div>
       );
     },
@@ -113,8 +111,8 @@ export const columns: ColumnDef<ShelfItem>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="🆔 ULID" />
     ),
-    cell: (cell) => {
-      return <pre>{cell.getValue() as any}</pre>;
+    cell: ({ row }) => {
+      return <pre>{row.original.ulid}</pre>;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));

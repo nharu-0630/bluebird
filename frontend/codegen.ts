@@ -6,15 +6,12 @@ const config: CodegenConfig = {
   schema: "./../backend/src/graphql/schema/*.graphql",
   documents: "src/gql/docs/*.graphql",
   generates: {
-    "src/gql/gen/client/": {
+    "src/gql/gen/": {
       preset: "client",
       plugins: [],
       presetConfig: {
         gqlTagName: "gql",
       },
-    },
-    "src/gql/gen/server/resolvers-types.ts": {
-      plugins: ["typescript", "typescript-resolvers"],
     },
   },
   ignoreNoDocuments: true,

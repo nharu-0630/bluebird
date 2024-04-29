@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  GetShelfItemsDocument,
-  GetShelfItemsQuery,
-} from "@/gql/gen/client/graphql";
+import { GetShelfItemsDocument, GetShelfItemsQuery } from "@/gql/gen/graphql";
 import { useQuery } from "@apollo/client";
 import { z } from "zod";
 import { shelfItemSchema } from "../data/schema";

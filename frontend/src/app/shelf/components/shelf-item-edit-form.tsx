@@ -27,21 +27,22 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  CreateShelfItemDocument,
+  CreateShelfItemMutation,
+  CreateShelfItemMutationVariables,
   GetShelfCategoriesDocument,
   GetShelfCategoriesQuery,
   GetShelfLocationsDocument,
   GetShelfLocationsQuery,
   GetShelfTagsDocument,
   GetShelfTagsQuery,
-} from "@/gql/gen/client/graphql";
-import { useQuery } from "@apollo/client";
+} from "@/gql/gen/graphql";
+import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { IoIosRefresh } from "react-icons/io";
-import { ulid } from "ulid";
 import { z } from "zod";
 
-const shelfItemAddFormSchema = z.object({
+const shelfItemEditFormSchema = z.object({
   ulid: z.string().length(26, { message: "Must be 26 characters" }),
   name: z.string().min(1, { message: "Must be at least 1 character" }),
   category: z.string().length(26, { message: "Must be 26 characters" }),
@@ -50,14 +51,14 @@ const shelfItemAddFormSchema = z.object({
   description: z.string().optional(),
 });
 
-type ShelfItemAddForm = z.infer<typeof shelfItemAddFormSchema>;
+type ShelfItemCreateForm = z.infer<typeof shelfItemEditFormSchema>;
 
-export function ShelfItemAddForm() {
-  const form = useForm<ShelfItemAddForm>({
-    resolver: zodResolver(shelfItemAddFormSchema),
+export function ShelfItemEditForm() {
+  const form = useForm<ShelfItemCreateForm>({
+    resolver: zodResolver(shelfItemEditFormSchema),
     mode: "onBlur",
     defaultValues: {
-      ulid: ulid(),
+      ulid: "",
       name: "",
       category: "",
       tags: [],
@@ -82,11 +83,26 @@ export function ShelfItemAddForm() {
     error: locationError,
   } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
 
+  const [
+    createShelfItem,
+    { loading: createShelfItemLoading, error: createShelfItemError },
+  ] = useMutation<CreateShelfItemMutation, CreateShelfItemMutationVariables>(
+    CreateShelfItemDocument
+  );
+
   if (categoryLoading || tagsLoading || locationLoading) return null;
   if (categoryError || tagsError || locationError) return null;
 
-  function onSubmit(data: ShelfItemAddForm) {
-    console.log(data);
+  function onSubmit(data: ShelfItemCreateForm) {
+    createShelfItem({
+      variables: {
+        name: data.name,
+        categoryUlid: data.category,
+        tagsUlid: data.tags,
+        locationUlid: data.location,
+        description: data.description ?? "",
+      },
+    });
   }
 
   return (
@@ -99,12 +115,7 @@ export function ShelfItemAddForm() {
             <FormItem>
               <FormLabel>ULID</FormLabel>
               <FormControl>
-                <div className="flex w-full items-center space-x-2">
-                  <Input {...field} />
-                  <Button onClick={() => field.onChange(ulid())}>
-                    <IoIosRefresh />
-                  </Button>
-                </div>
+                <Input {...field} />
               </FormControl>
             </FormItem>
           )}
@@ -198,7 +209,6 @@ export function ShelfItemAddForm() {
                     <SelectValue />
                     <SelectContent>
                       <SelectGroup>
-                        {/* <SelectLabel>Location</SelectLabel> */}
                         {locationData?.shelfLocations.map((location) => (
                           <SelectItem key={location.ulid} value={location.ulid}>
                             {location.name}

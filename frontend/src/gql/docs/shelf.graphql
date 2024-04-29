@@ -59,13 +59,19 @@ query GetShelfLocations {
   }
 }
 
-mutation CreateShelfItem {
+mutation CreateShelfItem(
+  $name: String!
+  $categoryUlid: String!
+  $tagsUlid: [String!]!
+  $locationUlid: String!
+  $description: String!
+) {
   createShelfItem(
-    name: "Item Name"
-    categoryUlid: "Category ULID"
-    tagsUlid: ["Tag ULID"]
-    locationUlid: "Location ULID"
-    description: "Item Description"
+    name: $name
+    categoryUlid: $categoryUlid
+    tagsUlid: $tagsUlid
+    locationUlid: $locationUlid
+    description: $description
   ) {
     ulid
     name
