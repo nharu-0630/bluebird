@@ -42,7 +42,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const shelfItemCreateFormSchema = z.object({
+const ShelfItemCreateFormSchema = z.object({
   name: z.string().min(1, { message: "Must be at least 1 character" }),
   category: z.string().length(26, { message: "Must be 26 characters" }),
   tags: z.array(z.string().length(26, { message: "Must be 26 characters" })),
@@ -50,7 +50,7 @@ const shelfItemCreateFormSchema = z.object({
   description: z.string().optional(),
 });
 
-type ShelfItemCreateForm = z.infer<typeof shelfItemCreateFormSchema>;
+type ShelfItemCreateForm = z.infer<typeof ShelfItemCreateFormSchema>;
 
 interface ShelfItemCreateDialogProps {
   onOpenChange: (value: boolean) => void;
@@ -58,7 +58,7 @@ interface ShelfItemCreateDialogProps {
 
 export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
   const form = useForm<ShelfItemCreateForm>({
-    resolver: zodResolver(shelfItemCreateFormSchema),
+    resolver: zodResolver(ShelfItemCreateFormSchema),
     mode: "onBlur",
     defaultValues: {
       name: "",

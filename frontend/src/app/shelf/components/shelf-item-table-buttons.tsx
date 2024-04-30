@@ -3,10 +3,12 @@
 import { useDialog } from "@/components/extension/use-dialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ShelfItemCreateForm } from "./shelf-item-create-form";
+import { ShelfCategoryEditForm } from "./form/shelf-category-edit-form";
+import { ShelfItemCreateForm } from "./form/shelf-item-create-form";
 
-export function ShelfTableButtons() {
+export function ShelfItemTableButtons() {
   const shelfItemCreateDialog = useDialog();
+  const shelfCategoryEditDialog = useDialog();
 
   return (
     <div className="flex items-center justify-between">
@@ -23,7 +25,11 @@ export function ShelfTableButtons() {
           <DialogTrigger asChild>
             <Button variant={"outline"}>カテゴリを編集</Button>
           </DialogTrigger>
-          <DialogContent>{/* <ShelfItemAddForm /> */}</DialogContent>
+          <DialogContent>
+            <ShelfCategoryEditForm
+              onOpenChange={shelfCategoryEditDialog.props.onOpenChange}
+            />
+          </DialogContent>
         </Dialog>
         <Dialog>
           <DialogTrigger asChild>

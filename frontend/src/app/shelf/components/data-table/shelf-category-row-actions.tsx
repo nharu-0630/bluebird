@@ -4,19 +4,10 @@ import { Button } from "@/components/ui/button";
 
 import { useDialog } from "@/components/extension/use-dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -35,22 +26,19 @@ import {
 import { useMutation } from "@apollo/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Row } from "@tanstack/react-table";
-import { QRCodeSVG } from "qrcode.react";
-import { shelfItemSchema } from "../data/schema";
-import { ShelfItemEditForm } from "./shelf-item-edit-form";
+import { ShelfCategorySchema } from "../../schema/shelf-category";
 
-interface DataTableRowActionsProps<TData> {
+interface ShelfCategoryRowActionsProps<TData> {
   row: Row<TData>;
 }
 
-export function DataTableRowActions<TData>({
+export function ShelfCategoryRowActions<TData>({
   row,
-}: DataTableRowActionsProps<TData>) {
-  const shelf = shelfItemSchema.parse(row.original);
+}: ShelfCategoryRowActionsProps<TData>) {
+  const shelf = ShelfCategorySchema.parse(row.original);
 
   const editDialog = useDialog();
   const deleteDialog = useDialog();
-  const qrCodeDialog = useDialog();
 
   const [
     deleteShelfItem,
@@ -79,48 +67,40 @@ export function DataTableRowActions<TData>({
           >
             ULIDをコピー
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={qrCodeDialog.trigger}>
-            QRコードを表示
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog {...editDialog.props}>
-        <DialogContent>
-          <ShelfItemEditForm
-            onOpenChange={editDialog.props.onOpenChange}
-            shelfItem={shelf}
-          />
-        </DialogContent>
+        <DialogContent></DialogContent>
       </Dialog>
-      <AlertDialog {...deleteDialog.props}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>アイテムを削除しますか？</AlertDialogTitle>
-            <AlertDialogDescription>
-              アイテムを削除します。この操作を元に戻すことはできません。
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>中止</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={async () => {
-                await deleteShelfItem({ variables: { ulid: shelf.ulid } });
-                deleteDialog.props.onOpenChange(false);
-              }}
-            >
-              削除
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      <Dialog {...qrCodeDialog.props}>
+      <Dialog {...deleteDialog.props}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>QRコード</DialogTitle>
+            <DialogTitle>アイテムを削除しますか？</DialogTitle>
             <DialogDescription>
-              <QRCodeSVG value={"https://nharu.dev/shelf/i/" + shelf.ulid} />,
+              アイテムを削除します。この操作を元に戻すことはできません。
             </DialogDescription>
           </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                deleteDialog.props.onOpenChange(false);
+              }}
+              variant={"outline"}
+            >
+              キャンセル
+            </Button>
+            <Button
+              onClick={async () => {
+                await deleteShelfItem({ variables: { ulid: shelf.ulid } });
+                if (!deleteShelfItemLoading) {
+                  deleteDialog.props.onOpenChange(false);
+                }
+              }}
+              variant={"destructive"}
+            >
+              削除
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const shelfItemSchema = z.object({
+export const ShelfItemSchema = z.object({
     ulid: z.string(),
     name: z.string(),
     category: z.object({
@@ -18,4 +18,4 @@ export const shelfItemSchema = z.object({
     description: z.string().optional(),
 })
 
-export type ShelfItem = z.infer<typeof shelfItemSchema>
+export type ShelfItem = z.infer<typeof ShelfItemSchema>

@@ -41,9 +41,9 @@ import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ShelfItem } from "../data/schema";
+import { ShelfItem } from "../../schema/shelf-item";
 
-const shelfItemEditFormSchema = z.object({
+const ShelfItemEditFormSchema = z.object({
   ulid: z.string().length(26, { message: "Must be 26 characters" }),
   name: z.string().min(1, { message: "Must be at least 1 character" }),
   category: z.string().length(26, { message: "Must be 26 characters" }),
@@ -52,7 +52,7 @@ const shelfItemEditFormSchema = z.object({
   description: z.string().optional(),
 });
 
-type ShelfItemEditForm = z.infer<typeof shelfItemEditFormSchema>;
+type ShelfItemEditForm = z.infer<typeof ShelfItemEditFormSchema>;
 
 interface ShelfItemEditDialogProps {
   shelfItem: ShelfItem;
@@ -61,7 +61,7 @@ interface ShelfItemEditDialogProps {
 
 export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
   const form = useForm<ShelfItemEditForm>({
-    resolver: zodResolver(shelfItemEditFormSchema),
+    resolver: zodResolver(ShelfItemEditFormSchema),
     mode: "onBlur",
     defaultValues: {
       ulid: props.shelfItem.ulid,

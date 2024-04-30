@@ -3,11 +3,11 @@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
-import { ShelfItem } from "../data/schema";
+import { ShelfItem } from "../../schema/shelf-item";
 import { DataTableColumnHeader } from "./data-table-column-header";
-import { DataTableRowActions } from "./data-table-row-actions";
+import { ShelfItemRowActions } from "./shelf-item-row-actions";
 
-export const columns: ColumnDef<ShelfItem>[] = [
+export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -120,7 +120,7 @@ export const columns: ColumnDef<ShelfItem>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    cell: ({ row }) => <ShelfItemRowActions row={row} />,
     enableHiding: false,
   },
 ];

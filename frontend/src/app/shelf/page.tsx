@@ -1,6 +1,6 @@
 import WithApollo from "../../components/with-apollo";
-import ShelfTable from "./components/shelf-table";
-import { ShelfTableButtons } from "./components/shelf-table-buttons";
+import ShelfItemTable from "./components/shelf-item-table";
+import { ShelfItemTableButtons } from "./components/shelf-item-table-buttons";
 
 export default function ShelfPage() {
   return (
@@ -11,8 +11,8 @@ export default function ShelfPage() {
             📦 アイテム
           </h1>
           <div className="space-y-4">
-            <ShelfTableButtons />
-            <ShelfTable />
+            <ShelfItemTableButtons />
+            <ShelfItemTable />
           </div>
         </div>
       </main>
