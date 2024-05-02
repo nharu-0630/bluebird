@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  GetShelfItemsDocument,
   GetShelfLocationsDocument,
   UpdateShelfLocationDocument,
   UpdateShelfLocationMutation,
@@ -50,7 +51,10 @@ export function ShelfLocationEditForm(props: ShelfLocationEditDialogProps) {
     UpdateShelfLocationMutation,
     UpdateShelfLocationMutationVariables
   >(UpdateShelfLocationDocument, {
-    refetchQueries: [{ query: GetShelfLocationsDocument }],
+    refetchQueries: [
+      { query: GetShelfItemsDocument },
+      { query: GetShelfLocationsDocument },
+    ],
   });
 
   function onSubmit(data: ShelfLocationEditForm) {

@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   GetShelfCategoriesDocument,
+  GetShelfItemsDocument,
   UpdateShelfCategoryDocument,
   UpdateShelfCategoryMutation,
   UpdateShelfCategoryMutationVariables,
@@ -50,7 +51,10 @@ export function ShelfCategoryEditForm(props: ShelfCategoryEditDialogProps) {
     UpdateShelfCategoryMutation,
     UpdateShelfCategoryMutationVariables
   >(UpdateShelfCategoryDocument, {
-    refetchQueries: [{ query: GetShelfCategoriesDocument }],
+    refetchQueries: [
+      { query: GetShelfItemsDocument },
+      { query: GetShelfCategoriesDocument },
+    ],
   });
 
   function onSubmit(data: ShelfCategoryEditForm) {

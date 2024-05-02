@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
+  GetShelfItemsDocument,
   GetShelfTagsDocument,
   UpdateShelfTagDocument,
   UpdateShelfTagMutation,
@@ -49,7 +50,10 @@ export function ShelfTagEditForm(props: ShelfTagEditDialogProps) {
   ] = useMutation<UpdateShelfTagMutation, UpdateShelfTagMutationVariables>(
     UpdateShelfTagDocument,
     {
-      refetchQueries: [{ query: GetShelfTagsDocument }],
+      refetchQueries: [
+        { query: GetShelfItemsDocument },
+        { query: GetShelfTagsDocument },
+      ],
     }
   );
 
