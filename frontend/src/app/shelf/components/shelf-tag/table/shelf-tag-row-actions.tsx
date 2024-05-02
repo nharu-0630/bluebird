@@ -19,32 +19,37 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  DeleteShelfItemDocument,
   DeleteShelfItemMutation,
   DeleteShelfItemMutationVariables,
+  DeleteShelfTagDocument,
+  GetShelfTagsDocument,
 } from "@/gql/gen/graphql";
 import { useMutation } from "@apollo/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Row } from "@tanstack/react-table";
-import { ShelfCategorySchema } from "../../schema/shelf-category";
+import { ShelfTagSchema } from "../../../schema/shelf-tag";
+import { ShelfTagEditForm } from "../form/shelf-tag-edit-form";
 
-interface ShelfCategoryRowActionsProps<TData> {
+interface ShelfTagRowActionsProps<TData> {
   row: Row<TData>;
 }
 
-export function ShelfCategoryRowActions<TData>({
+export function ShelfTagRowActions<TData>({
   row,
-}: ShelfCategoryRowActionsProps<TData>) {
-  const shelf = ShelfCategorySchema.parse(row.original);
+}: ShelfTagRowActionsProps<TData>) {
+  const item = ShelfTagSchema.parse(row.original);
 
   const editDialog = useDialog();
   const deleteDialog = useDialog();
 
   const [
-    deleteShelfItem,
-    { loading: deleteShelfItemLoading, error: deleteShelfItemError },
+    deleteShelfTag,
+    { loading: deleteShelfTagLoading, error: deleteShelfTagError },
   ] = useMutation<DeleteShelfItemMutation, DeleteShelfItemMutationVariables>(
-    DeleteShelfItemDocument
+    DeleteShelfTagDocument,
+    {
+      refetchQueries: [{ query: GetShelfTagsDocument }],
+    }
   );
 
   return (
@@ -63,21 +68,26 @@ export function ShelfCategoryRowActions<TData>({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(shelf.ulid)}
+            onClick={() => navigator.clipboard.writeText(item.ulid)}
           >
             ULIDをコピー
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog {...editDialog.props}>
-        <DialogContent></DialogContent>
+        <DialogContent>
+          <ShelfTagEditForm
+            shelfTag={item}
+            onOpenChange={editDialog.props.onOpenChange}
+          />
+        </DialogContent>
       </Dialog>
       <Dialog {...deleteDialog.props}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>アイテムを削除しますか？</DialogTitle>
+            <DialogTitle>タグを削除しますか？</DialogTitle>
             <DialogDescription>
-              アイテムを削除します。この操作を元に戻すことはできません。
+              タグを削除します。この操作を元に戻すことはできません。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -91,8 +101,8 @@ export function ShelfCategoryRowActions<TData>({
             </Button>
             <Button
               onClick={async () => {
-                await deleteShelfItem({ variables: { ulid: shelf.ulid } });
-                if (!deleteShelfItemLoading) {
+                await deleteShelfTag({ variables: { ulid: item.ulid } });
+                if (!deleteShelfTagLoading) {
                   deleteDialog.props.onOpenChange(false);
                 }
               }}

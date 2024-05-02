@@ -19,37 +19,38 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  DeleteShelfItemDocument,
-  DeleteShelfItemMutation,
-  DeleteShelfItemMutationVariables,
+  DeleteShelfCategoryDocument,
+  DeleteShelfCategoryMutation,
+  DeleteShelfCategoryMutationVariables,
+  GetShelfCategoriesDocument,
 } from "@/gql/gen/graphql";
 import { useMutation } from "@apollo/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Row } from "@tanstack/react-table";
-import { QRCodeSVG } from "qrcode.react";
-import { ShelfItemSchema } from "../../schema/shelf-item";
-import { ShelfItemEditForm } from "../form/shelf-item-edit-form";
+import { ShelfCategorySchema } from "../../../schema/shelf-category";
+import { ShelfCategoryEditForm } from "../form/shelf-category-edit-form";
 
-interface ShelfItemRowActionsProps<TData> {
+interface ShelfCategoryRowActionsProps<TData> {
   row: Row<TData>;
 }
 
-export function ShelfItemRowActions<TData>({
+export function ShelfCategoryRowActions<TData>({
   row,
-}: ShelfItemRowActionsProps<TData>) {
-  const shelf = ShelfItemSchema.parse(row.original);
+}: ShelfCategoryRowActionsProps<TData>) {
+  const item = ShelfCategorySchema.parse(row.original);
 
   const editDialog = useDialog();
   const deleteDialog = useDialog();
-  const qrCodeDialog = useDialog();
-  const locationQRCodeDialog = useDialog();
 
   const [
-    deleteShelfItem,
-    { loading: deleteShelfItemLoading, error: deleteShelfItemError },
-  ] = useMutation<DeleteShelfItemMutation, DeleteShelfItemMutationVariables>(
-    DeleteShelfItemDocument
-  );
+    deleteShelfCategory,
+    { loading: deleteShelfCategoryLoading, error: deleteShelfCategoryError },
+  ] = useMutation<
+    DeleteShelfCategoryMutation,
+    DeleteShelfCategoryMutationVariables
+  >(DeleteShelfCategoryDocument, {
+    refetchQueries: [{ query: GetShelfCategoriesDocument }],
+  });
 
   return (
     <>
@@ -67,40 +68,26 @@ export function ShelfItemRowActions<TData>({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(shelf.ulid)}
+            onClick={() => navigator.clipboard.writeText(item.ulid)}
           >
             ULIDをコピー
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={qrCodeDialog.trigger}>
-            QRコードを表示
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              navigator.clipboard.writeText(shelf.location.ulid);
-            }}
-          >
-            保管場所のULIDをコピー
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={locationQRCodeDialog.trigger}>
-            保管場所のQRコードを表示
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog {...editDialog.props}>
         <DialogContent>
-          <ShelfItemEditForm
+          <ShelfCategoryEditForm
+            shelfCategory={item}
             onOpenChange={editDialog.props.onOpenChange}
-            shelfItem={shelf}
           />
         </DialogContent>
       </Dialog>
       <Dialog {...deleteDialog.props}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>アイテムを削除しますか？</DialogTitle>
+            <DialogTitle>カテゴリを削除しますか？</DialogTitle>
             <DialogDescription>
-              アイテムを削除します。この操作を元に戻すことはできません。
+              カテゴリを削除します。この操作を元に戻すことはできません。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -114,8 +101,8 @@ export function ShelfItemRowActions<TData>({
             </Button>
             <Button
               onClick={async () => {
-                await deleteShelfItem({ variables: { ulid: shelf.ulid } });
-                if (!deleteShelfItemLoading) {
+                await deleteShelfCategory({ variables: { ulid: item.ulid } });
+                if (!deleteShelfCategoryLoading) {
                   deleteDialog.props.onOpenChange(false);
                 }
               }}
@@ -124,22 +111,6 @@ export function ShelfItemRowActions<TData>({
               削除
             </Button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      <Dialog {...qrCodeDialog.props}>
-        <DialogContent>
-          <div className="flex justify-center">
-            <QRCodeSVG value={"https://nharu.dev/shelf/i/" + shelf.ulid} />
-          </div>
-        </DialogContent>
-      </Dialog>
-      <Dialog {...locationQRCodeDialog.props}>
-        <DialogContent>
-          <div className="flex justify-center">
-            <QRCodeSVG
-              value={"https://nharu.dev/shelf/l/" + shelf.location.ulid}
-            />
-          </div>
         </DialogContent>
       </Dialog>
     </>

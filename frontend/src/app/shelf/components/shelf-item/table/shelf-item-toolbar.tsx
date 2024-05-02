@@ -13,16 +13,16 @@ import {
 import { useQuery } from "@apollo/client";
 import { Cross2Icon } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
-import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { DataTableViewOptions } from "./data-table-view-options";
+import { TableFacetedFilter } from "../../../../../components/table/table-faceted-filter";
+import { TableViewOptions } from "../../../../../components/table/table-view-options";
 
-interface DataTableToolbarProps<TData> {
+interface ShelfItemToolbarProps<TData> {
   table: Table<TData>;
 }
 
-export function DataTableToolbar<TData>({
+export function ShelfItemToolbar<TData>({
   table,
-}: DataTableToolbarProps<TData>) {
+}: ShelfItemToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const {
@@ -72,21 +72,21 @@ export function DataTableToolbar<TData>({
           className="h-8 w-[150px] lg:w-[250px]"
         />
         {table.getColumn("カテゴリ") && (
-          <DataTableFacetedFilter
+          <TableFacetedFilter
             column={table.getColumn("カテゴリ")}
             title="カテゴリ"
             options={category}
           />
         )}
         {table.getColumn("タグ") && (
-          <DataTableFacetedFilter
+          <TableFacetedFilter
             column={table.getColumn("タグ")}
             title="タグ"
             options={tags}
           />
         )}
         {table.getColumn("保管場所") && (
-          <DataTableFacetedFilter
+          <TableFacetedFilter
             column={table.getColumn("保管場所")}
             title="保管場所"
             options={location}
@@ -103,7 +103,7 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <TableViewOptions table={table} />
     </div>
   );
 }

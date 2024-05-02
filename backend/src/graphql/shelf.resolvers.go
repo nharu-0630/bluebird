@@ -149,7 +149,18 @@ func (r *mutationResolver) UpdateShelfCategory(ctx context.Context, ulid string,
 
 // DeleteShelfCategory is the resolver for the deleteShelfCategory field.
 func (r *mutationResolver) DeleteShelfCategory(ctx context.Context, ulid string) (bool, error) {
-	if err := r.DB.Where("ulid = ?", ulid).Delete(&model.ShelfCategory{}).Error; err != nil {
+	shelfCategory := model.ShelfCategory{}
+	if err := r.DB.Where("ulid = ?", ulid).First(&shelfCategory).Error; err != nil {
+		return false, err
+	}
+	var count int64
+	if err := r.DB.Model(&model.ShelfItem{}).Where("category_id = ?", shelfCategory.ID).Count(&count).Error; err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return false, nil
+	}
+	if err := r.DB.Where("ulid = ?", ulid).Unscoped().Delete(&model.ShelfCategory{}).Error; err != nil {
 		return false, err
 	}
 	return true, nil
@@ -174,9 +185,15 @@ func (r *mutationResolver) UpdateShelfTag(ctx context.Context, ulid string, name
 
 // DeleteShelfTag is the resolver for the deleteShelfTag field.
 func (r *mutationResolver) DeleteShelfTag(ctx context.Context, ulid string) (bool, error) {
-	if err := r.DB.Where("ulid = ?", ulid).Delete(&model.ShelfTag{}).Error; err != nil {
+	shelfTag := model.ShelfTag{}
+	if err := r.DB.Where("ulid = ?", ulid).First(&shelfTag).Error; err != nil {
 		return false, err
 	}
+	
+
+	// if err := r.DB.Where("ulid = ?", ulid).Delete(&model.ShelfTag{}).Error; err != nil {
+	// 	return false, err
+	// }
 	return true, nil
 }
 

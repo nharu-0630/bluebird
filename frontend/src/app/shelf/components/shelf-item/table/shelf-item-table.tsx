@@ -24,18 +24,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DataTablePagination } from "./data-table-pagination";
-import { DataTableToolbar } from "./data-table-toolbar";
+import { TablePagination } from "../../../../../components/table/table-pagination";
+import { ShelfItemToolbar } from "./shelf-item-toolbar";
 
-interface DataTableProps<TData, TValue> {
+interface ShelfItemTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+export function ShelfItemTable<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+}: ShelfItemTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -68,7 +68,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <DataTableToolbar table={table} />
+      <ShelfItemToolbar table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -119,7 +119,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <DataTablePagination table={table} />
+      <TablePagination table={table} />
     </div>
   );
 }

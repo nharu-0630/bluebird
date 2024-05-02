@@ -3,8 +3,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
-import { ShelfItem } from "../../schema/shelf-item";
-import { DataTableColumnHeader } from "./data-table-column-header";
+import { TableColumnHeader } from "../../../../../components/table/table-column-header";
+import { ShelfItem } from "../../../schema/shelf-item";
 import { ShelfItemRowActions } from "./shelf-item-row-actions";
 
 export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
@@ -38,7 +38,7 @@ export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
     accessorKey: "name",
     id: "名前",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🖊️ 名前" />
+      <TableColumnHeader column={column} title="🖊️ 名前" />
     ),
     cell: ({ row }) => {
       return (
@@ -50,7 +50,7 @@ export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
     accessorKey: "category.name",
     id: "カテゴリ",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🧰 カテゴリ" />
+      <TableColumnHeader column={column} title="🧰 カテゴリ" />
     ),
     cell: ({ row }) => {
       return (
@@ -67,13 +67,13 @@ export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
     accessorKey: "tags",
     id: "タグ",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🏷️ タグ" />
+      <TableColumnHeader column={column} title="🏷️ タグ" />
     ),
     cell: ({ row }) => {
       const tags = row.original.tags;
       return (
         <div className="flex max-w-[500px] space-x-2">
-          {tags.map((tag: any) => (
+          {tags.map((tag) => (
             <Badge key={tag.ulid} variant="outline" className="h-8 rounded-md">
               {tag.name}
             </Badge>
@@ -92,7 +92,7 @@ export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
     accessorKey: "location.name",
     id: "保管場所",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🌏 保管場所" />
+      <TableColumnHeader column={column} title="🌏 保管場所" />
     ),
     cell: ({ row }) => {
       return (
@@ -109,7 +109,7 @@ export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
     accessorKey: "ulid",
     id: "ULID",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🆔 ULID" />
+      <TableColumnHeader column={column} title="🆔 ULID" />
     ),
     cell: ({ row }) => {
       return <pre>{row.original.ulid}</pre>;

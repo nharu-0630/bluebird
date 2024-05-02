@@ -128,3 +128,57 @@ mutation UpdateShelfItem(
 mutation DeleteShelfItem($ulid: String!) {
   deleteShelfItem(ulid: $ulid)
 }
+
+mutation CreateShelfCategory($name: String!) {
+  createShelfCategory(name: $name) {
+    ulid
+    name
+  }
+}
+
+mutation UpdateShelfCategory($ulid: String!, $name: String) {
+  updateShelfCategory(ulid: $ulid, name: $name) {
+    ulid
+    name
+  }
+}
+
+mutation DeleteShelfCategory($ulid: String!) {
+  deleteShelfCategory(ulid: $ulid)
+}
+
+mutation CreateShelfTag($name: String!) {
+  createShelfTag(name: $name) {
+    ulid
+    name
+  }
+}
+
+mutation UpdateShelfTag($ulid: String!, $name: String) {
+  updateShelfTag(ulid: $ulid, name: $name) {
+    ulid
+    name
+  }
+}
+
+mutation DeleteShelfTag($ulid: String!) {
+  deleteShelfTag(ulid: $ulid)
+}
+
+mutation CreateShelfLocation($name: String!) {
+  createShelfLocation(name: $name) {
+    ulid
+    name
+  }
+}
+
+mutation UpdateShelfLocation($ulid: String!, $name: String) {
+  updateShelfLocation(ulid: $ulid, name: $name) {
+    ulid
+    name
+  }
+}
+
+mutation DeleteShelfLocation($ulid: String!) {
+  deleteShelfLocation(ulid: $ulid)
+}

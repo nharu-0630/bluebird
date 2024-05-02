@@ -21,7 +21,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-interface DataTableFacetedFilterProps<TData, TValue> {
+interface TableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
   title?: string;
   options: {
@@ -31,11 +31,11 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   }[];
 }
 
-export function DataTableFacetedFilter<TData, TValue>({
+export function TableFacetedFilter<TData, TValue>({
   column,
   title,
   options,
-}: DataTableFacetedFilterProps<TData, TValue>) {
+}: TableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues();
   const selectedValues = new Set(column?.getFilterValue() as string[]);
 

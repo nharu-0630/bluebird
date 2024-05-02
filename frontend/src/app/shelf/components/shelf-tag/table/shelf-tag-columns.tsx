@@ -1,16 +1,16 @@
 "use client";
 
-import { ShelfCategory } from "@/gql/gen/graphql";
+import { ShelfTag } from "@/gql/gen/graphql";
 import { ColumnDef } from "@tanstack/react-table";
-import { DataTableColumnHeader } from "./data-table-column-header";
-import { ShelfCategoryRowActions } from "./shelf-category-row-actions";
+import { TableColumnHeader } from "../../../../../components/table/table-column-header";
+import { ShelfTagRowActions } from "./shelf-tag-row-actions";
 
-export const ShelfCategoryColumns: ColumnDef<ShelfCategory>[] = [
+export const ShelfTagColumns: ColumnDef<ShelfTag>[] = [
   {
     accessorKey: "name",
     id: "名前",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🖊️ 名前" />
+      <TableColumnHeader column={column} title="🖊️ 名前" />
     ),
     cell: ({ row }) => {
       return (
@@ -22,7 +22,7 @@ export const ShelfCategoryColumns: ColumnDef<ShelfCategory>[] = [
     accessorKey: "ulid",
     id: "ULID",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="🆔 ULID" />
+      <TableColumnHeader column={column} title="🆔 ULID" />
     ),
     cell: ({ row }) => {
       return <pre>{row.original.ulid}</pre>;
@@ -33,7 +33,7 @@ export const ShelfCategoryColumns: ColumnDef<ShelfCategory>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => <ShelfCategoryRowActions row={row} />,
+    cell: ({ row }) => <ShelfTagRowActions row={row} />,
     enableHiding: false,
   },
 ];

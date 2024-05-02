@@ -27,24 +27,23 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  CreateShelfItemDocument,
+  CreateShelfItemMutation,
+  CreateShelfItemMutationVariables,
   GetShelfCategoriesDocument,
   GetShelfCategoriesQuery,
+  GetShelfItemsDocument,
   GetShelfLocationsDocument,
   GetShelfLocationsQuery,
   GetShelfTagsDocument,
   GetShelfTagsQuery,
-  UpdateShelfItemDocument,
-  UpdateShelfItemMutation,
-  UpdateShelfItemMutationVariables,
 } from "@/gql/gen/graphql";
 import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { ShelfItem } from "../../schema/shelf-item";
 
-const ShelfItemEditFormSchema = z.object({
-  ulid: z.string().length(26, { message: "Must be 26 characters" }),
+const ShelfItemCreateFormSchema = z.object({
   name: z.string().min(1, { message: "Must be at least 1 character" }),
   category: z.string().length(26, { message: "Must be 26 characters" }),
   tags: z.array(z.string().length(26, { message: "Must be 26 characters" })),
@@ -52,24 +51,22 @@ const ShelfItemEditFormSchema = z.object({
   description: z.string().optional(),
 });
 
-type ShelfItemEditForm = z.infer<typeof ShelfItemEditFormSchema>;
+type ShelfItemCreateForm = z.infer<typeof ShelfItemCreateFormSchema>;
 
-interface ShelfItemEditDialogProps {
-  shelfItem: ShelfItem;
+interface ShelfItemCreateDialogProps {
   onOpenChange: (value: boolean) => void;
 }
 
-export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
-  const form = useForm<ShelfItemEditForm>({
-    resolver: zodResolver(ShelfItemEditFormSchema),
+export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
+  const form = useForm<ShelfItemCreateForm>({
+    resolver: zodResolver(ShelfItemCreateFormSchema),
     mode: "onBlur",
     defaultValues: {
-      ulid: props.shelfItem.ulid,
-      name: props.shelfItem.name,
-      category: props.shelfItem.category.ulid,
-      tags: props.shelfItem.tags.map((tag) => tag.ulid),
-      location: props.shelfItem.location.ulid,
-      description: props.shelfItem.description,
+      name: "",
+      category: "",
+      tags: [],
+      location: "",
+      description: "",
     },
   });
 
@@ -90,19 +87,21 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
   } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
 
   const [
-    updateShelfItem,
-    { loading: updateShelfItemLoading, error: updateShelfItemError },
-  ] = useMutation<UpdateShelfItemMutation, UpdateShelfItemMutationVariables>(
-    UpdateShelfItemDocument
+    createShelfItem,
+    { loading: createShelfItemLoading, error: createShelfItemError },
+  ] = useMutation<CreateShelfItemMutation, CreateShelfItemMutationVariables>(
+    CreateShelfItemDocument,
+    {
+      refetchQueries: [{ query: GetShelfItemsDocument }],
+    }
   );
 
   if (categoryLoading || tagsLoading || locationLoading) return null;
   if (categoryError || tagsError || locationError) return null;
 
-  function onSubmit(data: ShelfItemEditForm) {
-    updateShelfItem({
+  function onSubmit(data: ShelfItemCreateForm) {
+    createShelfItem({
       variables: {
-        ulid: data.ulid,
         name: data.name,
         categoryUlid: data.category,
         tagsUlid: data.tags,
@@ -110,7 +109,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
         description: data.description ?? "",
       },
     });
-    if (!updateShelfItemLoading) {
+    if (!createShelfItemLoading) {
       props.onOpenChange(false);
     }
   }
@@ -118,18 +117,6 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="ulid"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ULID</FormLabel>
-              <FormControl>
-                <Input {...field} readOnly />
-              </FormControl>
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="name"
@@ -179,7 +166,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
               <FormControl>
                 <MultiSelector
                   onValuesChange={field.onChange}
-                  values={field.value}
+                  values={field.value ?? []}
                   displayValues={
                     field.value
                       .map(
@@ -256,7 +243,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
             </FormItem>
           )}
         />
-        <Button type="submit">変更</Button>
+        <Button type="submit">追加</Button>
       </form>
     </Form>
   );
