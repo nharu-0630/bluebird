@@ -1,9 +1,11 @@
 "use client";
 
 import { ShelfCategorySchema } from "@/app/shelf/schema/shelf-category";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import {
   CreateShelfCategoryDocument,
   CreateShelfCategoryMutation,
@@ -13,6 +15,7 @@ import {
 } from "@/gql/gen/graphql";
 import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
@@ -37,7 +40,6 @@ export function ShelfCategoryForm(props: ShelfCategoryEditDialogProps) {
     resolver: zodResolver(ShelfCategoryCreateFormSchema),
     mode: "onBlur",
   });
-
   const [
     createShelfCategory,
     { loading: createShelfCategoryLoading, error: createShelfCategoryError },
@@ -47,6 +49,24 @@ export function ShelfCategoryForm(props: ShelfCategoryEditDialogProps) {
   >(CreateShelfCategoryDocument, {
     refetchQueries: [{ query: GetShelfCategoriesDocument }],
   });
+  const { toast } = useToast();
+  if (loading)
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <TailSpin />
+      </div>
+    );
+  if (error)
+    return (
+      <Alert variant="destructive">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  const categories = z
+    .array(ShelfCategorySchema)
+    .parse(data?.shelfCategories ?? []);
 
   function onSubmit(data: ShelfCategoryCreateForm) {
     createShelfCategory({
@@ -54,26 +74,16 @@ export function ShelfCategoryForm(props: ShelfCategoryEditDialogProps) {
         name: data.name,
       },
     });
+    toast({
+      title: "カテゴリを作成しました",
+      description: data.name,
+    });
   }
-
-  if (loading)
-    return (
-      <div className="flex justify-center">
-        <TailSpin />
-      </div>
-    );
-  if (error) return <p>Error: {error.message}</p>;
-  const shelfCategories = z
-    .array(ShelfCategorySchema)
-    .parse(data?.shelfCategories ?? []);
 
   return (
     <>
       <div className="mb-4">
-        <ShelfCategoryTable
-          columns={ShelfCategoryColumns}
-          data={shelfCategories}
-        />
+        <ShelfCategoryTable columns={ShelfCategoryColumns} data={categories} />
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

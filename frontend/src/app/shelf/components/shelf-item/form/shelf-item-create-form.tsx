@@ -8,6 +8,7 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from "@/components/extension/multi-select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import {
   CreateShelfItemDocument,
   CreateShelfItemMutation,
@@ -40,7 +42,9 @@ import {
 } from "@/gql/gen/graphql";
 import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
+import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
 
 const ShelfItemCreateFormSchema = z.object({
@@ -69,7 +73,6 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
       description: "",
     },
   });
-
   const {
     data: categoryData,
     loading: categoryLoading,
@@ -85,7 +88,6 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
     loading: locationLoading,
     error: locationError,
   } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
-
   const [
     createShelfItem,
     { loading: createShelfItemLoading, error: createShelfItemError },
@@ -95,9 +97,27 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
       refetchQueries: [{ query: GetShelfItemsDocument }],
     }
   );
+  const { toast } = useToast();
 
-  if (categoryLoading || tagsLoading || locationLoading) return null;
-  if (categoryError || tagsError || locationError) return null;
+  if (categoryLoading || tagsLoading || locationLoading)
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <TailSpin />
+      </div>
+    );
+  if (categoryError || tagsError || locationError)
+    return (
+      <Alert variant="destructive">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          {categoryError?.message ??
+            tagsError?.message ??
+            locationError?.message ??
+            "An error occurred"}
+        </AlertDescription>
+      </Alert>
+    );
 
   function onSubmit(data: ShelfItemCreateForm) {
     createShelfItem({
@@ -109,9 +129,11 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
         description: data.description ?? "",
       },
     });
-    if (!createShelfItemLoading) {
-      props.onOpenChange(false);
-    }
+    props.onOpenChange(false);
+    toast({
+      title: "アイテムを追加しました",
+      description: data.name,
+    });
   }
 
   return (

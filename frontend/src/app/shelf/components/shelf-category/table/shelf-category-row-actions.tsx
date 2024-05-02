@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ui/use-toast";
 import {
   DeleteShelfCategoryDocument,
   DeleteShelfCategoryMutation,
@@ -41,7 +42,6 @@ export function ShelfCategoryRowActions<TData>({
 
   const editDialog = useDialog();
   const deleteDialog = useDialog();
-
   const [
     deleteShelfCategory,
     { loading: deleteShelfCategoryLoading, error: deleteShelfCategoryError },
@@ -51,6 +51,7 @@ export function ShelfCategoryRowActions<TData>({
   >(DeleteShelfCategoryDocument, {
     refetchQueries: [{ query: GetShelfCategoriesDocument }],
   });
+  const { toast } = useToast();
 
   return (
     <>
@@ -68,7 +69,13 @@ export function ShelfCategoryRowActions<TData>({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(item.ulid)}
+            onClick={() => {
+              navigator.clipboard.writeText(item.ulid);
+              toast({
+                title: "ULIDをコピーしました",
+                description: item.ulid,
+              });
+            }}
           >
             ULIDをコピー
           </DropdownMenuItem>
@@ -102,9 +109,11 @@ export function ShelfCategoryRowActions<TData>({
             <Button
               onClick={async () => {
                 await deleteShelfCategory({ variables: { ulid: item.ulid } });
-                if (!deleteShelfCategoryLoading) {
-                  deleteDialog.props.onOpenChange(false);
-                }
+                deleteDialog.props.onOpenChange(false);
+                toast({
+                  title: "カテゴリを削除しました",
+                  description: item.ulid,
+                });
               }}
               variant={"destructive"}
             >

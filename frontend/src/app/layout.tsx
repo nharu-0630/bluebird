@@ -1,3 +1,4 @@
+import { Toaster } from "@/components/ui/toaster";
 import WithApollo from "@/components/with-apollo";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -18,7 +19,12 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <WithApollo>
-        <body className={inter.className}>{children}</body>
+        <body className={inter.className}>
+          <main className="flex min-h-screen flex-col items-center justify-between p-24">
+            {children}
+          </main>
+          <Toaster />
+        </body>
       </WithApollo>
     </html>
   );

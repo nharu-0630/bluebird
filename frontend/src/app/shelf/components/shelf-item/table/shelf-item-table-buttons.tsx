@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { DeletedShelfItemForm } from "../../deleted-shelf-item/form/deleted-shelf-item-form";
 import { ShelfCategoryForm } from "../../shelf-category/form/shelf-category-form";
 import { ShelfLocationForm } from "../../shelf-location/form/shelf-location-form";
 import { ShelfTagForm } from "../../shelf-tag/form/shelf-tag-form";
@@ -18,7 +19,7 @@ export function ShelfItemTableButtons() {
   const shelfCategoryEditDialog = useDialog();
   const shelfTagEditDialog = useDialog();
   const shelfLocationEditDialog = useDialog();
-
+  
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -62,6 +63,15 @@ export function ShelfItemTableButtons() {
             <ShelfLocationForm
               onOpenChange={shelfLocationEditDialog.props.onOpenChange}
             />
+          </DialogContent>
+        </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant={"outline"}>削除済みのアイテムを復元</Button>
+          </DialogTrigger>
+          <DialogContent className="lg:max-w-screen-lg overflow-y-scroll max-h-screen">
+            <DialogTitle>削除済みのアイテム</DialogTitle>
+            <DeletedShelfItemForm />
           </DialogContent>
         </Dialog>
       </div>

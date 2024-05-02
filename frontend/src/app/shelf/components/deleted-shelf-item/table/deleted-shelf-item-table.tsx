@@ -16,7 +16,6 @@ import {
 } from "@tanstack/react-table";
 import * as React from "react";
 
-import { ShelfTagToolbar } from "@/app/shelf/components/shelf-tag/table/shelf-tag-toolbar";
 import {
   Table,
   TableBody,
@@ -25,17 +24,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SlimTablePagination } from "../../../../../components/table/slim-table-pagination";
+import { TablePagination } from "../../../../../components/table/table-pagination";
+import { DeletedShelfItemToolbar } from "./deleted-shelf-item-toolbar";
 
-interface ShelfTagTableProps<TData, TValue> {
+interface DeletedShelfItemTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function ShelfTagTable<TData, TValue>({
+export function DeletedShelfItemTable<TData, TValue>({
   columns,
   data,
-}: ShelfTagTableProps<TData, TValue>) {
+}: DeletedShelfItemTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
@@ -67,7 +67,7 @@ export function ShelfTagTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      <ShelfTagToolbar table={table} />
+      <DeletedShelfItemToolbar table={table} />
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -118,7 +118,7 @@ export function ShelfTagTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <SlimTablePagination table={table} />
+      <TablePagination table={table} />
     </div>
   );
 }

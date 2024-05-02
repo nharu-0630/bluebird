@@ -1,6 +1,5 @@
 "use client";
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,19 +11,18 @@ import {
   GetShelfTagsQuery,
 } from "@/gql/gen/graphql";
 import { useQuery } from "@apollo/client";
-import { Cross2Icon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { Cross2Icon } from "@radix-ui/react-icons";
 import { Table } from "@tanstack/react-table";
-import { TailSpin } from "react-loader-spinner";
 import { TableFacetedFilter } from "../../../../../components/table/table-faceted-filter";
 import { TableViewOptions } from "../../../../../components/table/table-view-options";
 
-interface ShelfItemToolbarProps<TData> {
+interface DeletedShelfItemToolbarProps<TData> {
   table: Table<TData>;
 }
 
-export function ShelfItemToolbar<TData>({
+export function DeletedShelfItemToolbar<TData>({
   table,
-}: ShelfItemToolbarProps<TData>) {
+}: DeletedShelfItemToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
 
   const {
@@ -43,40 +41,23 @@ export function ShelfItemToolbar<TData>({
     error: locationError,
   } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
 
-  if (categoryLoading || tagLoading || locationLoading)
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <TailSpin />
-      </div>
-    );
-  if (categoryError || tagError || locationError)
-    return (
-      <Alert variant="destructive">
-        <ExclamationTriangleIcon className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {categoryError?.message ??
-            tagError?.message ??
-            locationError?.message ??
-            "An error occurred"}
-        </AlertDescription>
-      </Alert>
-    );
+  if (categoryLoading || tagLoading || locationLoading) return null;
+  if (categoryError || tagError || locationError) return null;
 
   const category =
     categoryData?.shelfCategories.map((category) => ({
       value: category.name,
       label: category.name,
     })) ?? [];
-  const location =
-    locationData?.shelfLocations.map((location) => ({
-      value: location.name,
-      label: location.name,
-    })) ?? [];
   const tag =
     tagData?.shelfTags.map((tag) => ({
       value: tag.name,
       label: tag.name,
+    })) ?? [];
+  const location =
+    locationData?.shelfLocations.map((location) => ({
+      value: location.name,
+      label: location.name,
     })) ?? [];
 
   return (

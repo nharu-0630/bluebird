@@ -10,6 +10,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import {
   GetShelfCategoriesDocument,
   GetShelfItemsDocument,
@@ -43,7 +44,6 @@ export function ShelfCategoryEditForm(props: ShelfCategoryEditDialogProps) {
       name: props.shelfCategory.name,
     },
   });
-
   const [
     updateShelfCategory,
     { loading: updateShelfCategoryLoading, error: updateShelfCategoryError },
@@ -56,6 +56,7 @@ export function ShelfCategoryEditForm(props: ShelfCategoryEditDialogProps) {
       { query: GetShelfCategoriesDocument },
     ],
   });
+  const { toast } = useToast();
 
   function onSubmit(data: ShelfCategoryEditForm) {
     updateShelfCategory({
@@ -64,9 +65,11 @@ export function ShelfCategoryEditForm(props: ShelfCategoryEditDialogProps) {
         name: data.name,
       },
     });
-    if (!updateShelfCategoryLoading) {
-      props.onOpenChange(false);
-    }
+    props.onOpenChange(false);
+    toast({
+      title: "カテゴリを変更しました",
+      description: data.ulid,
+    });
   }
 
   return (

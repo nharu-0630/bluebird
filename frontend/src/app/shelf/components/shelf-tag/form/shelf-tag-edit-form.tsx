@@ -10,6 +10,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import {
   GetShelfItemsDocument,
   GetShelfTagsDocument,
@@ -43,7 +44,6 @@ export function ShelfTagEditForm(props: ShelfTagEditDialogProps) {
       name: props.shelfTag.name,
     },
   });
-
   const [
     updateShelfTag,
     { loading: updateShelfTagLoading, error: updateShelfTagError },
@@ -56,6 +56,7 @@ export function ShelfTagEditForm(props: ShelfTagEditDialogProps) {
       ],
     }
   );
+  const { toast } = useToast();
 
   function onSubmit(data: ShelfTagEditForm) {
     updateShelfTag({
@@ -64,9 +65,11 @@ export function ShelfTagEditForm(props: ShelfTagEditDialogProps) {
         name: data.name,
       },
     });
-    if (!updateShelfTagLoading) {
-      props.onOpenChange(false);
-    }
+    props.onOpenChange(false);
+    toast({
+      title: "タグを変更しました",
+      description: data.ulid,
+    });
   }
 
   return (

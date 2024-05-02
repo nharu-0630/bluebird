@@ -8,6 +8,7 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from "@/components/extension/multi-select";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -26,6 +27,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 import {
   GetShelfCategoriesDocument,
   GetShelfCategoriesQuery,
@@ -40,7 +42,9 @@ import {
 } from "@/gql/gen/graphql";
 import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
+import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
 import { ShelfItem } from "../../../schema/shelf-item";
 
@@ -73,23 +77,21 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       description: props.shelfItem.description,
     },
   });
-
   const {
     data: categoryData,
     loading: categoryLoading,
     error: categoryError,
   } = useQuery<GetShelfCategoriesQuery>(GetShelfCategoriesDocument);
   const {
-    data: tagsData,
-    loading: tagsLoading,
-    error: tagsError,
+    data: tagData,
+    loading: tagLoading,
+    error: tagError,
   } = useQuery<GetShelfTagsQuery>(GetShelfTagsDocument);
   const {
     data: locationData,
     loading: locationLoading,
     error: locationError,
   } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
-
   const [
     updateShelfItem,
     { loading: updateShelfItemLoading, error: updateShelfItemError },
@@ -99,9 +101,27 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       refetchQueries: [{ query: GetShelfItemsDocument }],
     }
   );
+  const { toast } = useToast();
 
-  if (categoryLoading || tagsLoading || locationLoading) return null;
-  if (categoryError || tagsError || locationError) return null;
+  if (categoryLoading || tagLoading || locationLoading)
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <TailSpin />
+      </div>
+    );
+  if (categoryError || tagError || locationError)
+    return (
+      <Alert variant="destructive">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>
+          {categoryError?.message ??
+            tagError?.message ??
+            locationError?.message ??
+            "An error occurred"}
+        </AlertDescription>
+      </Alert>
+    );
 
   function onSubmit(data: ShelfItemEditForm) {
     updateShelfItem({
@@ -114,9 +134,11 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
         description: data.description ?? "",
       },
     });
-    if (!updateShelfItemLoading) {
-      props.onOpenChange(false);
-    }
+    props.onOpenChange(false);
+    toast({
+      title: "アイテムを変更しました",
+      description: data.ulid,
+    });
   }
 
   return (
@@ -188,7 +210,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                     field.value
                       .map(
                         (tag) =>
-                          tagsData?.shelfTags.find((t) => t.ulid === tag)?.name
+                          tagData?.shelfTags.find((t) => t.ulid === tag)?.name
                       )
                       .filter(
                         (item): item is Exclude<typeof item, undefined> =>
@@ -204,7 +226,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                   </MultiSelectorTrigger>
                   <MultiSelectorContent>
                     <MultiSelectorList>
-                      {tagsData?.shelfTags.map((tag) => (
+                      {tagData?.shelfTags.map((tag) => (
                         <MultiSelectorItem
                           key={tag.ulid}
                           value={tag.ulid}

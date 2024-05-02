@@ -18,10 +18,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ui/use-toast";
 import {
   DeleteShelfItemDocument,
   DeleteShelfItemMutation,
   DeleteShelfItemMutationVariables,
+  GetDeletedShelfItemsDocument,
   GetShelfItemsDocument,
 } from "@/gql/gen/graphql";
 import { useMutation } from "@apollo/client";
@@ -44,14 +46,19 @@ export function ShelfItemRowActions<TData>({
   const deleteDialog = useDialog();
   const qrCodeDialog = useDialog();
   const locationQRCodeDialog = useDialog();
-
+  const { toast } = useToast();
   const [
     deleteShelfItem,
     { loading: deleteShelfItemLoading, error: deleteShelfItemError },
   ] = useMutation<DeleteShelfItemMutation, DeleteShelfItemMutationVariables>(
     DeleteShelfItemDocument,
     {
-      refetchQueries: [{ query: GetShelfItemsDocument }],
+      refetchQueries: [
+        { query: GetShelfItemsDocument },
+        {
+          query: GetDeletedShelfItemsDocument,
+        },
+      ],
     }
   );
 
@@ -71,7 +78,13 @@ export function ShelfItemRowActions<TData>({
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(item.ulid)}
+            onClick={() => {
+              navigator.clipboard.writeText(item.ulid);
+              toast({
+                title: "ULIDをコピーしました",
+                description: item.ulid,
+              });
+            }}
           >
             ULIDをコピー
           </DropdownMenuItem>
@@ -82,6 +95,10 @@ export function ShelfItemRowActions<TData>({
           <DropdownMenuItem
             onClick={() => {
               navigator.clipboard.writeText(item.location.ulid);
+              toast({
+                title: "保管場所のULIDをコピーしました",
+                description: item.location.ulid,
+              });
             }}
           >
             保管場所のULIDをコピー
@@ -103,9 +120,7 @@ export function ShelfItemRowActions<TData>({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>アイテムを削除しますか？</DialogTitle>
-            <DialogDescription>
-              アイテムを削除します。この操作を元に戻すことはできません。
-            </DialogDescription>
+            <DialogDescription>アイテムを削除します。</DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button
@@ -119,9 +134,12 @@ export function ShelfItemRowActions<TData>({
             <Button
               onClick={async () => {
                 await deleteShelfItem({ variables: { ulid: item.ulid } });
-                if (!deleteShelfItemLoading) {
-                  deleteDialog.props.onOpenChange(false);
-                }
+                deleteDialog.props.onOpenChange(false);
+                toast({
+                  variant: "destructive",
+                  title: "アイテムを削除しました",
+                  description: item.ulid,
+                });
               }}
               variant={"destructive"}
             >

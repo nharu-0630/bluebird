@@ -25,6 +25,8 @@ type ShelfLocation {
 type Query {
   shelfItems: [ShelfItem!]!
   shelfItem(ulid: String!): ShelfItem
+  deletedShelfItems: [ShelfItem!]!
+  deletedShelfItem(ulid: String!): ShelfItem
   shelfCategories: [ShelfCategory!]!
   shelfCategory(ulid: String!): ShelfCategory
   shelfTags: [ShelfTag!]!
@@ -50,6 +52,7 @@ type Mutation {
     description: String
   ): ShelfItem
   deleteShelfItem(ulid: String!): Boolean!
+  restoreShelfItem(ulid: String!): Boolean!
   createShelfCategory(name: String!): ShelfCategory
   updateShelfCategory(ulid: String!, name: String): ShelfCategory
   deleteShelfCategory(ulid: String!): Boolean!

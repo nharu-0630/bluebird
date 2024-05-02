@@ -43,7 +43,6 @@ export function ShelfCategoryTable<TData, TValue>({
     []
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
-
   const table = useReactTable({
     data,
     columns,
@@ -65,7 +64,6 @@ export function ShelfCategoryTable<TData, TValue>({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
   });
-
   return (
     <div className="space-y-4">
       <ShelfCategoryToolbar table={table} />

@@ -27,6 +27,7 @@ import {
 import { useMutation } from "@apollo/client";
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Row } from "@tanstack/react-table";
+import { QRCodeSVG } from "qrcode.react";
 import { ShelfLocationSchema } from "../../../schema/shelf-location";
 import { ShelfLocationEditForm } from "../form/shelf-location-edit-form";
 
@@ -41,7 +42,7 @@ export function ShelfLocationRowActions<TData>({
 
   const editDialog = useDialog();
   const deleteDialog = useDialog();
-
+  const qrCodeDialog = useDialog();
   const [
     deleteShelfLocation,
     { loading: deleteShelfLocationLoading, error: deleteShelfLocationError },
@@ -71,6 +72,9 @@ export function ShelfLocationRowActions<TData>({
             onClick={() => navigator.clipboard.writeText(item.ulid)}
           >
             ULIDをコピー
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={qrCodeDialog.trigger}>
+            QRコードを表示
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -111,6 +115,13 @@ export function ShelfLocationRowActions<TData>({
               削除
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog {...qrCodeDialog.props}>
+        <DialogContent>
+          <div className="flex justify-center">
+            <QRCodeSVG value={"https://nharu.dev/shelf/l/" + item.ulid} />
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -10,6 +10,7 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
 import {
   GetShelfItemsDocument,
   GetShelfLocationsDocument,
@@ -43,7 +44,6 @@ export function ShelfLocationEditForm(props: ShelfLocationEditDialogProps) {
       name: props.shelfLocation.name,
     },
   });
-
   const [
     updateShelfLocation,
     { loading: updateShelfLocationLoading, error: updateShelfLocationError },
@@ -56,6 +56,7 @@ export function ShelfLocationEditForm(props: ShelfLocationEditDialogProps) {
       { query: GetShelfLocationsDocument },
     ],
   });
+  const { toast } = useToast();
 
   function onSubmit(data: ShelfLocationEditForm) {
     updateShelfLocation({
@@ -64,9 +65,11 @@ export function ShelfLocationEditForm(props: ShelfLocationEditDialogProps) {
         name: data.name,
       },
     });
-    if (!updateShelfLocationLoading) {
-      props.onOpenChange(false);
-    }
+    props.onOpenChange(false);
+    toast({
+      title: "保管場所を変更しました",
+      description: data.ulid,
+    });
   }
 
   return (

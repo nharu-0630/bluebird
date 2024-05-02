@@ -38,6 +38,46 @@ query GetShelfItem($ulid: String!) {
   }
 }
 
+query GetDeletedShelfItems {
+  deletedShelfItems {
+    ulid
+    name
+    category {
+      ulid
+      name
+    }
+    tags {
+      ulid
+      name
+    }
+    location {
+      ulid
+      name
+    }
+    description
+  }
+}
+
+query GetDeletedShelfItem($ulid: String!) {
+  deletedShelfItem(ulid: $ulid) {
+    ulid
+    name
+    category {
+      ulid
+      name
+    }
+    tags {
+      ulid
+      name
+    }
+    location {
+      ulid
+      name
+    }
+    description
+  }
+}
+
 query GetShelfCategories {
   shelfCategories {
     ulid
@@ -127,6 +167,10 @@ mutation UpdateShelfItem(
 
 mutation DeleteShelfItem($ulid: String!) {
   deleteShelfItem(ulid: $ulid)
+}
+
+mutation RestoreShelfItem($ulid: String!) {
+  restoreShelfItem(ulid: $ulid)
 }
 
 mutation CreateShelfCategory($name: String!) {

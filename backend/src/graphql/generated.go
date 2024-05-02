@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 		DeleteShelfItem     func(childComplexity int, ulid string) int
 		DeleteShelfLocation func(childComplexity int, ulid string) int
 		DeleteShelfTag      func(childComplexity int, ulid string) int
+		RestoreShelfItem    func(childComplexity int, ulid string) int
 		UpdateShelfCategory func(childComplexity int, ulid string, name *string) int
 		UpdateShelfItem     func(childComplexity int, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) int
 		UpdateShelfLocation func(childComplexity int, ulid string, name *string) int
@@ -62,14 +63,16 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		ShelfCategories func(childComplexity int) int
-		ShelfCategory   func(childComplexity int, ulid string) int
-		ShelfItem       func(childComplexity int, ulid string) int
-		ShelfItems      func(childComplexity int) int
-		ShelfLocation   func(childComplexity int, ulid string) int
-		ShelfLocations  func(childComplexity int) int
-		ShelfTag        func(childComplexity int, ulid string) int
-		ShelfTags       func(childComplexity int) int
+		DeletedShelfItem  func(childComplexity int, ulid string) int
+		DeletedShelfItems func(childComplexity int) int
+		ShelfCategories   func(childComplexity int) int
+		ShelfCategory     func(childComplexity int, ulid string) int
+		ShelfItem         func(childComplexity int, ulid string) int
+		ShelfItems        func(childComplexity int) int
+		ShelfLocation     func(childComplexity int, ulid string) int
+		ShelfLocations    func(childComplexity int) int
+		ShelfTag          func(childComplexity int, ulid string) int
+		ShelfTags         func(childComplexity int) int
 	}
 
 	ShelfCategory struct {
@@ -101,6 +104,7 @@ type MutationResolver interface {
 	CreateShelfItem(ctx context.Context, name string, categoryUlid string, tagsUlid []string, locationUlid string, description string) (*ShelfItem, error)
 	UpdateShelfItem(ctx context.Context, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) (*ShelfItem, error)
 	DeleteShelfItem(ctx context.Context, ulid string) (bool, error)
+	RestoreShelfItem(ctx context.Context, ulid string) (bool, error)
 	CreateShelfCategory(ctx context.Context, name string) (*ShelfCategory, error)
 	UpdateShelfCategory(ctx context.Context, ulid string, name *string) (*ShelfCategory, error)
 	DeleteShelfCategory(ctx context.Context, ulid string) (bool, error)
@@ -114,6 +118,8 @@ type MutationResolver interface {
 type QueryResolver interface {
 	ShelfItems(ctx context.Context) ([]*ShelfItem, error)
 	ShelfItem(ctx context.Context, ulid string) (*ShelfItem, error)
+	DeletedShelfItems(ctx context.Context) ([]*ShelfItem, error)
+	DeletedShelfItem(ctx context.Context, ulid string) (*ShelfItem, error)
 	ShelfCategories(ctx context.Context) ([]*ShelfCategory, error)
 	ShelfCategory(ctx context.Context, ulid string) (*ShelfCategory, error)
 	ShelfTags(ctx context.Context) ([]*ShelfTag, error)
@@ -237,6 +243,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteShelfTag(childComplexity, args["ulid"].(string)), true
 
+	case "Mutation.restoreShelfItem":
+		if e.complexity.Mutation.RestoreShelfItem == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_restoreShelfItem_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RestoreShelfItem(childComplexity, args["ulid"].(string)), true
+
 	case "Mutation.updateShelfCategory":
 		if e.complexity.Mutation.UpdateShelfCategory == nil {
 			break
@@ -284,6 +302,25 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateShelfTag(childComplexity, args["ulid"].(string), args["name"].(*string)), true
+
+	case "Query.deletedShelfItem":
+		if e.complexity.Query.DeletedShelfItem == nil {
+			break
+		}
+
+		args, err := ec.field_Query_deletedShelfItem_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DeletedShelfItem(childComplexity, args["ulid"].(string)), true
+
+	case "Query.deletedShelfItems":
+		if e.complexity.Query.DeletedShelfItems == nil {
+			break
+		}
+
+		return e.complexity.Query.DeletedShelfItems(childComplexity), true
 
 	case "Query.shelfCategories":
 		if e.complexity.Query.ShelfCategories == nil {
@@ -724,6 +761,21 @@ func (ec *executionContext) field_Mutation_deleteShelfTag_args(ctx context.Conte
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_restoreShelfItem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ulid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ulid"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ulid"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_updateShelfCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -868,6 +920,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_deletedShelfItem_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ulid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ulid"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ulid"] = arg0
 	return args, nil
 }
 
@@ -1150,6 +1217,61 @@ func (ec *executionContext) fieldContext_Mutation_deleteShelfItem(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteShelfItem_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_restoreShelfItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_restoreShelfItem(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RestoreShelfItem(rctx, fc.Args["ulid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_restoreShelfItem(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_restoreShelfItem_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1787,6 +1909,130 @@ func (ec *executionContext) fieldContext_Query_shelfItem(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_shelfItem_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_deletedShelfItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_deletedShelfItems(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DeletedShelfItems(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ShelfItem)
+	fc.Result = res
+	return ec.marshalNShelfItem2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_deletedShelfItems(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "ulid":
+				return ec.fieldContext_ShelfItem_ulid(ctx, field)
+			case "name":
+				return ec.fieldContext_ShelfItem_name(ctx, field)
+			case "category":
+				return ec.fieldContext_ShelfItem_category(ctx, field)
+			case "tags":
+				return ec.fieldContext_ShelfItem_tags(ctx, field)
+			case "location":
+				return ec.fieldContext_ShelfItem_location(ctx, field)
+			case "description":
+				return ec.fieldContext_ShelfItem_description(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_deletedShelfItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_deletedShelfItem(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DeletedShelfItem(rctx, fc.Args["ulid"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ShelfItem)
+	fc.Result = res
+	return ec.marshalOShelfItem2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItem(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_deletedShelfItem(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "ulid":
+				return ec.fieldContext_ShelfItem_ulid(ctx, field)
+			case "name":
+				return ec.fieldContext_ShelfItem_name(ctx, field)
+			case "category":
+				return ec.fieldContext_ShelfItem_category(ctx, field)
+			case "tags":
+				return ec.fieldContext_ShelfItem_tags(ctx, field)
+			case "location":
+				return ec.fieldContext_ShelfItem_location(ctx, field)
+			case "description":
+				return ec.fieldContext_ShelfItem_description(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_deletedShelfItem_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4607,6 +4853,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "restoreShelfItem":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_restoreShelfItem(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createShelfCategory":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createShelfCategory(ctx, field)
@@ -4726,6 +4979,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_shelfItem(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "deletedShelfItems":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_deletedShelfItems(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "deletedShelfItem":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_deletedShelfItem(ctx, field)
 				return res
 			}
 

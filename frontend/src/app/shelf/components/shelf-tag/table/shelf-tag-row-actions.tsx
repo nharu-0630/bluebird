@@ -41,7 +41,6 @@ export function ShelfTagRowActions<TData>({
 
   const editDialog = useDialog();
   const deleteDialog = useDialog();
-
   const [
     deleteShelfTag,
     { loading: deleteShelfTagLoading, error: deleteShelfTagError },

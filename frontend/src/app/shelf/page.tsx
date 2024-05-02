@@ -1,7 +1,9 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GetShelfItemsDocument, GetShelfItemsQuery } from "@/gql/gen/graphql";
 import { useQuery } from "@apollo/client";
+import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
 import { ShelfItemColumns } from "./components/shelf-item/table/shelf-item-columns";
@@ -15,25 +17,30 @@ export default function ShelfPage() {
   );
   if (loading)
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="h-screen flex items-center justify-center">
         <TailSpin />
       </div>
     );
-  if (error) return <p>Error: {error.message}</p>;
-  const shelfItems = z.array(ShelfItemSchema).parse(data?.shelfItems ?? []);
+  if (error)
+    return (
+      <Alert variant="destructive">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error.message}</AlertDescription>
+      </Alert>
+    );
+  const items = z.array(ShelfItemSchema).parse(data?.shelfItems ?? []);
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="w-full">
-        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-          📦 アイテム
-        </h1>
-        <div className="space-y-4">
-          <ShelfItemTableButtons />
-          <div className="mb-4">
-            <ShelfItemTable columns={ShelfItemColumns} data={shelfItems} />
-          </div>
+    <div className="w-full">
+      <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+        📦 アイテム
+      </h1>
+      <div className="space-y-4">
+        <ShelfItemTableButtons />
+        <div className="mb-4">
+          <ShelfItemTable columns={ShelfItemColumns} data={items} />
         </div>
       </div>
-    </main>
+    </div>
   );
 }
