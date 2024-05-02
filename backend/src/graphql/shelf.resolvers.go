@@ -139,6 +139,21 @@ func (r *mutationResolver) RestoreShelfItem(ctx context.Context, ulid string) (b
 	return true, nil
 }
 
+// ForceDeleteShelfItem is the resolver for the forceDeleteShelfItem field.
+func (r *mutationResolver) ForceDeleteShelfItem(ctx context.Context, ulid string) (bool, error) {
+	shelfItem := model.ShelfItem{}
+	if err := r.DB.Unscoped().Where("ulid = ?", ulid).First(&shelfItem).Error; err != nil {
+		return false, err
+	}
+	if err := r.DB.Unscoped().Model(&shelfItem).Association("Tags").Unscoped().Clear(); err != nil {
+		return false, err
+	}
+	if err := r.DB.Unscoped().Where("ulid = ?", ulid).Delete(&model.ShelfItem{}).Error; err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // CreateShelfCategory is the resolver for the createShelfCategory field.
 func (r *mutationResolver) CreateShelfCategory(ctx context.Context, name string) (*ShelfCategory, error) {
 	shelfCategory := model.ShelfCategory{Ulid: ulid.Make().String(), Name: name}
@@ -169,7 +184,7 @@ func (r *mutationResolver) DeleteShelfCategory(ctx context.Context, ulid string)
 	if count > 0 {
 		return false, nil
 	}
-	if err := r.DB.Where("ulid = ?", ulid).Unscoped().Delete(&model.ShelfCategory{}).Error; err != nil {
+	if err := r.DB.Unscoped().Where("ulid = ?", ulid).Delete(&model.ShelfCategory{}).Error; err != nil {
 		return false, err
 	}
 	return true, nil
@@ -205,7 +220,7 @@ func (r *mutationResolver) DeleteShelfTag(ctx context.Context, ulid string) (boo
 	if count > 0 {
 		return false, nil
 	}
-	if err := r.DB.Where("ulid = ?", ulid).Unscoped().Delete(&model.ShelfTag{}).Error; err != nil {
+	if err := r.DB.Unscoped().Where("ulid = ?", ulid).Delete(&model.ShelfTag{}).Error; err != nil {
 		return false, err
 	}
 	return true, nil
@@ -230,7 +245,18 @@ func (r *mutationResolver) UpdateShelfLocation(ctx context.Context, ulid string,
 
 // DeleteShelfLocation is the resolver for the deleteShelfLocation field.
 func (r *mutationResolver) DeleteShelfLocation(ctx context.Context, ulid string) (bool, error) {
-	if err := r.DB.Where("ulid = ?", ulid).Delete(&model.ShelfLocation{}).Error; err != nil {
+	shelfLocation := model.ShelfLocation{}
+	if err := r.DB.Where("ulid = ?", ulid).First(&shelfLocation).Error; err != nil {
+		return false, err
+	}
+	var count int64
+	if err := r.DB.Model(&model.ShelfItem{}).Where("location_id = ?", shelfLocation.ID).Count(&count).Error; err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return false, nil
+	}
+	if err := r.DB.Unscoped().Where("ulid = ?", ulid).Delete(&model.ShelfLocation{}).Error; err != nil {
 		return false, err
 	}
 	return true, nil

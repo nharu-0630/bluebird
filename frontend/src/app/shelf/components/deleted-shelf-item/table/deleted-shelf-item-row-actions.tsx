@@ -19,6 +19,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
 import {
+  ForceDeleteShelfItemDocument,
+  ForceDeleteShelfItemMutation,
+  ForceDeleteShelfItemMutationVariables,
   GetDeletedShelfItemsDocument,
   GetShelfItemsDocument,
   RestoreShelfItemDocument,
@@ -40,8 +43,7 @@ export function DeletedShelfItemRowActions<TData>({
   const item = ShelfItemSchema.parse(row.original);
 
   const restoreDialog = useDialog();
-  const { toast } = useToast();
-
+  const forceDeleteDialog = useDialog();
   const [
     restoreShelfItem,
     { loading: restoreShelfItemLoading, error: restoreShelfItemError },
@@ -56,6 +58,21 @@ export function DeletedShelfItemRowActions<TData>({
       ],
     }
   );
+  const [
+    forceDeleteShelfItem,
+    { loading: forceDeleteShelfItemLoading, error: forceDeleteShelfItemError },
+  ] = useMutation<
+    ForceDeleteShelfItemMutation,
+    ForceDeleteShelfItemMutationVariables
+  >(ForceDeleteShelfItemDocument, {
+    refetchQueries: [
+      { query: GetShelfItemsDocument },
+      {
+        query: GetDeletedShelfItemsDocument,
+      },
+    ],
+  });
+  const { toast } = useToast();
 
   return (
     <>
@@ -69,6 +86,9 @@ export function DeletedShelfItemRowActions<TData>({
         <DropdownMenuContent align="end">
           <DropdownMenuItem onClick={restoreDialog.trigger}>
             復元
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={forceDeleteDialog.trigger}>
+            完全に削除
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -92,11 +112,45 @@ export function DeletedShelfItemRowActions<TData>({
                 await restoreShelfItem({ variables: { ulid: item.ulid } });
                 toast({
                   title: "アイテムを復元しました",
-                  description: item.ulid,
+                  description: item.location.ulid,
                 });
               }}
             >
               復元
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog {...forceDeleteDialog.props}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>アイテムを完全に削除しますか？</DialogTitle>
+            <DialogDescription>
+              アイテムを完全に削除します。この操作を元に戻すことはできません。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                forceDeleteDialog.props.onOpenChange(false);
+              }}
+              variant={"outline"}
+            >
+              キャンセル
+            </Button>
+            <Button
+              onClick={async () => {
+                await forceDeleteShelfItem({ variables: { ulid: item.ulid } });
+                forceDeleteDialog.props.onOpenChange(false);
+                toast({
+                  variant: "destructive",
+                  title: "アイテムを完全に削除しました",
+                  description: item.ulid,
+                });
+              }}
+              variant={"destructive"}
+            >
+              完全に削除
             </Button>
           </DialogFooter>
         </DialogContent>

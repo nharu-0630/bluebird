@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ui/use-toast";
 import {
   DeleteShelfLocationDocument,
   DeleteShelfLocationMutation,
@@ -52,6 +53,7 @@ export function ShelfLocationRowActions<TData>({
   >(DeleteShelfLocationDocument, {
     refetchQueries: [{ query: GetShelfLocationsDocument }],
   });
+  const { toast } = useToast();
 
   return (
     <>
@@ -106,9 +108,12 @@ export function ShelfLocationRowActions<TData>({
             <Button
               onClick={async () => {
                 await deleteShelfLocation({ variables: { ulid: item.ulid } });
-                if (!deleteShelfLocationLoading) {
-                  deleteDialog.props.onOpenChange(false);
-                }
+                deleteDialog.props.onOpenChange(false);
+                toast({
+                  variant: "destructive",
+                  title: "保管場所を削除しました",
+                  description: item.ulid,
+                });
               }}
               variant={"destructive"}
             >

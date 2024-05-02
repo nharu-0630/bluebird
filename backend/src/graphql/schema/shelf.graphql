@@ -53,6 +53,7 @@ type Mutation {
   ): ShelfItem
   deleteShelfItem(ulid: String!): Boolean!
   restoreShelfItem(ulid: String!): Boolean!
+  forceDeleteShelfItem(ulid: String!): Boolean!
   createShelfCategory(name: String!): ShelfCategory
   updateShelfCategory(ulid: String!, name: String): ShelfCategory
   deleteShelfCategory(ulid: String!): Boolean!

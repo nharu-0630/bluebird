@@ -111,6 +111,7 @@ export function ShelfCategoryRowActions<TData>({
                 await deleteShelfCategory({ variables: { ulid: item.ulid } });
                 deleteDialog.props.onOpenChange(false);
                 toast({
+                  variant: "destructive",
                   title: "カテゴリを削除しました",
                   description: item.ulid,
                 });

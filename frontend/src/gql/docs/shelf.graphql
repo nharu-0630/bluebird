@@ -173,6 +173,10 @@ mutation RestoreShelfItem($ulid: String!) {
   restoreShelfItem(ulid: $ulid)
 }
 
+mutation ForceDeleteShelfItem($ulid: String!) {
+  forceDeleteShelfItem(ulid: $ulid)
+}
+
 mutation CreateShelfCategory($name: String!) {
   createShelfCategory(name: $name) {
     ulid

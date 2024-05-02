@@ -29,6 +29,7 @@ import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import { Row } from "@tanstack/react-table";
 import { ShelfTagSchema } from "../../../schema/shelf-tag";
 import { ShelfTagEditForm } from "../form/shelf-tag-edit-form";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ShelfTagRowActionsProps<TData> {
   row: Row<TData>;
@@ -50,6 +51,7 @@ export function ShelfTagRowActions<TData>({
       refetchQueries: [{ query: GetShelfTagsDocument }],
     }
   );
+  const { toast } = useToast();
 
   return (
     <>
@@ -101,9 +103,12 @@ export function ShelfTagRowActions<TData>({
             <Button
               onClick={async () => {
                 await deleteShelfTag({ variables: { ulid: item.ulid } });
-                if (!deleteShelfTagLoading) {
-                  deleteDialog.props.onOpenChange(false);
-                }
+                deleteDialog.props.onOpenChange(false);
+                toast({
+                  variant: "destructive",
+                  title: "タグを削除しました",
+                  description: item.ulid,
+                });
               }}
               variant={"destructive"}
             >
