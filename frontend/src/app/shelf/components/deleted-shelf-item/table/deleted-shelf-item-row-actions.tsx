@@ -110,6 +110,7 @@ export function DeletedShelfItemRowActions<TData>({
             <Button
               onClick={async () => {
                 await restoreShelfItem({ variables: { ulid: item.ulid } });
+                restoreDialog.props.onOpenChange(false);
                 toast({
                   title: "アイテムを復元しました",
                   description: item.location.ulid,
