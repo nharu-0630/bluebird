@@ -1,3 +1,5 @@
+scalar Upload
+
 type ShelfItem {
   ulid: String!
   name: String!
@@ -22,6 +24,10 @@ type ShelfLocation {
   name: String!
 }
 
+type ShelfItemImage {
+  token: String!
+}
+
 type Query {
   shelfItems: [ShelfItem!]!
   shelfItem(ulid: String!): ShelfItem
@@ -33,6 +39,7 @@ type Query {
   shelfTag(ulid: String!): ShelfTag
   shelfLocations: [ShelfLocation!]!
   shelfLocation(ulid: String!): ShelfLocation
+  shelfItemImages: [ShelfItemImage!]!
 }
 
 type Mutation {
@@ -63,4 +70,5 @@ type Mutation {
   createShelfLocation(name: String!): ShelfLocation
   updateShelfLocation(ulid: String!, name: String): ShelfLocation
   deleteShelfLocation(ulid: String!): Boolean!
+  uploadShelfItemImage(file: Upload!): ShelfItemImage
 }

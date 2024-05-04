@@ -22,6 +22,10 @@ type ShelfItem struct {
 	Description string         `json:"description"`
 }
 
+type ShelfItemImage struct {
+	Token string `json:"token"`
+}
+
 type ShelfLocation struct {
 	Ulid string `json:"ulid"`
 	Name string `json:"name"`

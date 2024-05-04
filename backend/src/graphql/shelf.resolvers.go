@@ -6,7 +6,12 @@ package graphql
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"time"
 
+	"github.com/99designs/gqlgen/graphql"
+	jwt "github.com/dgrijalva/jwt-go"
 	ulid "github.com/oklog/ulid/v2"
 	"github.com/xyzyxJP/bluebird/src/model"
 )
@@ -45,9 +50,9 @@ func (r *mutationResolver) CreateShelfItem(ctx context.Context, name string, cat
 	return &ShelfItem{
 		Ulid:        ulid,
 		Name:        name,
-		Category:    &ShelfCategory{Ulid: categoryUlid},
+		Category:    &ShelfCategory{Ulid: categoryUlid, Name: shelfCategory.Name},
 		Tags:        parsedShelfTags,
-		Location:    &ShelfLocation{Ulid: locationUlid},
+		Location:    &ShelfLocation{Ulid: locationUlid, Name: shelfLocation.Name},
 		Description: description,
 	}, nil
 }
@@ -262,6 +267,28 @@ func (r *mutationResolver) DeleteShelfLocation(ctx context.Context, ulid string)
 	return true, nil
 }
 
+// UploadShelfItemImage is the resolver for the uploadShelfItemImage field.
+func (r *mutationResolver) UploadShelfItemImage(ctx context.Context, file graphql.Upload) (*ShelfItemImage, error) {
+	bytes, err := io.ReadAll(file.File)
+	if err != nil {
+		return nil, err
+	}
+	shelfItemImage := model.ShelfItemImage{Index: 0, Image: bytes}
+	if err := r.DB.Create(&shelfItemImage).Error; err != nil {
+		return nil, err
+	}
+	claims := jwt.MapClaims{
+		"id":  shelfItemImage.ID,
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedToken, err := token.SignedString([]byte("secret"))
+	if err != nil {
+		return nil, err
+	}
+	return &ShelfItemImage{Token: signedToken}, nil
+}
+
 // ShelfItems is the resolver for the shelfItems field.
 func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 	shelfItems := []model.ShelfItem{}
@@ -462,6 +489,11 @@ func (r *queryResolver) ShelfLocation(ctx context.Context, ulid string) (*ShelfL
 		return nil, err
 	}
 	return &ShelfLocation{Ulid: shelfLocation.Ulid, Name: shelfLocation.Name}, nil
+}
+
+// ShelfItemImages is the resolver for the shelfItemImages field.
+func (r *queryResolver) ShelfItemImages(ctx context.Context) ([]*ShelfItemImage, error) {
+	panic(fmt.Errorf("not implemented: ShelfItemImages - shelfItemImages"))
 }
 
 // Mutation returns MutationResolver implementation.

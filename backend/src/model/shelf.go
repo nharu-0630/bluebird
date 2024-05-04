@@ -33,3 +33,9 @@ type ShelfLocation struct {
 	Ulid string `gorm:"uniqueIndex;not null"`
 	Name string `gorm:"unique;not null"`
 }
+
+type ShelfItemImage struct {
+	gorm.Model
+	Index int    `gorm:"not null"`
+	Image []byte `gorm:"not null;size:4294967295"`
+}

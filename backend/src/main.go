@@ -12,6 +12,7 @@ import (
 	"github.com/xyzyxJP/bluebird/src/graphql"
 	"github.com/xyzyxJP/bluebird/src/mock"
 	"github.com/xyzyxJP/bluebird/src/model"
+	"github.com/xyzyxJP/bluebird/src/resolver"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -24,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{})
+	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.ShelfItemImage{})
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
@@ -45,6 +46,9 @@ func main() {
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
+
+	shelfFileResolver := resolver.NewShelfFileResolver(db)
+	http.HandleFunc("/shelf-file", shelfFileResolver.ShelfResolver)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))
