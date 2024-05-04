@@ -114,7 +114,7 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
           {categoryError?.message ??
             tagsError?.message ??
             locationError?.message ??
-            "An error occurred"}
+            "エラーが発生しました"}
         </AlertDescription>
       </Alert>
     );

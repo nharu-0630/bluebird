@@ -58,7 +58,7 @@ export function ShelfItemToolbar<TData>({
           {categoryError?.message ??
             tagError?.message ??
             locationError?.message ??
-            "An error occurred"}
+            "エラーが発生しました"}
         </AlertDescription>
       </Alert>
     );
