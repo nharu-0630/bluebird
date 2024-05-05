@@ -48,7 +48,7 @@ func main() {
 	http.Handle("/query", srv)
 
 	shelfFileResolver := resolver.NewShelfFileResolver(db)
-	http.HandleFunc("/shelf-file", shelfFileResolver.ShelfResolver)
+	http.HandleFunc("/shelf-file", shelfFileResolver.Resolver)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))

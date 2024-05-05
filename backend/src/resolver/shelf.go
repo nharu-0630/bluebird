@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -17,7 +18,7 @@ func NewShelfFileResolver(db *gorm.DB) *ShelfFileResolver {
 	return &ShelfFileResolver{DB: db}
 }
 
-func (s ShelfFileResolver) ShelfResolver(w http.ResponseWriter, req *http.Request) {
+func (s ShelfFileResolver) Resolver(w http.ResponseWriter, req *http.Request) {
 	tokenQuery := req.URL.Query().Get("token")
 	if tokenQuery == "" {
 		http.Error(w, "token is required", http.StatusBadRequest)
@@ -27,7 +28,7 @@ func (s ShelfFileResolver) ShelfResolver(w http.ResponseWriter, req *http.Reques
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, nil
 		}
-		return []byte("secret"), nil
+		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

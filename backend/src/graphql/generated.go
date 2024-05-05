@@ -70,7 +70,6 @@ type ComplexityRoot struct {
 		ShelfCategories   func(childComplexity int) int
 		ShelfCategory     func(childComplexity int, ulid string) int
 		ShelfItem         func(childComplexity int, ulid string) int
-		ShelfItemImages   func(childComplexity int) int
 		ShelfItems        func(childComplexity int) int
 		ShelfLocation     func(childComplexity int, ulid string) int
 		ShelfLocations    func(childComplexity int) int
@@ -83,17 +82,19 @@ type ComplexityRoot struct {
 		Ulid func(childComplexity int) int
 	}
 
+	ShelfImage struct {
+		BaseURI func(childComplexity int) int
+		Token   func(childComplexity int) int
+	}
+
 	ShelfItem struct {
 		Category    func(childComplexity int) int
 		Description func(childComplexity int) int
+		Images      func(childComplexity int) int
 		Location    func(childComplexity int) int
 		Name        func(childComplexity int) int
 		Tags        func(childComplexity int) int
 		Ulid        func(childComplexity int) int
-	}
-
-	ShelfItemImage struct {
-		Token func(childComplexity int) int
 	}
 
 	ShelfLocation struct {
@@ -122,7 +123,7 @@ type MutationResolver interface {
 	CreateShelfLocation(ctx context.Context, name string) (*ShelfLocation, error)
 	UpdateShelfLocation(ctx context.Context, ulid string, name *string) (*ShelfLocation, error)
 	DeleteShelfLocation(ctx context.Context, ulid string) (bool, error)
-	UploadShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*ShelfItemImage, error)
+	UploadShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*ShelfImage, error)
 }
 type QueryResolver interface {
 	ShelfItems(ctx context.Context) ([]*ShelfItem, error)
@@ -135,7 +136,6 @@ type QueryResolver interface {
 	ShelfTag(ctx context.Context, ulid string) (*ShelfTag, error)
 	ShelfLocations(ctx context.Context) ([]*ShelfLocation, error)
 	ShelfLocation(ctx context.Context, ulid string) (*ShelfLocation, error)
-	ShelfItemImages(ctx context.Context) ([]*ShelfItemImage, error)
 }
 
 type executableSchema struct {
@@ -387,13 +387,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ShelfItem(childComplexity, args["ulid"].(string)), true
 
-	case "Query.shelfItemImages":
-		if e.complexity.Query.ShelfItemImages == nil {
-			break
-		}
-
-		return e.complexity.Query.ShelfItemImages(childComplexity), true
-
 	case "Query.shelfItems":
 		if e.complexity.Query.ShelfItems == nil {
 			break
@@ -453,6 +446,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ShelfCategory.Ulid(childComplexity), true
 
+	case "ShelfImage.baseUri":
+		if e.complexity.ShelfImage.BaseURI == nil {
+			break
+		}
+
+		return e.complexity.ShelfImage.BaseURI(childComplexity), true
+
+	case "ShelfImage.token":
+		if e.complexity.ShelfImage.Token == nil {
+			break
+		}
+
+		return e.complexity.ShelfImage.Token(childComplexity), true
+
 	case "ShelfItem.category":
 		if e.complexity.ShelfItem.Category == nil {
 			break
@@ -466,6 +473,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ShelfItem.Description(childComplexity), true
+
+	case "ShelfItem.images":
+		if e.complexity.ShelfItem.Images == nil {
+			break
+		}
+
+		return e.complexity.ShelfItem.Images(childComplexity), true
 
 	case "ShelfItem.location":
 		if e.complexity.ShelfItem.Location == nil {
@@ -494,13 +508,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ShelfItem.Ulid(childComplexity), true
-
-	case "ShelfItemImage.token":
-		if e.complexity.ShelfItemImage.Token == nil {
-			break
-		}
-
-		return e.complexity.ShelfItemImage.Token(childComplexity), true
 
 	case "ShelfLocation.name":
 		if e.complexity.ShelfLocation.Name == nil {
@@ -1171,6 +1178,8 @@ func (ec *executionContext) fieldContext_Mutation_createShelfItem(ctx context.Co
 				return ec.fieldContext_ShelfItem_location(ctx, field)
 			case "description":
 				return ec.fieldContext_ShelfItem_description(ctx, field)
+			case "images":
+				return ec.fieldContext_ShelfItem_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
 		},
@@ -1237,6 +1246,8 @@ func (ec *executionContext) fieldContext_Mutation_updateShelfItem(ctx context.Co
 				return ec.fieldContext_ShelfItem_location(ctx, field)
 			case "description":
 				return ec.fieldContext_ShelfItem_description(ctx, field)
+			case "images":
+				return ec.fieldContext_ShelfItem_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
 		},
@@ -1956,9 +1967,9 @@ func (ec *executionContext) _Mutation_uploadShelfItemImage(ctx context.Context, 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*ShelfItemImage)
+	res := resTmp.(*ShelfImage)
 	fc.Result = res
-	return ec.marshalOShelfItemImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemImage(ctx, field.Selections, res)
+	return ec.marshalOShelfImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfImage(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Mutation_uploadShelfItemImage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1969,10 +1980,12 @@ func (ec *executionContext) fieldContext_Mutation_uploadShelfItemImage(ctx conte
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "baseUri":
+				return ec.fieldContext_ShelfImage_baseUri(ctx, field)
 			case "token":
-				return ec.fieldContext_ShelfItemImage_token(ctx, field)
+				return ec.fieldContext_ShelfImage_token(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfItemImage", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ShelfImage", field.Name)
 		},
 	}
 	defer func() {
@@ -2040,6 +2053,8 @@ func (ec *executionContext) fieldContext_Query_shelfItems(ctx context.Context, f
 				return ec.fieldContext_ShelfItem_location(ctx, field)
 			case "description":
 				return ec.fieldContext_ShelfItem_description(ctx, field)
+			case "images":
+				return ec.fieldContext_ShelfItem_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
 		},
@@ -2095,6 +2110,8 @@ func (ec *executionContext) fieldContext_Query_shelfItem(ctx context.Context, fi
 				return ec.fieldContext_ShelfItem_location(ctx, field)
 			case "description":
 				return ec.fieldContext_ShelfItem_description(ctx, field)
+			case "images":
+				return ec.fieldContext_ShelfItem_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
 		},
@@ -2164,6 +2181,8 @@ func (ec *executionContext) fieldContext_Query_deletedShelfItems(ctx context.Con
 				return ec.fieldContext_ShelfItem_location(ctx, field)
 			case "description":
 				return ec.fieldContext_ShelfItem_description(ctx, field)
+			case "images":
+				return ec.fieldContext_ShelfItem_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
 		},
@@ -2219,6 +2238,8 @@ func (ec *executionContext) fieldContext_Query_deletedShelfItem(ctx context.Cont
 				return ec.fieldContext_ShelfItem_location(ctx, field)
 			case "description":
 				return ec.fieldContext_ShelfItem_description(ctx, field)
+			case "images":
+				return ec.fieldContext_ShelfItem_images(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ShelfItem", field.Name)
 		},
@@ -2561,54 +2582,6 @@ func (ec *executionContext) fieldContext_Query_shelfLocation(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_shelfItemImages(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_shelfItemImages(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ShelfItemImages(rctx)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*ShelfItemImage)
-	fc.Result = res
-	return ec.marshalNShelfItemImage2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemImageᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_shelfItemImages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "token":
-				return ec.fieldContext_ShelfItemImage_token(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfItemImage", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query___type(ctx, field)
 	if err != nil {
@@ -2816,6 +2789,94 @@ func (ec *executionContext) _ShelfCategory_name(ctx context.Context, field graph
 func (ec *executionContext) fieldContext_ShelfCategory_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ShelfCategory",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShelfImage_baseUri(ctx context.Context, field graphql.CollectedField, obj *ShelfImage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShelfImage_baseUri(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.BaseURI, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShelfImage_baseUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShelfImage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ShelfImage_token(ctx context.Context, field graphql.CollectedField, obj *ShelfImage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShelfImage_token(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Token, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ShelfImage_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ShelfImage",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -3108,8 +3169,8 @@ func (ec *executionContext) fieldContext_ShelfItem_description(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _ShelfItemImage_token(ctx context.Context, field graphql.CollectedField, obj *ShelfItemImage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShelfItemImage_token(ctx, field)
+func (ec *executionContext) _ShelfItem_images(ctx context.Context, field graphql.CollectedField, obj *ShelfItem) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ShelfItem_images(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3122,7 +3183,7 @@ func (ec *executionContext) _ShelfItemImage_token(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Token, nil
+		return obj.Images, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3134,19 +3195,25 @@ func (ec *executionContext) _ShelfItemImage_token(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.([]*ShelfImage)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNShelfImage2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfImageᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_ShelfItemImage_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_ShelfItem_images(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "ShelfItemImage",
+		Object:     "ShelfItem",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			switch field.Name {
+			case "baseUri":
+				return ec.fieldContext_ShelfImage_baseUri(ctx, field)
+			case "token":
+				return ec.fieldContext_ShelfImage_token(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ShelfImage", field.Name)
 		},
 	}
 	return fc, nil
@@ -5453,28 +5520,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "shelfItemImages":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_shelfItemImages(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -5550,6 +5595,50 @@ func (ec *executionContext) _ShelfCategory(ctx context.Context, sel ast.Selectio
 	return out
 }
 
+var shelfImageImplementors = []string{"ShelfImage"}
+
+func (ec *executionContext) _ShelfImage(ctx context.Context, sel ast.SelectionSet, obj *ShelfImage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shelfImageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ShelfImage")
+		case "baseUri":
+			out.Values[i] = ec._ShelfImage_baseUri(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "token":
+			out.Values[i] = ec._ShelfImage_token(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var shelfItemImplementors = []string{"ShelfItem"}
 
 func (ec *executionContext) _ShelfItem(ctx context.Context, sel ast.SelectionSet, obj *ShelfItem) graphql.Marshaler {
@@ -5591,42 +5680,8 @@ func (ec *executionContext) _ShelfItem(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var shelfItemImageImplementors = []string{"ShelfItemImage"}
-
-func (ec *executionContext) _ShelfItemImage(ctx context.Context, sel ast.SelectionSet, obj *ShelfItemImage) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, shelfItemImageImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ShelfItemImage")
-		case "token":
-			out.Values[i] = ec._ShelfItemImage_token(ctx, field, obj)
+		case "images":
+			out.Values[i] = ec._ShelfItem_images(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6136,6 +6191,60 @@ func (ec *executionContext) marshalNShelfCategory2ᚖgithubᚗcomᚋxyzyxJPᚋbl
 	return ec._ShelfCategory(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNShelfImage2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfImageᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfImage) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNShelfImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfImage(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNShelfImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfImage(ctx context.Context, sel ast.SelectionSet, v *ShelfImage) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ShelfImage(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNShelfItem2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfItem) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -6188,60 +6297,6 @@ func (ec *executionContext) marshalNShelfItem2ᚖgithubᚗcomᚋxyzyxJPᚋbluebi
 		return graphql.Null
 	}
 	return ec._ShelfItem(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNShelfItemImage2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemImageᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfItemImage) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNShelfItemImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemImage(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNShelfItemImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemImage(ctx context.Context, sel ast.SelectionSet, v *ShelfItemImage) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ShelfItemImage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNShelfLocation2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfLocationᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfLocation) graphql.Marshaler {
@@ -6700,18 +6755,18 @@ func (ec *executionContext) marshalOShelfCategory2ᚖgithubᚗcomᚋxyzyxJPᚋbl
 	return ec._ShelfCategory(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalOShelfImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfImage(ctx context.Context, sel ast.SelectionSet, v *ShelfImage) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ShelfImage(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOShelfItem2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItem(ctx context.Context, sel ast.SelectionSet, v *ShelfItem) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._ShelfItem(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOShelfItemImage2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfItemImage(ctx context.Context, sel ast.SelectionSet, v *ShelfItemImage) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ShelfItemImage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOShelfLocation2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐShelfLocation(ctx context.Context, sel ast.SelectionSet, v *ShelfLocation) graphql.Marshaler {
