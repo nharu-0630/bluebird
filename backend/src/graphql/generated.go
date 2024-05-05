@@ -61,7 +61,7 @@ type ComplexityRoot struct {
 		UpdateShelfItem      func(childComplexity int, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) int
 		UpdateShelfLocation  func(childComplexity int, ulid string, name *string) int
 		UpdateShelfTag       func(childComplexity int, ulid string, name *string) int
-		UploadShelfItemImage func(childComplexity int, file graphql.Upload) int
+		UploadShelfItemImage func(childComplexity int, ulid string, file graphql.Upload) int
 	}
 
 	Query struct {
@@ -122,7 +122,7 @@ type MutationResolver interface {
 	CreateShelfLocation(ctx context.Context, name string) (*ShelfLocation, error)
 	UpdateShelfLocation(ctx context.Context, ulid string, name *string) (*ShelfLocation, error)
 	DeleteShelfLocation(ctx context.Context, ulid string) (bool, error)
-	UploadShelfItemImage(ctx context.Context, file graphql.Upload) (*ShelfItemImage, error)
+	UploadShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*ShelfItemImage, error)
 }
 type QueryResolver interface {
 	ShelfItems(ctx context.Context) ([]*ShelfItem, error)
@@ -335,7 +335,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UploadShelfItemImage(childComplexity, args["file"].(graphql.Upload)), true
+		return e.complexity.Mutation.UploadShelfItemImage(childComplexity, args["ulid"].(string), args["file"].(graphql.Upload)), true
 
 	case "Query.deletedShelfItem":
 		if e.complexity.Query.DeletedShelfItem == nil {
@@ -974,15 +974,24 @@ func (ec *executionContext) field_Mutation_updateShelfTag_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_uploadShelfItemImage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 graphql.Upload
-	if tmp, ok := rawArgs["file"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-		arg0, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["ulid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ulid"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["file"] = arg0
+	args["ulid"] = arg0
+	var arg1 graphql.Upload
+	if tmp, ok := rawArgs["file"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		arg1, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["file"] = arg1
 	return args, nil
 }
 
@@ -1938,7 +1947,7 @@ func (ec *executionContext) _Mutation_uploadShelfItemImage(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadShelfItemImage(rctx, fc.Args["file"].(graphql.Upload))
+		return ec.resolvers.Mutation().UploadShelfItemImage(rctx, fc.Args["ulid"].(string), fc.Args["file"].(graphql.Upload))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

@@ -44,12 +44,12 @@ func (s ShelfFileResolver) ShelfResolver(w http.ResponseWriter, req *http.Reques
 			http.Error(w, "token is expired", http.StatusBadRequest)
 			return
 		}
-		shelfItemImage := model.ShelfItemImage{}
-		if err := s.DB.Where("id = ?", id).First(&shelfItemImage).Error; err != nil {
+		shelfImage := model.ShelfImage{}
+		if err := s.DB.Where("id = ?", id).First(&shelfImage).Error; err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		w.Header().Set("Content-Type", "image/jpeg")
-		w.Write(shelfItemImage.Image)
+		w.Write(shelfImage.Image)
 	}
 }

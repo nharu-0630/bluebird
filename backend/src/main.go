@@ -25,7 +25,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.ShelfItemImage{})
+	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.ShelfImage{})
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())

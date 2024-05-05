@@ -1,41 +1,51 @@
 package model
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type ShelfItem struct {
-	gorm.Model
-	Ulid        string        `gorm:"uniqueIndex;not null"`
-	Name        string        `gorm:"not null"`
-	CategoryID  uint          `gorm:"not null"`
-	Category    ShelfCategory `gorm:"foreignKey:CategoryID"`
-	Tags        []ShelfTag    `gorm:"many2many:shelf_item_tags;"`
-	LocationID  uint          `gorm:"not null"`
-	Location    ShelfLocation `gorm:"foreignKey:LocationID"`
-	Description string        `gorm:"not null"`
+	Ulid         string `gorm:"primaryKey;not null"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
+	Name         string         `gorm:"not null"`
+	CategoryUlid string         `gorm:"not null"`
+	Category     ShelfCategory  `gorm:"foreignKey:CategoryUlid"`
+	Tags         []ShelfTag     `gorm:"many2many:shelf_item_tags;"`
+	LocationUlid string         `gorm:"not null"`
+	Location     ShelfLocation  `gorm:"foreignKey:LocationUlid"`
+	Description  string         `gorm:"not null"`
+	Images       []ShelfImage   `gorm:"many2many:shelf_item_images;"`
 }
 
 type ShelfCategory struct {
-	gorm.Model
-	Ulid string `gorm:"uniqueIndex;not null"`
-	Name string `gorm:"unique;not null"`
+	Ulid      string `gorm:"primaryKey;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Name      string         `gorm:"unique;not null"`
 }
 
 type ShelfTag struct {
-	gorm.Model
-	Ulid string `gorm:"uniqueIndex;not null"`
-	Name string `gorm:"unique;not null"`
+	Ulid      string `gorm:"primaryKey;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Name      string         `gorm:"unique;not null"`
 }
 
 type ShelfLocation struct {
-	gorm.Model
-	Ulid string `gorm:"uniqueIndex;not null"`
-	Name string `gorm:"unique;not null"`
+	Ulid      string `gorm:"primaryKey;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Name      string         `gorm:"unique;not null"`
 }
 
-type ShelfItemImage struct {
+type ShelfImage struct {
 	gorm.Model
-	Index int    `gorm:"not null"`
 	Image []byte `gorm:"not null;size:4294967295"`
 }

@@ -70,5 +70,5 @@ type Mutation {
   createShelfLocation(name: String!): ShelfLocation
   updateShelfLocation(ulid: String!, name: String): ShelfLocation
   deleteShelfLocation(ulid: String!): Boolean!
-  uploadShelfItemImage(file: Upload!): ShelfItemImage
+  uploadShelfItemImage(ulid: String!, file: Upload!): ShelfItemImage
 }
