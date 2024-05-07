@@ -13,7 +13,7 @@ type ShelfCategory struct {
 	Name string `json:"name"`
 }
 
-type ShelfImage struct {
+type ShelfFile struct {
 	BaseURI string `json:"baseUri"`
 	Token   string `json:"token"`
 }
@@ -25,7 +25,7 @@ type ShelfItem struct {
 	Tags        []*ShelfTag    `json:"tags"`
 	Location    *ShelfLocation `json:"location"`
 	Description string         `json:"description"`
-	Images      []*ShelfImage  `json:"images"`
+	Images      []*ShelfFile   `json:"images"`
 }
 
 type ShelfLocation struct {

@@ -6,6 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { TableColumnHeader } from "../../../../../components/table/table-column-header";
 import { ShelfItem } from "../../../schema/shelf-item";
 import { ShelfItemRowActions } from "./shelf-item-row-actions";
+import { ShelfItemRowName } from "./shelf-item-row-name";
 
 export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
   {
@@ -40,11 +41,7 @@ export const ShelfItemColumns: ColumnDef<ShelfItem>[] = [
     header: ({ column }) => (
       <TableColumnHeader column={column} title="🖊️ 名前" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex items-center space-x-2">{row.original.name}</div>
-      );
-    },
+    cell: ({ row }) => <ShelfItemRowName row={row} />,
   },
   {
     accessorKey: "category.name",

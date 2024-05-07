@@ -9,6 +9,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
+	"github.com/xyzyxJP/bluebird/src/config"
 	"github.com/xyzyxJP/bluebird/src/graphql"
 	"github.com/xyzyxJP/bluebird/src/mock"
 	"github.com/xyzyxJP/bluebird/src/model"
@@ -25,7 +26,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.ShelfImage{})
+	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.ShelfFile{})
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
@@ -48,7 +49,7 @@ func main() {
 	http.Handle("/query", srv)
 
 	shelfFileResolver := resolver.NewShelfFileResolver(db)
-	http.HandleFunc("/shelf-file", shelfFileResolver.Resolver)
+	http.HandleFunc(config.ShelfFileResolverURI, shelfFileResolver.Resolver)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, handler))

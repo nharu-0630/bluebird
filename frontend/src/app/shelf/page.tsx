@@ -4,12 +4,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { GetShelfItemsDocument, GetShelfItemsQuery } from "@/gql/gen/graphql";
 import { useQuery } from "@apollo/client";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
 import { ShelfItemColumns } from "./components/shelf-item/table/shelf-item-columns";
 import { ShelfItemTable } from "./components/shelf-item/table/shelf-item-table";
 import { ShelfItemTableButtons } from "./components/shelf-item/table/shelf-item-table-buttons";
 import { ShelfItemSchema } from "./schema/shelf-item";
+
+const queryClient = new QueryClient();
 
 export default function ShelfPage() {
   const { data, loading, error } = useQuery<GetShelfItemsQuery>(
@@ -31,16 +34,18 @@ export default function ShelfPage() {
     );
   const items = z.array(ShelfItemSchema).parse(data?.shelfItems ?? []);
   return (
-    <div className="w-full">
-      <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-        📦 アイテム
-      </h1>
-      <div className="space-y-4">
-        <ShelfItemTableButtons />
-        <div className="mb-4">
-          <ShelfItemTable columns={ShelfItemColumns} data={items} />
+    <QueryClientProvider client={queryClient}>
+      <div className="w-full">
+        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+          📦 アイテム
+        </h1>
+        <div className="space-y-4">
+          <ShelfItemTableButtons />
+          <div className="mb-4">
+            <ShelfItemTable columns={ShelfItemColumns} data={items} />
+          </div>
         </div>
       </div>
-    </div>
+    </QueryClientProvider>
   );
 }
