@@ -26,10 +26,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.ShelfFile{})
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
+
+	db.AutoMigrate(&model.TwitterUser{}, &model.TwitterTweet{}, &model.TwitterMedia{})
 
 	port := os.Getenv("PORT")
 	if port == "" {
