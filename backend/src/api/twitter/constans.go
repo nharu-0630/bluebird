@@ -1,17 +1,12 @@
 package twitter
 
-const MAX_GQL_CHAR_LIMIT = 4_200
-
-const MAX_ENDPOINT_LIMIT = 500
-
-const MAX_IMAGE_SIZE = 5_242_880
-const MAX_GIF_SIZE = 15_728_640
-const MAX_VIDEO_SIZE = 536_870_912
-
-const UPLOAD_CHUNK_SIZE = 4 * 1024 * 1024
-const MEDIA_UPLOAD_SUCCEED = "succeeded"
-const MEDIA_UPLOAD_FAIL = "failed"
-
-const GQL_API_ENDPOINT = "https://twitter.com/i/api/graphql"
+const GQL_API_ENDPOINT = "https://api.twitter.com/graphql"
 const V1_API_ENDPOINT = "https://api.twitter.com/1.1/"
 const V2_API_ENDPOINT = "https://twitter.com/i/api/2"
+
+const BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
+const USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+
+var PROXY_SERVERS = []string{
+	"20.210.113.32:80",
+}
