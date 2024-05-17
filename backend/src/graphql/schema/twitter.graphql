@@ -52,9 +52,9 @@ type TwitterUser {
 }
 
 extend type Query {
-  tweet(tweet_id: String!): TwitterTweet
-  user(screen_name: String!): TwitterUser
-  likes(user_id: String!): [TwitterTweet]
-  user_tweets(user_id: String!): [TwitterTweet]
-  bookmarks: [TwitterTweet]
+  twitterTweet(tweet_id: String!): TwitterTweet
+  twitterUser(screen_name: String!): TwitterUser
+  twitterLikes(user_id: String!): [TwitterTweet]
+  twitterUserTweets(user_id: String!): [TwitterTweet]
+  twitterBookmarks: [TwitterTweet]
 }

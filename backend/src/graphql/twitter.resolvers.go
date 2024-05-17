@@ -8,8 +8,8 @@ import (
 	"context"
 )
 
-// Tweet is the resolver for the tweet field.
-func (r *queryResolver) Tweet(ctx context.Context, tweetID string) (*TwitterTweet, error) {
+// TwitterTweet is the resolver for the twitterTweet field.
+func (r *queryResolver) TwitterTweet(ctx context.Context, tweetID string) (*TwitterTweet, error) {
 	tweet, err := r.TwitterClient.TweetResultByRestId(tweetID)
 	if err != nil {
 		return nil, err
@@ -17,8 +17,8 @@ func (r *queryResolver) Tweet(ctx context.Context, tweetID string) (*TwitterTwee
 	return PressTweet(tweet)
 }
 
-// User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, screenName string) (*TwitterUser, error) {
+// TwitterUser is the resolver for the twitterUser field.
+func (r *queryResolver) TwitterUser(ctx context.Context, screenName string) (*TwitterUser, error) {
 	user, err := r.TwitterClient.UserByScreenName(screenName)
 	if err != nil {
 		return nil, err
@@ -26,8 +26,8 @@ func (r *queryResolver) User(ctx context.Context, screenName string) (*TwitterUs
 	return ParseUser(user)
 }
 
-// Likes is the resolver for the likes field.
-func (r *queryResolver) Likes(ctx context.Context, userID string) ([]*TwitterTweet, error) {
+// TwitterLikes is the resolver for the twitterLikes field.
+func (r *queryResolver) TwitterLikes(ctx context.Context, userID string) ([]*TwitterTweet, error) {
 	tweets, _, err := r.TwitterClient.Likes(userID)
 	if err != nil {
 		return nil, err
@@ -35,8 +35,8 @@ func (r *queryResolver) Likes(ctx context.Context, userID string) ([]*TwitterTwe
 	return ParseTweets(tweets)
 }
 
-// UserTweets is the resolver for the user_tweets field.
-func (r *queryResolver) UserTweets(ctx context.Context, userID string) ([]*TwitterTweet, error) {
+// TwitterUserTweets is the resolver for the twitterUserTweets field.
+func (r *queryResolver) TwitterUserTweets(ctx context.Context, userID string) ([]*TwitterTweet, error) {
 	tweets, _, err := r.TwitterClient.UserTweets(userID)
 	if err != nil {
 		return nil, err
@@ -44,8 +44,8 @@ func (r *queryResolver) UserTweets(ctx context.Context, userID string) ([]*Twitt
 	return ParseTweets(tweets)
 }
 
-// Bookmarks is the resolver for the bookmarks field.
-func (r *queryResolver) Bookmarks(ctx context.Context) ([]*TwitterTweet, error) {
+// TwitterBookmarks is the resolver for the twitterBookmarks field.
+func (r *queryResolver) TwitterBookmarks(ctx context.Context) ([]*TwitterTweet, error) {
 	tweets, _, err := r.TwitterClient.Bookmarks()
 	if err != nil {
 		return nil, err

@@ -1,0 +1,222 @@
+query GetTwitterTweet($tweetID: string) {
+  twitterTweet(tweetID: $tweetID) {
+    id
+    full_text
+    created_at
+    reply_count
+    retweet_count
+    quote_count
+    retweeted
+    favorite_count
+    favorited
+    bookmark_count
+    bookmarked
+    lang
+    user {
+      id
+      name
+      screen_name
+      verified
+      blue_verified
+      description
+      location
+      birthday
+      created_at
+      friends_count
+      following
+      fast_followers_count
+      followers_count
+      normal_followers_count
+      followed_by
+      media_count
+      favourites_count
+      listed_count
+      pinned_tweet_ids
+      profile_banner_url
+      profile_image_url
+      statuses_count
+    }
+    media {
+      id
+      media_key
+      expanded_url
+      type
+      thumb_url
+      video_url
+    }
+  }
+}
+
+query GetTwitterUser($screenName: string) {
+  twitterUser(screenName: $screenName) {
+    id
+    name
+    screen_name
+    verified
+    blue_verified
+    description
+    location
+    birthday
+    created_at
+    friends_count
+    following
+    fast_followers_count
+    followers_count
+    normal_followers_count
+    followed_by
+    media_count
+    favourites_count
+    listed_count
+    pinned_tweet_ids
+    profile_banner_url
+    profile_image_url
+    statuses_count
+  }
+}
+
+query GetTwitterLikes($userID: string) {
+  twitterLikes(userID: $userID) {
+    id
+    full_text
+    created_at
+    reply_count
+    retweet_count
+    quote_count
+    retweeted
+    favorite_count
+    favorited
+    bookmark_count
+    bookmarked
+    lang
+    user {
+      id
+      name
+      screen_name
+      verified
+      blue_verified
+      description
+      location
+      birthday
+      created_at
+      friends_count
+      following
+      fast_followers_count
+      followers_count
+      normal_followers_count
+      followed_by
+      media_count
+      favourites_count
+      listed_count
+      pinned_tweet_ids
+      profile_banner_url
+      profile_image_url
+      statuses_count
+    }
+    media {
+      id
+      media_key
+      expanded_url
+      type
+      thumb_url
+      video_url
+    }
+  }
+}
+
+query GetTwitterUserTweets($userID: string) {
+  twitterUserTweets(userID: $userID) {
+    id
+    full_text
+    created_at
+    reply_count
+    retweet_count
+    quote_count
+    retweeted
+    favorite_count
+    favorited
+    bookmark_count
+    bookmarked
+    lang
+    user {
+      id
+      name
+      screen_name
+      verified
+      blue_verified
+      description
+      location
+      birthday
+      created_at
+      friends_count
+      following
+      fast_followers_count
+      followers_count
+      normal_followers_count
+      followed_by
+      media_count
+      favourites_count
+      listed_count
+      pinned_tweet_ids
+      profile_banner_url
+      profile_image_url
+      statuses_count
+    }
+    media {
+      id
+      media_key
+      expanded_url
+      type
+      thumb_url
+      video_url
+    }
+  }
+}
+
+query GetTwitterBookmarks() {
+    twitterBookmarks {
+        id
+        full_text
+        created_at
+        reply_count
+        retweet_count
+        quote_count
+        retweeted
+        favorite_count
+        favorited
+        bookmark_count
+        bookmarked
+        lang
+        user {
+        id
+        name
+        screen_name
+        verified
+        blue_verified
+        description
+        location
+        birthday
+        created_at
+        friends_count
+        following
+        fast_followers_count
+        followers_count
+        normal_followers_count
+        followed_by
+        media_count
+        favourites_count
+        listed_count
+        pinned_tweet_ids
+        profile_banner_url
+        profile_image_url
+        statuses_count
+        }
+        media {
+        id
+        media_key
+        expanded_url
+        type
+        thumb_url
+        video_url
+        }
+    }
+}

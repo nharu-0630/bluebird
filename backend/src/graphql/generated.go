@@ -66,10 +66,8 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Bookmarks         func(childComplexity int) int
 		DeletedShelfItem  func(childComplexity int, ulid string) int
 		DeletedShelfItems func(childComplexity int) int
-		Likes             func(childComplexity int, userID string) int
 		ShelfCategories   func(childComplexity int) int
 		ShelfCategory     func(childComplexity int, ulid string) int
 		ShelfItem         func(childComplexity int, ulid string) int
@@ -78,9 +76,11 @@ type ComplexityRoot struct {
 		ShelfLocations    func(childComplexity int) int
 		ShelfTag          func(childComplexity int, ulid string) int
 		ShelfTags         func(childComplexity int) int
-		Tweet             func(childComplexity int, tweetID string) int
-		User              func(childComplexity int, screenName string) int
-		UserTweets        func(childComplexity int, userID string) int
+		TwitterBookmarks  func(childComplexity int) int
+		TwitterLikes      func(childComplexity int, userID string) int
+		TwitterTweet      func(childComplexity int, tweetID string) int
+		TwitterUser       func(childComplexity int, screenName string) int
+		TwitterUserTweets func(childComplexity int, userID string) int
 	}
 
 	ShelfCategory struct {
@@ -193,11 +193,11 @@ type QueryResolver interface {
 	ShelfTag(ctx context.Context, ulid string) (*ShelfTag, error)
 	ShelfLocations(ctx context.Context) ([]*ShelfLocation, error)
 	ShelfLocation(ctx context.Context, ulid string) (*ShelfLocation, error)
-	Tweet(ctx context.Context, tweetID string) (*TwitterTweet, error)
-	User(ctx context.Context, screenName string) (*TwitterUser, error)
-	Likes(ctx context.Context, userID string) ([]*TwitterTweet, error)
-	UserTweets(ctx context.Context, userID string) ([]*TwitterTweet, error)
-	Bookmarks(ctx context.Context) ([]*TwitterTweet, error)
+	TwitterTweet(ctx context.Context, tweetID string) (*TwitterTweet, error)
+	TwitterUser(ctx context.Context, screenName string) (*TwitterUser, error)
+	TwitterLikes(ctx context.Context, userID string) ([]*TwitterTweet, error)
+	TwitterUserTweets(ctx context.Context, userID string) ([]*TwitterTweet, error)
+	TwitterBookmarks(ctx context.Context) ([]*TwitterTweet, error)
 }
 
 type executableSchema struct {
@@ -399,13 +399,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UploadShelfItemImage(childComplexity, args["ulid"].(string), args["file"].(graphql.Upload)), true
 
-	case "Query.bookmarks":
-		if e.complexity.Query.Bookmarks == nil {
-			break
-		}
-
-		return e.complexity.Query.Bookmarks(childComplexity), true
-
 	case "Query.deletedShelfItem":
 		if e.complexity.Query.DeletedShelfItem == nil {
 			break
@@ -424,18 +417,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DeletedShelfItems(childComplexity), true
-
-	case "Query.likes":
-		if e.complexity.Query.Likes == nil {
-			break
-		}
-
-		args, err := ec.field_Query_likes_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Likes(childComplexity, args["user_id"].(string)), true
 
 	case "Query.shelfCategories":
 		if e.complexity.Query.ShelfCategories == nil {
@@ -513,41 +494,60 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ShelfTags(childComplexity), true
 
-	case "Query.tweet":
-		if e.complexity.Query.Tweet == nil {
+	case "Query.twitterBookmarks":
+		if e.complexity.Query.TwitterBookmarks == nil {
 			break
 		}
 
-		args, err := ec.field_Query_tweet_args(context.TODO(), rawArgs)
+		return e.complexity.Query.TwitterBookmarks(childComplexity), true
+
+	case "Query.twitterLikes":
+		if e.complexity.Query.TwitterLikes == nil {
+			break
+		}
+
+		args, err := ec.field_Query_twitterLikes_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Tweet(childComplexity, args["tweet_id"].(string)), true
+		return e.complexity.Query.TwitterLikes(childComplexity, args["user_id"].(string)), true
 
-	case "Query.user":
-		if e.complexity.Query.User == nil {
+	case "Query.twitterTweet":
+		if e.complexity.Query.TwitterTweet == nil {
 			break
 		}
 
-		args, err := ec.field_Query_user_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_twitterTweet_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["screen_name"].(string)), true
+		return e.complexity.Query.TwitterTweet(childComplexity, args["tweet_id"].(string)), true
 
-	case "Query.user_tweets":
-		if e.complexity.Query.UserTweets == nil {
+	case "Query.twitterUser":
+		if e.complexity.Query.TwitterUser == nil {
 			break
 		}
 
-		args, err := ec.field_Query_user_tweets_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_twitterUser_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.UserTweets(childComplexity, args["user_id"].(string)), true
+		return e.complexity.Query.TwitterUser(childComplexity, args["screen_name"].(string)), true
+
+	case "Query.twitterUserTweets":
+		if e.complexity.Query.TwitterUserTweets == nil {
+			break
+		}
+
+		args, err := ec.field_Query_twitterUserTweets_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.TwitterUserTweets(childComplexity, args["user_id"].(string)), true
 
 	case "ShelfCategory.name":
 		if e.complexity.ShelfCategory.Name == nil {
@@ -1444,21 +1444,6 @@ func (ec *executionContext) field_Query_deletedShelfItem_args(ctx context.Contex
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_likes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["user_id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["user_id"] = arg0
-	return args, nil
-}
-
 func (ec *executionContext) field_Query_shelfCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1519,7 +1504,22 @@ func (ec *executionContext) field_Query_shelfTag_args(ctx context.Context, rawAr
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_tweet_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_twitterLikes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["user_id"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("user_id"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["user_id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_twitterTweet_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1534,22 +1534,7 @@ func (ec *executionContext) field_Query_tweet_args(ctx context.Context, rawArgs 
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["screen_name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screen_name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["screen_name"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_user_tweets_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_twitterUserTweets_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1561,6 +1546,21 @@ func (ec *executionContext) field_Query_user_tweets_args(ctx context.Context, ra
 		}
 	}
 	args["user_id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_twitterUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["screen_name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("screen_name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["screen_name"] = arg0
 	return args, nil
 }
 
@@ -3054,8 +3054,8 @@ func (ec *executionContext) fieldContext_Query_shelfLocation(ctx context.Context
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_tweet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_tweet(ctx, field)
+func (ec *executionContext) _Query_twitterTweet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_twitterTweet(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3068,7 +3068,7 @@ func (ec *executionContext) _Query_tweet(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Tweet(rctx, fc.Args["tweet_id"].(string))
+		return ec.resolvers.Query().TwitterTweet(rctx, fc.Args["tweet_id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3082,7 +3082,7 @@ func (ec *executionContext) _Query_tweet(ctx context.Context, field graphql.Coll
 	return ec.marshalOTwitterTweet2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐTwitterTweet(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_tweet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_twitterTweet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -3129,15 +3129,15 @@ func (ec *executionContext) fieldContext_Query_tweet(ctx context.Context, field 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_tweet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_twitterTweet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_user(ctx, field)
+func (ec *executionContext) _Query_twitterUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_twitterUser(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3150,7 +3150,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().User(rctx, fc.Args["screen_name"].(string))
+		return ec.resolvers.Query().TwitterUser(rctx, fc.Args["screen_name"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3164,7 +3164,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	return ec.marshalOTwitterUser2ᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐTwitterUser(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_twitterUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -3227,15 +3227,15 @@ func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field g
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_twitterUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_likes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_likes(ctx, field)
+func (ec *executionContext) _Query_twitterLikes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_twitterLikes(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3248,7 +3248,7 @@ func (ec *executionContext) _Query_likes(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Likes(rctx, fc.Args["user_id"].(string))
+		return ec.resolvers.Query().TwitterLikes(rctx, fc.Args["user_id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3262,7 +3262,7 @@ func (ec *executionContext) _Query_likes(ctx context.Context, field graphql.Coll
 	return ec.marshalOTwitterTweet2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐTwitterTweet(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_likes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_twitterLikes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -3309,15 +3309,15 @@ func (ec *executionContext) fieldContext_Query_likes(ctx context.Context, field 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_likes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_twitterLikes_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_user_tweets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_user_tweets(ctx, field)
+func (ec *executionContext) _Query_twitterUserTweets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_twitterUserTweets(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3330,7 +3330,7 @@ func (ec *executionContext) _Query_user_tweets(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().UserTweets(rctx, fc.Args["user_id"].(string))
+		return ec.resolvers.Query().TwitterUserTweets(rctx, fc.Args["user_id"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3344,7 +3344,7 @@ func (ec *executionContext) _Query_user_tweets(ctx context.Context, field graphq
 	return ec.marshalOTwitterTweet2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐTwitterTweet(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_user_tweets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_twitterUserTweets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -3391,15 +3391,15 @@ func (ec *executionContext) fieldContext_Query_user_tweets(ctx context.Context, 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_tweets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_twitterUserTweets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_bookmarks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_bookmarks(ctx, field)
+func (ec *executionContext) _Query_twitterBookmarks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_twitterBookmarks(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3412,7 +3412,7 @@ func (ec *executionContext) _Query_bookmarks(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Bookmarks(rctx)
+		return ec.resolvers.Query().TwitterBookmarks(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3426,7 +3426,7 @@ func (ec *executionContext) _Query_bookmarks(ctx context.Context, field graphql.
 	return ec.marshalOTwitterTweet2ᚕᚖgithubᚗcomᚋxyzyxJPᚋbluebirdᚋsrcᚋgraphqlᚐTwitterTweet(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_bookmarks(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_twitterBookmarks(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -8189,7 +8189,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "tweet":
+		case "twitterTweet":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -8198,7 +8198,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_tweet(ctx, field)
+				res = ec._Query_twitterTweet(ctx, field)
 				return res
 			}
 
@@ -8208,7 +8208,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "user":
+		case "twitterUser":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -8217,7 +8217,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_user(ctx, field)
+				res = ec._Query_twitterUser(ctx, field)
 				return res
 			}
 
@@ -8227,7 +8227,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "likes":
+		case "twitterLikes":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -8236,7 +8236,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_likes(ctx, field)
+				res = ec._Query_twitterLikes(ctx, field)
 				return res
 			}
 
@@ -8246,7 +8246,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "user_tweets":
+		case "twitterUserTweets":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -8255,7 +8255,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_user_tweets(ctx, field)
+				res = ec._Query_twitterUserTweets(ctx, field)
 				return res
 			}
 
@@ -8265,7 +8265,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "bookmarks":
+		case "twitterBookmarks":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -8274,7 +8274,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_bookmarks(ctx, field)
+				res = ec._Query_twitterBookmarks(ctx, field)
 				return res
 			}
 
