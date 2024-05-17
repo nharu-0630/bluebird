@@ -3,58 +3,63 @@ scalar DateTime
 type TwitterTweet {
   id: String
   user: TwitterUser
-  full_text: String
+  fullText: String
   media: [TwitterMedia]
-  created_at: DateTime
-  reply_count: Int
-  retweet_count: Int
-  quote_count: Int
+  createdAt: DateTime
+  replyCount: Int
+  retweetCount: Int
+  quoteCount: Int
   retweeted: Boolean
-  favorite_count: Int
+  favoriteCount: Int
   favorited: Boolean
-  bookmark_count: Int
+  bookmarkCount: Int
   bookmarked: Boolean
   lang: String
 }
 
 type TwitterMedia {
   id: String
-  media_key: String
-  expanded_url: String
+  mediaKey: String
+  expandedURL: String
   type: String
-  thumb_url: String
-  video_url: String
+  thumbURL: String
+  videoURL: String
 }
 
 type TwitterUser {
   id: String
   name: String
-  screen_name: String
+  screenName: String
   verified: Boolean
-  blue_verified: Boolean
+  blueVerified: Boolean
   description: String
   location: String
   birthday: DateTime
-  created_at: DateTime
-  friends_count: Int
+  createdAt: DateTime
+  friendsCount: Int
   following: Boolean
-  fast_followers_count: Int
-  followers_count: Int
-  normal_followers_count: Int
-  followed_by: Boolean
-  media_count: Int
-  favourites_count: Int
-  listed_count: Int
-  pinned_tweet_ids: [String]
-  profile_banner_url: String
-  profile_image_url: String
-  statuses_count: Int
+  fastFollowersCount: Int
+  followersCount: Int
+  normalFollowersCount: Int
+  followedBy: Boolean
+  mediaCount: Int
+  favouritesCount: Int
+  listedCount: Int
+  pinnedTweetIDs: [String]
+  profileBannerURL: String
+  profileImageURL: String
+  statusesCount: Int
+}
+
+type TweetConnection {
+  tweets: [TwitterTweet]
+  cursor: String
 }
 
 extend type Query {
-  twitterTweet(tweet_id: String!): TwitterTweet
-  twitterUser(screen_name: String!): TwitterUser
-  twitterLikes(user_id: String!): [TwitterTweet]
-  twitterUserTweets(user_id: String!): [TwitterTweet]
-  twitterBookmarks: [TwitterTweet]
+  twitterTweet(tweetID: String!): TwitterTweet
+  twitterUser(screenName: String!): TwitterUser
+  twitterLikes(userID: String!, cursor: String): TweetConnection
+  twitterUserTweets(userID: String!, cursor: String): TweetConnection
+  twitterBookmarks(cursor: String): TweetConnection
 }

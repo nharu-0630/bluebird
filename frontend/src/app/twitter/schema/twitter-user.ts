@@ -1,0 +1,26 @@
+import { z } from "zod";
+
+export const TwitterUserSchema = z.object({
+  id: z.string().nullable(),
+  name: z.string().nullable(),
+  screenName: z.string().nullable(),
+  verified: z.boolean().nullable(),
+  blueVerified: z.boolean().nullable(),
+  description: z.string().nullable(),
+  location: z.string().nullable(),
+  birthday: z.string().nullable(),
+  createdAt: z.string().nullable(),
+  friendsCount: z.number().nullable(),
+  following: z.boolean().nullable(),
+  fastFollowersCount: z.number().nullable(),
+  followersCount: z.number().nullable(),
+  normalFollowersCount: z.number().nullable(),
+  followedBy: z.boolean().nullable(),
+  mediaCount: z.number().nullable(),
+  favouritesCount: z.number().nullable(),
+  listedCount: z.number().nullable(),
+  pinnedTweetIDs: z.array(z.string()).nullable(),
+  profileBannerURL: z.string().nullable(),
+  profileImageURL: z.string().nullable(),
+  statusesCount: z.number().nullable(),
+});

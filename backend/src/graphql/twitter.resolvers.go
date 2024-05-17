@@ -27,28 +27,58 @@ func (r *queryResolver) TwitterUser(ctx context.Context, screenName string) (*Tw
 }
 
 // TwitterLikes is the resolver for the twitterLikes field.
-func (r *queryResolver) TwitterLikes(ctx context.Context, userID string) ([]*TwitterTweet, error) {
-	tweets, _, err := r.TwitterClient.Likes(userID)
+func (r *queryResolver) TwitterLikes(ctx context.Context, userID string, cursor *string) (*TweetConnection, error) {
+	if cursor == nil {
+		cursor = new(string)
+	}
+	tweets, resCursor, err := r.TwitterClient.Likes(userID, *cursor)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTweets(tweets)
+	parsedTweets, err := ParseTweets(tweets)
+	if err != nil {
+		return nil, err
+	}
+	return &TweetConnection{
+		Tweets: parsedTweets,
+		Cursor: &resCursor.BottomCursor,
+	}, nil
 }
 
 // TwitterUserTweets is the resolver for the twitterUserTweets field.
-func (r *queryResolver) TwitterUserTweets(ctx context.Context, userID string) ([]*TwitterTweet, error) {
-	tweets, _, err := r.TwitterClient.UserTweets(userID)
+func (r *queryResolver) TwitterUserTweets(ctx context.Context, userID string, cursor *string) (*TweetConnection, error) {
+	if cursor == nil {
+		cursor = new(string)
+	}
+	tweets, resCursor, err := r.TwitterClient.UserTweets(userID, *cursor)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTweets(tweets)
+	parsedTweets, err := ParseTweets(tweets)
+	if err != nil {
+		return nil, err
+	}
+	return &TweetConnection{
+		Tweets: parsedTweets,
+		Cursor: &resCursor.BottomCursor,
+	}, nil
 }
 
 // TwitterBookmarks is the resolver for the twitterBookmarks field.
-func (r *queryResolver) TwitterBookmarks(ctx context.Context) ([]*TwitterTweet, error) {
-	tweets, _, err := r.TwitterClient.Bookmarks()
+func (r *queryResolver) TwitterBookmarks(ctx context.Context, cursor *string) (*TweetConnection, error) {
+	if cursor == nil {
+		cursor = new(string)
+	}
+	tweets, resCursor, err := r.TwitterClient.Bookmarks(*cursor)
 	if err != nil {
 		return nil, err
 	}
-	return ParseTweets(tweets)
+	parsedTweets, err := ParseTweets(tweets)
+	if err != nil {
+		return nil, err
+	}
+	return &TweetConnection{
+		Tweets: parsedTweets,
+		Cursor: &resCursor.BottomCursor,
+	}, nil
 }

@@ -1,222 +1,103 @@
-query GetTwitterTweet($tweetID: string) {
-  twitterTweet(tweetID: $tweetID) {
-    id
-    full_text
-    created_at
-    reply_count
-    retweet_count
-    quote_count
-    retweeted
-    favorite_count
-    favorited
-    bookmark_count
-    bookmarked
-    lang
-    user {
+query GetTwitterLikes($userID: String!, $cursor: String) {
+  twitterLikes(userID: $userID, cursor: $cursor) {
+    cursor
+    tweets {
       id
-      name
-      screen_name
-      verified
-      blue_verified
-      description
-      location
-      birthday
-      created_at
-      friends_count
-      following
-      fast_followers_count
-      followers_count
-      normal_followers_count
-      followed_by
-      media_count
-      favourites_count
-      listed_count
-      pinned_tweet_ids
-      profile_banner_url
-      profile_image_url
-      statuses_count
-    }
-    media {
-      id
-      media_key
-      expanded_url
-      type
-      thumb_url
-      video_url
-    }
-  }
-}
-
-query GetTwitterUser($screenName: string) {
-  twitterUser(screenName: $screenName) {
-    id
-    name
-    screen_name
-    verified
-    blue_verified
-    description
-    location
-    birthday
-    created_at
-    friends_count
-    following
-    fast_followers_count
-    followers_count
-    normal_followers_count
-    followed_by
-    media_count
-    favourites_count
-    listed_count
-    pinned_tweet_ids
-    profile_banner_url
-    profile_image_url
-    statuses_count
-  }
-}
-
-query GetTwitterLikes($userID: string) {
-  twitterLikes(userID: $userID) {
-    id
-    full_text
-    created_at
-    reply_count
-    retweet_count
-    quote_count
-    retweeted
-    favorite_count
-    favorited
-    bookmark_count
-    bookmarked
-    lang
-    user {
-      id
-      name
-      screen_name
-      verified
-      blue_verified
-      description
-      location
-      birthday
-      created_at
-      friends_count
-      following
-      fast_followers_count
-      followers_count
-      normal_followers_count
-      followed_by
-      media_count
-      favourites_count
-      listed_count
-      pinned_tweet_ids
-      profile_banner_url
-      profile_image_url
-      statuses_count
-    }
-    media {
-      id
-      media_key
-      expanded_url
-      type
-      thumb_url
-      video_url
-    }
-  }
-}
-
-query GetTwitterUserTweets($userID: string) {
-  twitterUserTweets(userID: $userID) {
-    id
-    full_text
-    created_at
-    reply_count
-    retweet_count
-    quote_count
-    retweeted
-    favorite_count
-    favorited
-    bookmark_count
-    bookmarked
-    lang
-    user {
-      id
-      name
-      screen_name
-      verified
-      blue_verified
-      description
-      location
-      birthday
-      created_at
-      friends_count
-      following
-      fast_followers_count
-      followers_count
-      normal_followers_count
-      followed_by
-      media_count
-      favourites_count
-      listed_count
-      pinned_tweet_ids
-      profile_banner_url
-      profile_image_url
-      statuses_count
-    }
-    media {
-      id
-      media_key
-      expanded_url
-      type
-      thumb_url
-      video_url
-    }
-  }
-}
-
-query GetTwitterBookmarks() {
-    twitterBookmarks {
-        id
-        full_text
-        created_at
-        reply_count
-        retweet_count
-        quote_count
-        retweeted
-        favorite_count
-        favorited
-        bookmark_count
-        bookmarked
-        lang
-        user {
+      fullText
+      createdAt
+      replyCount
+      retweetCount
+      quoteCount
+      retweeted
+      favoriteCount
+      favorited
+      bookmarkCount
+      bookmarked
+      lang
+      user {
         id
         name
-        screen_name
+        screenName
         verified
-        blue_verified
+        blueVerified
         description
         location
         birthday
-        created_at
-        friends_count
+        createdAt
+        friendsCount
         following
-        fast_followers_count
-        followers_count
-        normal_followers_count
-        followed_by
-        media_count
-        favourites_count
-        listed_count
-        pinned_tweet_ids
-        profile_banner_url
-        profile_image_url
-        statuses_count
-        }
-        media {
+        fastFollowersCount
+        followersCount
+        normalFollowersCount
+        followedBy
+        mediaCount
+        favouritesCount
+        listedCount
+        pinnedTweetIDs
+        profileBannerURL
+        profileImageURL
+        statusesCount
+      }
+      media {
         id
-        media_key
-        expanded_url
+        mediaKey
+        expandedURL
         type
-        thumb_url
-        video_url
-        }
+        thumbURL
+        videoURL
+      }
     }
+  }
+}
+
+query GetTwitterBookmarks($cursor: String) {
+  twitterBookmarks(cursor: $cursor) {
+    cursor
+    tweets {
+      id
+      fullText
+      createdAt
+      replyCount
+      retweetCount
+      quoteCount
+      retweeted
+      favoriteCount
+      favorited
+      bookmarkCount
+      bookmarked
+      lang
+      user {
+        id
+        name
+        screenName
+        verified
+        blueVerified
+        description
+        location
+        birthday
+        createdAt
+        friendsCount
+        following
+        fastFollowersCount
+        followersCount
+        normalFollowersCount
+        followedBy
+        mediaCount
+        favouritesCount
+        listedCount
+        pinnedTweetIDs
+        profileBannerURL
+        profileImageURL
+        statusesCount
+      }
+      media {
+        id
+        mediaKey
+        expandedURL
+        type
+        thumbURL
+        videoURL
+      }
+    }
+  }
 }

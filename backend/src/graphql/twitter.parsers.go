@@ -82,7 +82,7 @@ func ParseUser(user model.User) (*TwitterUser, error) {
 		MediaCount:           &user.Legacy.MediaCount,
 		FavouritesCount:      &user.Legacy.FavouritesCount,
 		ListedCount:          &user.Legacy.ListedCount,
-		PinnedTweetIds:       nil,
+		PinnedTweetIDs:       nil,
 		ProfileBannerURL:     &user.Legacy.ProfileBannerURL,
 		ProfileImageURL:      &user.Legacy.ProfileImageURLHTTPS,
 		StatusesCount:        &user.Legacy.StatusesCount,
