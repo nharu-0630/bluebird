@@ -1,0 +1,181 @@
+# type ResponseObjects {
+#   immediateReactions: [String]
+#   feedbackActions: [String]
+# }
+
+# type MediaResults {
+#   result: Result
+# }
+
+# type AllowDownloadStatus {
+#   allow_download: Boolean
+# }
+
+# type FocusRects {
+#   x: Int
+#   y: Int
+#   w: Int
+#   h: Int
+# }
+
+# type OriginalInfo {
+#   height: Int
+#   width: Int
+#   focus_rects: [FocusRects]
+# }
+
+# type Thumb {
+#   h: Int
+#   w: Int
+#   resize: String
+# }
+
+# type Small {
+#   h: Int
+#   w: Int
+#   resize: String
+# }
+
+# type Medium {
+#   h: Int
+#   w: Int
+#   resize: String
+# }
+
+# type Large {
+#   h: Int
+#   w: Int
+#   resize: String
+# }
+
+# type Sizes {
+#   thumb: Thumb
+#   small: Small
+#   medium: Medium
+#   large: Large
+# }
+
+# type Orig {
+#   faces: [String]
+# }
+
+# type Features {
+#   orig: Orig
+#   small: Small
+#   medium: Medium
+#   large: Large
+# }
+
+# type ExtMediaAvailability {
+#   status: String
+# }
+
+# type Media {
+#   display_url: String
+#   expanded_url: String
+#   id_str: String
+#   media_key: String
+#   media_url_https: String
+#   type: String
+#   url: String
+#   media_results: MediaResults
+#   allow_download_status: AllowDownloadStatus
+#   original_info: OriginalInfo
+#   sizes: Sizes
+#   features: Features
+#   ext_media_availability: ExtMediaAvailability
+#   indices: [Int]
+# }
+
+# type ExtendedEntities {
+#   media: [Media]
+# }
+
+# type Entities {
+#   user_mentions: [String]
+#   urls: [String]
+#   timestamps: [String]
+#   symbols: [String]
+#   media: [Media]
+#   hashtags: [String]
+# }
+
+# type Views {
+#   count: String
+#   state: String
+# }
+
+# type EditControl {
+#   editable_until_msecs: String
+#   is_edit_eligible: Boolean
+#   edits_remaining: String
+#   edit_tweet_ids: [String]
+# }
+
+# type Urls {
+#   display_url: String
+#   expanded_url: String
+#   url: String
+#   indices: [Int]
+# }
+
+# type Url {
+#   urls: [Urls]
+# }
+
+# type Description {
+#   urls: [String]
+# }
+
+# type Legacy {
+#   following: Boolean
+#   can_dm: Boolean
+#   can_media_tag: Boolean
+#   created_at: String
+#   default_profile: Boolean
+#   default_profile_image: Boolean
+#   description: String
+#   fast_followers_count: Int
+#   favourites_count: Int
+#   followers_count: Int
+#   friends_count: Int
+#   has_custom_timelines: Boolean
+#   is_translator: Boolean
+#   listed_count: Int
+#   location: String
+#   media_count: Int
+#   name: String
+#   normal_followers_count: Int
+#   possibly_sensitive: Boolean
+#   profile_banner_url: String
+#   profile_image_url_https: String
+#   profile_interstitial_type: String
+#   screen_name: String
+#   statuses_count: Int
+#   translator_type: String
+#   url: String
+#   verified: Boolean
+#   want_retweets: Boolean
+#   withheld_in_countries: [String]
+#   pinned_tweet_ids_str: [String]
+#   entities: Entities
+# }
+
+# type UserResults {
+#   result: Result
+# }
+
+# type Core {
+#   user_results: UserResults
+# }
+
+# type Result {
+#   __typename: String
+#   rest_id: String
+#   is_translatable: Boolean
+#   source: String
+#   legacy: Legacy
+#   views: Views
+#   edit_control: EditControl
+#   core: Core
+# }

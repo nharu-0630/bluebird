@@ -20,8 +20,6 @@ type TwitterClient struct {
 	client       *http.Client
 	guestToken   string
 	clientUUID   string
-	authToken    string
-	csrfToken    string
 	lastCalledAt time.Time
 }
 
@@ -36,8 +34,6 @@ func NewTwitterClient(config TwitterClientConfig) *TwitterClient {
 		client.initializeGuestToken()
 	} else {
 		client.initializeClientUUID()
-		client.authToken = config.AuthToken
-		client.csrfToken = config.CsrfToken
 	}
 	return client
 }
@@ -100,10 +96,10 @@ func (c *TwitterClient) setAuthorizedHeaders(req *http.Request) {
 	req.Header.Add("origin", "https://twitter.com")
 	req.Header.Add("referer", "https://twitter.com/")
 	req.Header.Add("user-agent", USER_AGENT)
-	req.AddCookie(&http.Cookie{Name: "auth_token", Value: c.authToken})
-	req.AddCookie(&http.Cookie{Name: "ct0", Value: c.csrfToken})
+	req.AddCookie(&http.Cookie{Name: "auth_token", Value: c.config.AuthToken})
+	req.AddCookie(&http.Cookie{Name: "ct0", Value: c.config.CsrfToken})
 	req.Header.Add("x-client-uuid", c.clientUUID)
-	req.Header.Add("x-csrf-token", c.csrfToken)
+	req.Header.Add("x-csrf-token", c.config.CsrfToken)
 	req.Header.Add("x-twitter-active-user", "yes")
 	req.Header.Add("x-twitter-auth-type", "OAuth2Session")
 	req.Header.Add("x-twitter-client-language", "ja")

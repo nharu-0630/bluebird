@@ -65,10 +65,29 @@ func TestLikes(t *testing.T) {
 }
 
 func TestUserTweets(t *testing.T) {
+	LoadEnv()
 	client := twitter.NewTwitterClient(twitter.TwitterClientConfig{
 		IsGuestTokenEnabled: false,
+		AuthToken:           os.Getenv("TWITTER_AUTH_TOKEN"),
+		CsrfToken:           os.Getenv("TWITTER_CSRF_TOKEN"),
 	})
 	tweets, cursor, err := client.UserTweets("1003084799592972288")
+	if err != nil {
+		t.Error(err)
+	} else {
+		fmt.Println(tweets)
+		fmt.Println(cursor)
+	}
+}
+
+func TestBookmarks(t *testing.T) {
+	LoadEnv()
+	client := twitter.NewTwitterClient(twitter.TwitterClientConfig{
+		IsGuestTokenEnabled: false,
+		AuthToken:           os.Getenv("TWITTER_AUTH_TOKEN"),
+		CsrfToken:           os.Getenv("TWITTER_CSRF_TOKEN"),
+	})
+	tweets, cursor, err := client.Bookmarks()
 	if err != nil {
 		t.Error(err)
 	} else {
