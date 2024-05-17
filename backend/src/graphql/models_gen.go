@@ -2,6 +2,10 @@
 
 package graphql
 
+import (
+	"time"
+)
+
 type Mutation struct {
 }
 
@@ -36,4 +40,55 @@ type ShelfLocation struct {
 type ShelfTag struct {
 	Ulid string `json:"ulid"`
 	Name string `json:"name"`
+}
+
+type TwitterMedia struct {
+	ID          *string `json:"id,omitempty"`
+	MediaKey    *string `json:"media_key,omitempty"`
+	ExpandedURL *string `json:"expanded_url,omitempty"`
+	Type        *string `json:"type,omitempty"`
+	ThumbURL    *string `json:"thumb_url,omitempty"`
+	VideoURL    *string `json:"video_url,omitempty"`
+}
+
+type TwitterTweet struct {
+	ID            *string         `json:"id,omitempty"`
+	User          *TwitterUser    `json:"user,omitempty"`
+	FullText      *string         `json:"full_text,omitempty"`
+	Media         []*TwitterMedia `json:"media,omitempty"`
+	CreatedAt     *time.Time      `json:"created_at,omitempty"`
+	ReplyCount    *int            `json:"reply_count,omitempty"`
+	RetweetCount  *int            `json:"retweet_count,omitempty"`
+	QuoteCount    *int            `json:"quote_count,omitempty"`
+	Retweeted     *bool           `json:"retweeted,omitempty"`
+	FavoriteCount *int            `json:"favorite_count,omitempty"`
+	Favorited     *bool           `json:"favorited,omitempty"`
+	BookmarkCount *int            `json:"bookmark_count,omitempty"`
+	Bookmarked    *bool           `json:"bookmarked,omitempty"`
+	Lang          *string         `json:"lang,omitempty"`
+}
+
+type TwitterUser struct {
+	ID                   *string    `json:"id,omitempty"`
+	Name                 *string    `json:"name,omitempty"`
+	ScreenName           *string    `json:"screen_name,omitempty"`
+	Verified             *bool      `json:"verified,omitempty"`
+	BlueVerified         *bool      `json:"blue_verified,omitempty"`
+	Description          *string    `json:"description,omitempty"`
+	Location             *string    `json:"location,omitempty"`
+	Birthday             *time.Time `json:"birthday,omitempty"`
+	CreatedAt            *time.Time `json:"created_at,omitempty"`
+	FriendsCount         *int       `json:"friends_count,omitempty"`
+	Following            *bool      `json:"following,omitempty"`
+	FastFollowersCount   *int       `json:"fast_followers_count,omitempty"`
+	FollowersCount       *int       `json:"followers_count,omitempty"`
+	NormalFollowersCount *int       `json:"normal_followers_count,omitempty"`
+	FollowedBy           *bool      `json:"followed_by,omitempty"`
+	MediaCount           *int       `json:"media_count,omitempty"`
+	FavouritesCount      *int       `json:"favourites_count,omitempty"`
+	ListedCount          *int       `json:"listed_count,omitempty"`
+	PinnedTweetIds       []*string  `json:"pinned_tweet_ids,omitempty"`
+	ProfileBannerURL     *string    `json:"profile_banner_url,omitempty"`
+	ProfileImageURL      *string    `json:"profile_image_url,omitempty"`
+	StatusesCount        *int       `json:"statuses_count,omitempty"`
 }

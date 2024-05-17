@@ -25,7 +25,7 @@ func LoadEnv() {
 }
 
 func TestTweetResultByRestId(t *testing.T) {
-	client := twitter.NewTwitterClient(twitter.TwitterClientConfig{
+	client := twitter.NewClient(twitter.ClientConfig{
 		IsGuestTokenEnabled: true,
 	})
 	tweet, err := client.TweetResultByRestId("1762646776916635958")
@@ -37,7 +37,7 @@ func TestTweetResultByRestId(t *testing.T) {
 }
 
 func TestUserByRestId(t *testing.T) {
-	client := twitter.NewTwitterClient(twitter.TwitterClientConfig{
+	client := twitter.NewClient(twitter.ClientConfig{
 		IsGuestTokenEnabled: true,
 	})
 	user, err := client.UserByScreenName("xyzyxJP")
@@ -50,7 +50,7 @@ func TestUserByRestId(t *testing.T) {
 
 func TestLikes(t *testing.T) {
 	LoadEnv()
-	client := twitter.NewTwitterClient(twitter.TwitterClientConfig{
+	client := twitter.NewClient(twitter.ClientConfig{
 		IsGuestTokenEnabled: false,
 		AuthToken:           os.Getenv("TWITTER_AUTH_TOKEN"),
 		CsrfToken:           os.Getenv("TWITTER_CSRF_TOKEN"),
@@ -66,7 +66,7 @@ func TestLikes(t *testing.T) {
 
 func TestUserTweets(t *testing.T) {
 	LoadEnv()
-	client := twitter.NewTwitterClient(twitter.TwitterClientConfig{
+	client := twitter.NewClient(twitter.ClientConfig{
 		IsGuestTokenEnabled: false,
 		AuthToken:           os.Getenv("TWITTER_AUTH_TOKEN"),
 		CsrfToken:           os.Getenv("TWITTER_CSRF_TOKEN"),
@@ -82,7 +82,7 @@ func TestUserTweets(t *testing.T) {
 
 func TestBookmarks(t *testing.T) {
 	LoadEnv()
-	client := twitter.NewTwitterClient(twitter.TwitterClientConfig{
+	client := twitter.NewClient(twitter.ClientConfig{
 		IsGuestTokenEnabled: false,
 		AuthToken:           os.Getenv("TWITTER_AUTH_TOKEN"),
 		CsrfToken:           os.Getenv("TWITTER_CSRF_TOKEN"),

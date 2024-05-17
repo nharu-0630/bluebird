@@ -40,58 +40,7 @@ type Tweet struct {
 	} `json:"birdwatch_pivot,omitempty"`
 	Core struct {
 		UserResults struct {
-			Result struct {
-				Typename                   string `json:"__typename,omitempty"`
-				ID                         string `json:"id,omitempty"`
-				RestID                     string `json:"rest_id,omitempty"`
-				AffiliatesHighlightedLabel struct {
-				} `json:"affiliates_highlighted_label,omitempty"`
-				IsBlueVerified    bool   `json:"is_blue_verified,omitempty"`
-				ProfileImageShape string `json:"profile_image_shape,omitempty"`
-				Legacy            struct {
-					CreatedAt           string `json:"created_at,omitempty"`
-					DefaultProfile      bool   `json:"default_profile,omitempty"`
-					DefaultProfileImage bool   `json:"default_profile_image,omitempty"`
-					Description         string `json:"description,omitempty"`
-					Entities            struct {
-						Description struct {
-							Urls []any `json:"urls,omitempty"`
-						} `json:"description,omitempty"`
-					} `json:"entities,omitempty"`
-					FastFollowersCount      int    `json:"fast_followers_count,omitempty"`
-					FavouritesCount         int    `json:"favourites_count,omitempty"`
-					FollowersCount          int    `json:"followers_count,omitempty"`
-					FriendsCount            int    `json:"friends_count,omitempty"`
-					HasCustomTimelines      bool   `json:"has_custom_timelines,omitempty"`
-					IsTranslator            bool   `json:"is_translator,omitempty"`
-					ListedCount             int    `json:"listed_count,omitempty"`
-					Location                string `json:"location,omitempty"`
-					MediaCount              int    `json:"media_count,omitempty"`
-					Name                    string `json:"name,omitempty"`
-					NormalFollowersCount    int    `json:"normal_followers_count,omitempty"`
-					PinnedTweetIdsStr       []any  `json:"pinned_tweet_ids_str,omitempty"`
-					PossiblySensitive       bool   `json:"possibly_sensitive,omitempty"`
-					ProfileBannerURL        string `json:"profile_banner_url,omitempty"`
-					ProfileImageURLHTTPS    string `json:"profile_image_url_https,omitempty"`
-					ProfileInterstitialType string `json:"profile_interstitial_type,omitempty"`
-					ScreenName              string `json:"screen_name,omitempty"`
-					StatusesCount           int    `json:"statuses_count,omitempty"`
-					TranslatorType          string `json:"translator_type,omitempty"`
-					Verified                bool   `json:"verified,omitempty"`
-					WithheldInCountries     []any  `json:"withheld_in_countries,omitempty"`
-				} `json:"legacy,omitempty"`
-				TipjarSettings struct {
-					IsEnabled      bool   `json:"is_enabled,omitempty"`
-					BandcampHandle string `json:"bandcamp_handle,omitempty"`
-					BitcoinHandle  string `json:"bitcoin_handle,omitempty"`
-					CashAppHandle  string `json:"cash_app_handle,omitempty"`
-					EthereumHandle string `json:"ethereum_handle,omitempty"`
-					GofundmeHandle string `json:"gofundme_handle,omitempty"`
-					PatreonHandle  string `json:"patreon_handle,omitempty"`
-					PayPalHandle   string `json:"pay_pal_handle,omitempty"`
-					VenmoHandle    string `json:"venmo_handle,omitempty"`
-				} `json:"tipjar_settings,omitempty"`
-			} `json:"result,omitempty"`
+			Result User `json:"result,omitempty"`
 		} `json:"user_results,omitempty"`
 	} `json:"core,omitempty"`
 	UnmentionData struct {
@@ -132,31 +81,20 @@ type Tweet struct {
 		Entities          struct {
 			Hashtags []any `json:"hashtags,omitempty"`
 			Media    []struct {
-				DisplayURL           string `json:"display_url,omitempty"`
-				ExpandedURL          string `json:"expanded_url,omitempty"`
-				IDStr                string `json:"id_str,omitempty"`
-				Indices              []int  `json:"indices,omitempty"`
-				MediaKey             string `json:"media_key,omitempty"`
-				MediaURLHTTPS        string `json:"media_url_https,omitempty"`
-				Type                 string `json:"type,omitempty"`
-				URL                  string `json:"url,omitempty"`
+				DisplayURL          string `json:"display_url,omitempty"`
+				ExpandedURL         string `json:"expanded_url,omitempty"`
+				IDStr               string `json:"id_str,omitempty"`
+				Indices             []int  `json:"indices,omitempty"`
+				MediaKey            string `json:"media_key,omitempty"`
+				MediaURLHTTPS       string `json:"media_url_https,omitempty"`
+				Type                string `json:"type,omitempty"`
+				URL                 string `json:"url,omitempty"`
+				AdditionalMediaInfo struct {
+					Monetizable bool `json:"monetizable,omitempty"`
+				} `json:"additional_media_info,omitempty"`
 				ExtMediaAvailability struct {
 					Status string `json:"status,omitempty"`
 				} `json:"ext_media_availability,omitempty"`
-				Features struct {
-					Large struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"large,omitempty"`
-					Medium struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"medium,omitempty"`
-					Small struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"small,omitempty"`
-					Orig struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"orig,omitempty"`
-				} `json:"features,omitempty"`
 				Sizes struct {
 					Large struct {
 						H      int    `json:"h,omitempty"`
@@ -180,15 +118,22 @@ type Tweet struct {
 					} `json:"thumb,omitempty"`
 				} `json:"sizes,omitempty"`
 				OriginalInfo struct {
-					Height     int `json:"height,omitempty"`
-					Width      int `json:"width,omitempty"`
-					FocusRects []struct {
-						X int `json:"x,omitempty"`
-						Y int `json:"y,omitempty"`
-						W int `json:"w,omitempty"`
-						H int `json:"h,omitempty"`
-					} `json:"focus_rects,omitempty"`
+					Height     int           `json:"height,omitempty"`
+					Width      int           `json:"width,omitempty"`
+					FocusRects []interface{} `json:"focus_rects,omitempty"`
 				} `json:"original_info,omitempty"`
+				AllowDownloadStatus struct {
+					AllowDownload bool `json:"allow_download,omitempty"`
+				} `json:"allow_download_status,omitempty"`
+				VideoInfo struct {
+					AspectRatio    []int `json:"aspect_ratio,omitempty"`
+					DurationMillis int   `json:"duration_millis,omitempty"`
+					Variants       []struct {
+						ContentType string `json:"content_type,omitempty"`
+						URL         string `json:"url,omitempty"`
+						Bitrate     int    `json:"bitrate,omitempty"`
+					} `json:"variants,omitempty"`
+				} `json:"video_info,omitempty"`
 				MediaResults struct {
 					Result struct {
 						MediaKey string `json:"media_key,omitempty"`
@@ -202,31 +147,20 @@ type Tweet struct {
 		} `json:"entities,omitempty"`
 		ExtendedEntities struct {
 			Media []struct {
-				DisplayURL           string `json:"display_url,omitempty"`
-				ExpandedURL          string `json:"expanded_url,omitempty"`
-				IDStr                string `json:"id_str,omitempty"`
-				Indices              []int  `json:"indices,omitempty"`
-				MediaKey             string `json:"media_key,omitempty"`
-				MediaURLHTTPS        string `json:"media_url_https,omitempty"`
-				Type                 string `json:"type,omitempty"`
-				URL                  string `json:"url,omitempty"`
+				DisplayURL          string `json:"display_url,omitempty"`
+				ExpandedURL         string `json:"expanded_url,omitempty"`
+				IDStr               string `json:"id_str,omitempty"`
+				Indices             []int  `json:"indices,omitempty"`
+				MediaKey            string `json:"media_key,omitempty"`
+				MediaURLHTTPS       string `json:"media_url_https,omitempty"`
+				Type                string `json:"type,omitempty"`
+				URL                 string `json:"url,omitempty"`
+				AdditionalMediaInfo struct {
+					Monetizable bool `json:"monetizable,omitempty"`
+				} `json:"additional_media_info,omitempty"`
 				ExtMediaAvailability struct {
 					Status string `json:"status,omitempty"`
 				} `json:"ext_media_availability,omitempty"`
-				Features struct {
-					Large struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"large,omitempty"`
-					Medium struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"medium,omitempty"`
-					Small struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"small,omitempty"`
-					Orig struct {
-						Faces []any `json:"faces,omitempty"`
-					} `json:"orig,omitempty"`
-				} `json:"features,omitempty"`
 				Sizes struct {
 					Large struct {
 						H      int    `json:"h,omitempty"`
@@ -250,15 +184,22 @@ type Tweet struct {
 					} `json:"thumb,omitempty"`
 				} `json:"sizes,omitempty"`
 				OriginalInfo struct {
-					Height     int `json:"height,omitempty"`
-					Width      int `json:"width,omitempty"`
-					FocusRects []struct {
-						X int `json:"x,omitempty"`
-						Y int `json:"y,omitempty"`
-						W int `json:"w,omitempty"`
-						H int `json:"h,omitempty"`
-					} `json:"focus_rects,omitempty"`
+					Height     int           `json:"height,omitempty"`
+					Width      int           `json:"width,omitempty"`
+					FocusRects []interface{} `json:"focus_rects,omitempty"`
 				} `json:"original_info,omitempty"`
+				AllowDownloadStatus struct {
+					AllowDownload bool `json:"allow_download,omitempty"`
+				} `json:"allow_download_status,omitempty"`
+				VideoInfo struct {
+					AspectRatio    []int `json:"aspect_ratio,omitempty"`
+					DurationMillis int   `json:"duration_millis,omitempty"`
+					Variants       []struct {
+						ContentType string `json:"content_type,omitempty"`
+						URL         string `json:"url,omitempty"`
+						Bitrate     int    `json:"bitrate,omitempty"`
+					} `json:"variants,omitempty"`
+				} `json:"video_info,omitempty"`
 				MediaResults struct {
 					Result struct {
 						MediaKey string `json:"media_key,omitempty"`

@@ -9,22 +9,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type TwitterClientConfig struct {
+type ClientConfig struct {
 	IsGuestTokenEnabled bool
 	AuthToken           string
 	CsrfToken           string
 }
 
-type TwitterClient struct {
-	config       TwitterClientConfig
+type Client struct {
+	config       ClientConfig
 	client       *http.Client
 	guestToken   string
 	clientUUID   string
 	lastCalledAt time.Time
 }
 
-func NewTwitterClient(config TwitterClientConfig) *TwitterClient {
-	client := &TwitterClient{config: config,
+func NewClient(config ClientConfig) *Client {
+	client := &Client{config: config,
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
@@ -38,7 +38,7 @@ func NewTwitterClient(config TwitterClientConfig) *TwitterClient {
 	return client
 }
 
-func (c *TwitterClient) gql(method string, queryID string, operation string, params map[string]interface{}) (map[string]interface{}, error) {
+func (c *Client) gql(method string, queryID string, operation string, params map[string]interface{}) (map[string]interface{}, error) {
 	if method == "POST" {
 		return nil, nil
 	} else if method == "GET" {
@@ -73,7 +73,7 @@ func (c *TwitterClient) gql(method string, queryID string, operation string, par
 	}
 }
 
-func (c *TwitterClient) setHeaders(req *http.Request) {
+func (c *Client) setHeaders(req *http.Request) {
 	if c.config.IsGuestTokenEnabled {
 		c.setGuestHeaders(req)
 	} else {
@@ -81,7 +81,7 @@ func (c *TwitterClient) setHeaders(req *http.Request) {
 	}
 }
 
-func (c *TwitterClient) setGuestHeaders(req *http.Request) {
+func (c *Client) setGuestHeaders(req *http.Request) {
 	req.Header.Add("authorization", "Bearer "+BEARER_TOKEN)
 	req.Header.Add("origin", "https://twitter.com")
 	req.Header.Add("referer", "https://twitter.com/")
@@ -91,7 +91,7 @@ func (c *TwitterClient) setGuestHeaders(req *http.Request) {
 	req.Header.Add("x-twitter-client-language", "ja")
 }
 
-func (c *TwitterClient) setAuthorizedHeaders(req *http.Request) {
+func (c *Client) setAuthorizedHeaders(req *http.Request) {
 	req.Header.Add("authorization", "Bearer "+BEARER_TOKEN)
 	req.Header.Add("origin", "https://twitter.com")
 	req.Header.Add("referer", "https://twitter.com/")
@@ -105,7 +105,7 @@ func (c *TwitterClient) setAuthorizedHeaders(req *http.Request) {
 	req.Header.Add("x-twitter-client-language", "ja")
 }
 
-func (c *TwitterClient) initializeGuestToken() {
+func (c *Client) initializeGuestToken() {
 	req, err := http.NewRequest("POST", "https://api.twitter.com/1.1/guest/activate.json", nil)
 	if err != nil {
 		panic(err)
@@ -127,7 +127,7 @@ func (c *TwitterClient) initializeGuestToken() {
 	c.guestToken = resData["guest_token"].(string)
 }
 
-func (c *TwitterClient) initializeClientUUID() {
+func (c *Client) initializeClientUUID() {
 	clientUUID, err := uuid.NewRandom()
 	if err != nil {
 		panic(err)
