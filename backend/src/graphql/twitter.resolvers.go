@@ -26,6 +26,25 @@ func (r *queryResolver) TwitterUser(ctx context.Context, screenName string) (*Tw
 	return ParseUser(user)
 }
 
+// TwitterTweets is the resolver for the twitterTweets field.
+func (r *queryResolver) TwitterTweets(ctx context.Context, userID string, cursor *string) (*TweetConnection, error) {
+	if cursor == nil {
+		cursor = new(string)
+	}
+	tweets, resCursor, err := r.TwitterClient.UserTweets(userID, *cursor)
+	if err != nil {
+		return nil, err
+	}
+	parsedTweets, err := ParseTweets(tweets)
+	if err != nil {
+		return nil, err
+	}
+	return &TweetConnection{
+		Tweets: parsedTweets,
+		Cursor: &resCursor.BottomCursor,
+	}, nil
+}
+
 // TwitterLikes is the resolver for the twitterLikes field.
 func (r *queryResolver) TwitterLikes(ctx context.Context, userID string, cursor *string) (*TweetConnection, error) {
 	if cursor == nil {

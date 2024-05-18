@@ -7,10 +7,10 @@ import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
-import { ShelfItemColumns } from "./components/shelf-item/table/shelf-item-columns";
-import { ShelfItemTable } from "./components/shelf-item/table/shelf-item-table";
-import { ShelfItemTableButtons } from "./components/shelf-item/table/shelf-item-table-buttons";
-import { ShelfItemSchema } from "./schema/shelf-item";
+import { ShelfItemColumns } from "./(components)/shelf-item/table/shelf-item-columns";
+import { ShelfItemTable } from "./(components)/shelf-item/table/shelf-item-table";
+import { ShelfItemTableButtons } from "./(components)/shelf-item/table/shelf-item-table-buttons";
+import { ShelfItemSchema } from "./(schema)/shelf-item";
 
 const queryClient = new QueryClient();
 

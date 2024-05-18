@@ -59,6 +59,7 @@ type TweetConnection {
 extend type Query {
   twitterTweet(tweetID: String!): TwitterTweet
   twitterUser(screenName: String!): TwitterUser
+  twitterTweets(userID: String!, cursor: String): TweetConnection
   twitterLikes(userID: String!, cursor: String): TweetConnection
   twitterUserTweets(userID: String!, cursor: String): TweetConnection
   twitterBookmarks(cursor: String): TweetConnection

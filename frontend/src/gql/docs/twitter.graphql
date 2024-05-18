@@ -1,3 +1,55 @@
+query GetTwitterTweets($userID: String!, $cursor: String) {
+  twitterTweets(userID: $userID, cursor: $cursor) {
+    cursor
+    tweets {
+      id
+      fullText
+      createdAt
+      replyCount
+      retweetCount
+      quoteCount
+      retweeted
+      favoriteCount
+      favorited
+      bookmarkCount
+      bookmarked
+      lang
+      user {
+        id
+        name
+        screenName
+        verified
+        blueVerified
+        description
+        location
+        birthday
+        createdAt
+        friendsCount
+        following
+        fastFollowersCount
+        followersCount
+        normalFollowersCount
+        followedBy
+        mediaCount
+        favouritesCount
+        listedCount
+        pinnedTweetIDs
+        profileBannerURL
+        profileImageURL
+        statusesCount
+      }
+      media {
+        id
+        mediaKey
+        expandedURL
+        type
+        thumbURL
+        videoURL
+      }
+    }
+  }
+}
+
 query GetTwitterLikes($userID: String!, $cursor: String) {
   twitterLikes(userID: $userID, cursor: $cursor) {
     cursor
