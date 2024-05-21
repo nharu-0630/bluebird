@@ -21,45 +21,32 @@ export function TweetCard({ item }: TweetCardProps) {
       key={item.id}
       className={cn(
         "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
-        // mail.selected === item.id && "bg-muted"
       )}
     >
-      <div className="flex w-full flex-col gap-1">
-        <div className="flex items-center">
-          <div className="flex items-center gap-2">
-            <Avatar>
-              <AvatarImage src={item.user?.profileImageURL!} />
-            </Avatar>
-            <div>
-              <div className="font-semibold">{item.user?.name}</div>
-              <div className="text-xs font-medium">{item.user?.screenName}</div>
-            </div>
-            <div>
-              <span className="font-semibold">{item.user?.followersCount}</span>{" "}
-              Followers
-              {item.user?.following && (
-                <Badge className="ml-2" variant={"outline"}>
-                  Following
-                </Badge>
-              )}
-            </div>
-            <span className="font-semibold">{item.user?.friendsCount}</span>{" "}
-            Friends
-            {item.user?.followedBy && (
-              <Badge variant={"outline"}>FollowedBy</Badge>
-            )}
-          </div>
-          <div
-            className={cn(
-              "ml-auto text-xs"
-              //   mail.selected === item.id
-              //     ? "text-foreground"
-              //     : "text-muted-foreground"
-            )}
-          >
-            {item.createdAt}
-          </div>
+      <div className="my-4 flex w-full h-5 items-center justify-space space-x-4 text-sm">
+        <Avatar>
+          <AvatarImage src={item.user?.profileImageURL!} />
+        </Avatar>
+        <div>
+          <div className="font-semibold">{item.user?.name}</div>
+          <div className="text-xs font-medium">{item.user?.screenName}</div>
         </div>
+        <Separator orientation="vertical" />
+        <div>
+          <span className="font-semibold">{item.user?.followersCount}</span>{" "}
+          Followers
+          {item.user?.following && <Badge variant={"outline"}>Following</Badge>}
+        </div>
+        <Separator orientation="vertical" />
+        <div>
+          <span className="font-semibold">{item.user?.friendsCount}</span>{" "}
+          Friends
+          {item.user?.followedBy && (
+            <Badge variant={"outline"}>FollowedBy</Badge>
+          )}
+        </div>
+        <Separator orientation="vertical" />
+        <div className={cn("ml-auto text-xs")}>{item.createdAt}</div>
       </div>
       <div className="text-s">{item.fullText}</div>
       {item.media!.length > 0 && (

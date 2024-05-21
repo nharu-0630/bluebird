@@ -42,7 +42,7 @@ export default function TweetsPage({ params }: { params: { id: string } }) {
     });
   };
   return (
-    <div className="w-full">
+    <div className="max-2xl">
       <h1 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
         ポスト
       </h1>

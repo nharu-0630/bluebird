@@ -39,7 +39,7 @@ export default function BookmarksPage() {
     });
   };
   return (
-    <div className="w-full">
+    <div className="max-w-xl">
       <h1 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
         ブックマーク
       </h1>

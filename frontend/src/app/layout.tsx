@@ -23,10 +23,7 @@ export default function RootLayout({
     <html lang="ja">
       <WithApollo>
         <body className={inter.className}>
-          {/* set space for each screen width */}
-          <main className="max-w-7xl flex flex-col mx-auto size-full p-4">
-            {children}
-          </main>
+          <div className="p-4 flex flex-col size-full">{children}</div>
           <Toaster />
         </body>
       </WithApollo>
