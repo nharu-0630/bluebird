@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 import { Dialog } from "@radix-ui/react-dialog";
 import { saveAs } from "file-saver";
 import Image from "next/image";
@@ -17,36 +16,56 @@ interface TweetCardProps {
 
 export function TweetCard({ item }: TweetCardProps) {
   return (
-    <button
+    <div
       key={item.id}
-      className={cn(
-        "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent"
-      )}
+      className={
+        "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent m-2"
+      }
     >
-      <div className="my-4 flex w-full h-5 items-center justify-space space-x-4 text-sm">
-        <Avatar>
-          <AvatarImage src={item.user?.profileImageURL!} />
-        </Avatar>
-        <div>
-          <div className="font-semibold">{item.user?.name}</div>
-          <div className="text-xs font-medium">{item.user?.screenName}</div>
-        </div>
-        <Separator orientation="vertical" />
-        <div>
-          <span className="font-semibold">{item.user?.followersCount}</span>{" "}
-          Followers
+      <div className="flex w-full h-10 items-center justify-start space-x-4 text-sm">
+        <Button
+          variant="link"
+          className="flex gap-2 p-0"
+          onClick={() => window.open(`https://x.com/${item.user?.screenName}`)}
+        >
+          <Avatar className="flex-shrink-0">
+            <AvatarImage src={item.user?.profileImageURL!} />
+          </Avatar>
+          <div className="flex flex-col items-start justify-center">
+            <div className="font-semibold">{item.user?.name}</div>
+            <div className="text-xs font-medium">@{item.user?.screenName}</div>
+          </div>
+        </Button>
+        <div className="flex w-full h-10 items-center justify-around space-x-4 text-sm">
+          <Separator orientation="vertical" />
+          <Button
+            variant="link"
+            onClick={() =>
+              window.open(`https://x.com/${item.user?.screenName}/followers`)
+            }
+          >
+            <span>
+              <span className="font-semibold">{item.user?.followersCount}</span>{" "}
+              Followers
+            </span>
+          </Button>
           {item.user?.following && <Badge variant={"outline"}>Following</Badge>}
-        </div>
-        <Separator orientation="vertical" />
-        <div>
-          <span className="font-semibold">{item.user?.friendsCount}</span>{" "}
-          Friends
+          <Separator orientation="vertical" />
+          <Button
+            variant="link"
+            onClick={() =>
+              window.open(`https://x.com/${item.user?.screenName}/following `)
+            }
+          >
+            <span>
+              <span className="font-semibold">{item.user?.friendsCount}</span>{" "}
+              Friends
+            </span>
+          </Button>
           {item.user?.followedBy && (
             <Badge variant={"outline"}>FollowedBy</Badge>
           )}
         </div>
-        <Separator orientation="vertical" />
-        <div className={cn("ml-auto text-xs")}>{item.createdAt}</div>
       </div>
       <div className="text-s">{item.fullText}</div>
       {item.media!.length > 0 && (
@@ -118,38 +137,70 @@ export function TweetCard({ item }: TweetCardProps) {
         </div>
       )}
       <div className="flex w-full h-5 items-center justify-around space-x-4 text-sm">
-        <div>
-          <span className="font-semibold">{item.replyCount}</span> Replies
-        </div>
+        <Button
+          variant="link"
+          onClick={() =>
+            window.open(
+              `https://x.com/${item.user?.screenName}/status/${item.id}`
+            )
+          }
+        >
+          <span>
+            <span className="font-semibold">{item.replyCount}</span> Replies
+          </span>
+        </Button>
         <Separator orientation="vertical" />
-        <div>
-          <span className="font-semibold">
-            {item.retweetCount} ({item.quoteCount})
-          </span>{" "}
-          Retweets
-          {item.retweeted && (
-            <Badge className="ml-2" variant="outline">
-              Retweeted
-            </Badge>
-          )}
-        </div>
+        <Button
+          variant="link"
+          onClick={() =>
+            window.open(
+              `https://x.com/${item.user?.screenName}/status/${item.id}/retweets`
+            )
+          }
+        >
+          <span>
+            <span className="font-semibold">{item.retweetCount}</span>
+            {(item.quoteCount ?? 0) > 0 && (
+              <span className="font-semibold"> ({item.quoteCount})</span>
+            )}{" "}
+            Retweets
+          </span>
+        </Button>
+        {item.retweeted && (
+          <Badge className="ml-2" variant="outline">
+            Retweeted
+          </Badge>
+        )}
         <Separator orientation="vertical" />
-        <div>
-          <span className="font-semibold">{item.favoriteCount}</span> Likes
-          {item.favorited && (
-            <Badge className="ml-2" variant="outline">
-              Liked
-            </Badge>
-          )}
-        </div>
+        <Button
+          variant="link"
+          onClick={() =>
+            window.open(
+              `https://x.com/${item.user?.screenName}/status/${item.id}/likes`
+            )
+          }
+        >
+          <span>
+            <span className="font-semibold">{item.favoriteCount}</span> Likes
+          </span>
+        </Button>
+        {item.favorited && (
+          <Badge className="ml-2" variant="outline">
+            Liked
+          </Badge>
+        )}
       </div>
-      <div className="flex w-full gap-2 justify-end">
+      <div className="flex w-full gap-2 justify-end items-center">
+        <pre className="text-xs">{item.id}</pre>
+        <div className={"ml-auto text-xs"}>
+          {item.createdAt && new Date(item.createdAt).toLocaleString()}
+        </div>
         <Button
           variant="outline"
           size="icon"
           onClick={() =>
             window.open(
-              `https://twitter.com/${item.user?.screenName}/status/${item.id}`
+              `https://x.com/${item.user?.screenName}/status/${item.id}`
             )
           }
         >
@@ -160,13 +211,13 @@ export function TweetCard({ item }: TweetCardProps) {
           size="icon"
           onClick={() =>
             navigator.clipboard.writeText(
-              `https://twitter.com/${item.user?.screenName}/status/${item.id}`
+              `https://x.com/${item.user?.screenName}/status/${item.id}`
             )
           }
         >
           <FaLink />
         </Button>
       </div>
-    </button>
+    </div>
   );
 }
