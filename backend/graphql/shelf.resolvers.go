@@ -14,9 +14,9 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/nharu-0630/bluebird/config"
+	"github.com/nharu-0630/bluebird/model"
 	ulid "github.com/oklog/ulid/v2"
-	"github.com/xyzyxJP/bluebird/src/config"
-	"github.com/xyzyxJP/bluebird/src/model"
 )
 
 // CreateShelfItem is the resolver for the createShelfItem field.

@@ -1,18 +1,17 @@
 schema:
-  - src/graphql/schema/*.graphql
-  # - src/graphql/schema/*/*.graphql
+  - graphql/schema/*.graphql
 
 exec:
-  filename: src/graphql/generated.go
+  filename: graphql/generated.go
   package: graphql
 
 model:
-  filename: src/graphql/models_gen.go
+  filename: graphql/models_gen.go
   package: graphql
 
 resolver:
   layout: follow-schema
-  dir: src/graphql
+  dir: graphql
   package: graphql
   filename_template: "{name}.resolvers.go"
 

@@ -1,4 +1,4 @@
-module github.com/xyzyxJP/bluebird
+module github.com/nharu-0630/bluebird
 
 go 1.22.2
 

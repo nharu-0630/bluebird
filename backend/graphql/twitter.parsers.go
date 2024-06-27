@@ -3,7 +3,7 @@ package graphql
 import (
 	"time"
 
-	"github.com/xyzyxJP/bluebird/src/api/twitter/model"
+	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
 func PressTweet(tweet model.Tweet) (*TwitterTweet, error) {

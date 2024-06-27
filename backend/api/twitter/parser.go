@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/xyzyxJP/bluebird/src/api/twitter/model"
+	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
 func ParseTweet(data map[string]interface{}) (model.Tweet, error) {

@@ -3,7 +3,7 @@ package twitter
 import (
 	"errors"
 
-	"github.com/xyzyxJP/bluebird/src/api/twitter/model"
+	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
 func (c *Client) TweetResultByRestId(tweetID string) (model.Tweet, error) {

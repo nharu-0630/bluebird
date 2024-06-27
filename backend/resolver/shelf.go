@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/xyzyxJP/bluebird/src/model"
+	"github.com/nharu-0630/bluebird/model"
 	"gorm.io/gorm"
 )
 

@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	"github.com/xyzyxJP/bluebird/src/api/twitter"
+	"github.com/nharu-0630/bluebird/api/twitter"
 	"gorm.io/gorm"
 )
 

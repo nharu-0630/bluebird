@@ -1,8 +1,8 @@
 package mock
 
 import (
+	"github.com/nharu-0630/bluebird/model"
 	"github.com/oklog/ulid/v2"
-	"github.com/xyzyxJP/bluebird/src/model"
 )
 
 func MockShelfCategory() []model.ShelfCategory {

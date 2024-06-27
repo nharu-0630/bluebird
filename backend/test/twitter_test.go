@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/xyzyxJP/bluebird/src/api/twitter"
+	"github.com/nharu-0630/bluebird/api/twitter"
 )
 
 const PROJECT_DIR = "bluebird"
@@ -40,7 +40,7 @@ func TestUserByRestId(t *testing.T) {
 	client := twitter.NewClient(twitter.ClientConfig{
 		IsGuestTokenEnabled: true,
 	})
-	user, err := client.UserByScreenName("xyzyxJP")
+	user, err := client.UserByScreenName("nharu-0630")
 	if err != nil {
 		t.Error(err)
 	} else {
