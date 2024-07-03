@@ -24,7 +24,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const ShelfCategoryEditFormSchema = z.object({
-  ulid: z.string().length(26, { message: "Must be 26 characters" }),
+  ulid: z.string(),
   name: z.string().min(1, { message: "Must be at least 1 character" }),
 });
 

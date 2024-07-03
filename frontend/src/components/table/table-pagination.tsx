@@ -22,7 +22,7 @@ interface TablePaginationProps<TData> {
 export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
   return (
     <div className="flex items-center justify-between px-2 py-2">
-      <div className="flex-1 text-sm text-muted-foreground">
+      <div className="flex text-sm text-muted-foreground">
         {table.getFilteredSelectedRowModel().rows.length} /{" "}
         {table.getFilteredRowModel().rows.length} アイテムを選択中
       </div>
@@ -35,7 +35,7 @@ export function TablePagination<TData>({ table }: TablePaginationProps<TData>) {
               table.setPageSize(Number(value));
             }}
           >
-            <SelectTrigger className="h-8 w-[70px]">
+            <SelectTrigger className="w-[70px]">
               <SelectValue placeholder={table.getState().pagination.pageSize} />
             </SelectTrigger>
             <SelectContent side="top">

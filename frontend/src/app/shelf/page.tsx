@@ -35,9 +35,9 @@ export default function ShelfPage() {
   const items = z.array(ShelfItemSchema).parse(data?.shelfItems ?? []);
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="w-full">
-        <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-          📦 アイテム
+      <div className="max-w-7xl h-full">
+        <h1 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
+          シェルフ
         </h1>
         <div className="space-y-4">
           <ShelfItemTableButtons />

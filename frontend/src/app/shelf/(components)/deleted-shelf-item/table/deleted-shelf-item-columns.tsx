@@ -72,9 +72,13 @@ export const DeletedShelfItemColumns: ColumnDef<ShelfItem>[] = [
     cell: ({ row }) => {
       const tags = row.original.tags;
       return (
-        <div className="flex max-w-[500px] space-x-2">
+        <div className="flex items-center gap-2">
           {tags.map((tag) => (
-            <Badge key={tag.ulid} variant="outline" className="h-8 rounded-md">
+            <Badge
+              key={tag.ulid}
+              variant="outline"
+              className="h-8 min-w-[80px] rounded-md text-center"
+            >
               {tag.name}
             </Badge>
           ))}

@@ -22,13 +22,13 @@ export function ShelfCategoryToolbar<TData>({
           onChange={(event) =>
             table.getColumn("名前")?.setFilterValue(event.target.value)
           }
-          className="h-8 w-[150px] lg:w-[250px]"
+          className="w-[150px] lg:w-[250px]"
         />
         {isFiltered && (
           <Button
             variant="ghost"
             onClick={() => table.resetColumnFilters()}
-            className="h-8 px-2 lg:px-3"
+            className="px-2 lg:px-3"
           >
             リセット
             <Cross2Icon className="ml-2 h-4 w-4" />

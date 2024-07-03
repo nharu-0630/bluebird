@@ -49,11 +49,11 @@ import { z } from "zod";
 import { ShelfItem } from "../../../(schema)/shelf-item";
 
 const ShelfItemEditFormSchema = z.object({
-  ulid: z.string().length(26, { message: "Must be 26 characters" }),
+  ulid: z.string(),
   name: z.string().min(1, { message: "Must be at least 1 character" }),
-  category: z.string().length(26, { message: "Must be 26 characters" }),
-  tags: z.array(z.string().length(26, { message: "Must be 26 characters" })),
-  location: z.string().length(26, { message: "Must be 26 characters" }),
+  category: z.string(),
+  tags: z.array(z.string()),
+  location: z.string(),
   description: z.string().optional(),
 });
 
