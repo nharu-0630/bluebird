@@ -2,9 +2,8 @@ package test
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"regexp"
+	"path/filepath"
 	"testing"
 
 	"github.com/joho/godotenv"
@@ -13,15 +12,26 @@ import (
 
 const PROJECT_DIR = "bluebird"
 
-func LoadEnv() {
-	re := regexp.MustCompile(`^(.*` + PROJECT_DIR + `)`)
-	cwd, _ := os.Getwd()
-	rootPath := re.Find([]byte(cwd))
-	err := godotenv.Load(string(rootPath) + `/.env`)
+func LoadEnv() error {
+	currentDir, err := os.Getwd()
 	if err != nil {
-		log.Fatal("Error loading .env file")
-		os.Exit(-1)
+		return err
 	}
+	for {
+		envPath := filepath.Join(currentDir, ".env")
+		if _, err := os.Stat(envPath); err == nil {
+			if err := godotenv.Load(envPath); err != nil {
+				return err
+			}
+			return nil
+		}
+		parentDir := filepath.Dir(currentDir)
+		if parentDir == currentDir {
+			break
+		}
+		currentDir = parentDir
+	}
+	return nil
 }
 
 func TestTweetResultByRestId(t *testing.T) {

@@ -2,11 +2,13 @@ package twitter
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 type ClientConfig struct {
@@ -16,11 +18,18 @@ type ClientConfig struct {
 }
 
 type Client struct {
-	config       ClientConfig
-	client       *http.Client
-	guestToken   string
-	clientUUID   string
-	lastCalledAt time.Time
+	config     ClientConfig
+	client     *http.Client
+	guestToken string
+	clientUUID string
+	rateLimits map[string]*RateLimit
+}
+
+type RateLimit struct {
+	limit     int
+	remaining int
+	interval  time.Duration
+	reset     time.Time
 }
 
 func NewClient(config ClientConfig) *Client {
@@ -28,17 +37,36 @@ func NewClient(config ClientConfig) *Client {
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		lastCalledAt: time.Now(),
 	}
 	if config.IsGuestTokenEnabled {
 		client.initializeGuestToken()
 	} else {
 		client.initializeClientUUID()
 	}
+	client.rateLimits = make(map[string]*RateLimit)
+	client.rateLimits["TweetResultByRestId"] = NewRateLimit(100, 15*time.Minute)
+	client.rateLimits["UserByScreenName"] = NewRateLimit(100, 15*time.Minute)
+	client.rateLimits["UserTweets"] = NewRateLimit(50, 15*time.Minute)
+	client.rateLimits["TweetDetail"] = NewRateLimit(150, 15*time.Minute)
+	client.rateLimits["Following"] = NewRateLimit(50, 15*time.Minute)
+	client.rateLimits["Followers"] = NewRateLimit(50, 15*time.Minute)
 	return client
 }
 
 func (c *Client) gql(method string, queryID string, operation string, params map[string]interface{}) (map[string]interface{}, error) {
+	zap.L().Debug("GQL request", zap.String("operation", operation))
+	if _, ok := c.rateLimits[operation]; ok {
+		if c.config.IsGuestTokenEnabled {
+			if !c.rateLimits[operation].GuestCall() {
+				zap.L().Debug("Rate limit exceeded", zap.String("operation", operation))
+				c.initializeGuestToken()
+				c.rateLimits[operation].GuestCall()
+			}
+		} else {
+			c.rateLimits[operation].Call()
+		}
+		zap.L().Debug("Rate limit", zap.Int("remaining", c.rateLimits[operation].remaining), zap.Int("limit", c.rateLimits[operation].limit))
+	}
 	if method == "POST" {
 		return nil, nil
 	} else if method == "GET" {
@@ -67,7 +95,10 @@ func (c *Client) gql(method string, queryID string, operation string, params map
 		if err != nil {
 			return nil, err
 		}
-		return resData, nil
+		if _, ok := resData["data"]; !ok {
+			return nil, errors.New("response does not contain data")
+		}
+		return resData["data"].(map[string]interface{}), nil
 	} else {
 		return nil, nil
 	}
@@ -106,6 +137,7 @@ func (c *Client) setAuthorizedHeaders(req *http.Request) {
 }
 
 func (c *Client) initializeGuestToken() {
+	zap.L().Debug("Initializing guest token")
 	req, err := http.NewRequest("POST", "https://api.twitter.com/1.1/guest/activate.json", nil)
 	if err != nil {
 		panic(err)
@@ -125,9 +157,13 @@ func (c *Client) initializeGuestToken() {
 		panic(err)
 	}
 	c.guestToken = resData["guest_token"].(string)
+	for _, value := range c.rateLimits {
+		value.Reset()
+	}
 }
 
 func (c *Client) initializeClientUUID() {
+	zap.L().Debug("Initializing client UUID")
 	clientUUID, err := uuid.NewRandom()
 	if err != nil {
 		panic(err)

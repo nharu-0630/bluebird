@@ -21,7 +21,6 @@ import (
 
 // CreateShelfItem is the resolver for the createShelfItem field.
 func (r *mutationResolver) CreateShelfItem(ctx context.Context, name string, categoryUlid string, tagsUlid []string, locationUlid string, description string) (*ShelfItem, error) {
-	ulid := ulid.Make().String()
 	tx := r.DB.Begin()
 	defer func() {
 		if r := recover(); r != nil {
@@ -47,6 +46,7 @@ func (r *mutationResolver) CreateShelfItem(ctx context.Context, name string, cat
 		tx.Rollback()
 		return nil, err
 	}
+	ulid := config.ShelfItemIDPrefix + ulid.Make().String()
 	shelfItem := model.ShelfItem{
 		Ulid:         ulid,
 		Name:         name,
@@ -183,7 +183,8 @@ func (r *mutationResolver) ForceDeleteShelfItem(ctx context.Context, ulid string
 
 // CreateShelfCategory is the resolver for the createShelfCategory field.
 func (r *mutationResolver) CreateShelfCategory(ctx context.Context, name string) (*ShelfCategory, error) {
-	shelfCategory := model.ShelfCategory{Ulid: ulid.Make().String(), Name: name}
+	ulid := config.ShelfCategoryIDPrefix + ulid.Make().String()
+	shelfCategory := model.ShelfCategory{Ulid: ulid, Name: name}
 	if err := r.DB.Create(&shelfCategory).Error; err != nil {
 		return nil, err
 	}
@@ -219,7 +220,8 @@ func (r *mutationResolver) DeleteShelfCategory(ctx context.Context, ulid string)
 
 // CreateShelfTag is the resolver for the createShelfTag field.
 func (r *mutationResolver) CreateShelfTag(ctx context.Context, name string) (*ShelfTag, error) {
-	shelfTag := model.ShelfTag{Ulid: ulid.Make().String(), Name: name}
+	ulid := config.ShelfTagIDPrefix + ulid.Make().String()
+	shelfTag := model.ShelfTag{Ulid: ulid, Name: name}
 	if err := r.DB.Create(&shelfTag).Error; err != nil {
 		return nil, err
 	}
@@ -255,7 +257,8 @@ func (r *mutationResolver) DeleteShelfTag(ctx context.Context, ulid string) (boo
 
 // CreateShelfLocation is the resolver for the createShelfLocation field.
 func (r *mutationResolver) CreateShelfLocation(ctx context.Context, name string) (*ShelfLocation, error) {
-	shelfLocation := model.ShelfLocation{Ulid: ulid.Make().String(), Name: name}
+	ulid := config.ShelfLocationIDPrefix + ulid.Make().String()
+	shelfLocation := model.ShelfLocation{Ulid: ulid, Name: name}
 	if err := r.DB.Create(&shelfLocation).Error; err != nil {
 		return nil, err
 	}

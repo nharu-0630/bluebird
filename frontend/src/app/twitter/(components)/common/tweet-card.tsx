@@ -6,7 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { Dialog } from "@radix-ui/react-dialog";
 import { saveAs } from "file-saver";
 import Image from "next/image";
-import { FaDownload, FaExternalLinkAlt, FaLink } from "react-icons/fa";
+import { FaDownload, FaExternalLinkAlt, FaLink, FaStar } from "react-icons/fa";
+import { FaReply, FaRetweet } from "react-icons/fa6";
 import { z } from "zod";
 import { TwitterTweetSchema } from "../../(schema)/twitter-tweet";
 
@@ -67,7 +68,7 @@ export function TweetCard({ item }: TweetCardProps) {
           )}
         </div>
       </div>
-      <div className="text-s">{item.fullText}</div>
+      <div className="my-2 text-s">{item.fullText}</div>
       {item.media!.length > 0 && (
         <div className="flex flex-wrap gap-4">
           {item.media?.map((media) => (
@@ -145,9 +146,8 @@ export function TweetCard({ item }: TweetCardProps) {
             )
           }
         >
-          <span>
-            <span className="font-semibold">{item.replyCount}</span> Replies
-          </span>
+          <FaReply />
+          <span className="ml-2 font-semibold">{item.replyCount}</span>
         </Button>
         <Separator orientation="vertical" />
         <Button
@@ -158,13 +158,11 @@ export function TweetCard({ item }: TweetCardProps) {
             )
           }
         >
-          <span>
-            <span className="font-semibold">{item.retweetCount}</span>
-            {(item.quoteCount ?? 0) > 0 && (
-              <span className="font-semibold"> ({item.quoteCount})</span>
-            )}{" "}
-            Retweets
-          </span>
+          <FaRetweet />
+          <span className="ml-2 font-semibold">{item.retweetCount}</span>
+          {(item.quoteCount ?? 0) > 0 && (
+            <span className="font-semibold"> ({item.quoteCount})</span>
+          )}
         </Button>
         {item.retweeted && (
           <Badge className="ml-2" variant="outline">
@@ -180,9 +178,8 @@ export function TweetCard({ item }: TweetCardProps) {
             )
           }
         >
-          <span>
-            <span className="font-semibold">{item.favoriteCount}</span> Likes
-          </span>
+          <FaStar />
+          <span className="ml-2 font-semibold">{item.favoriteCount}</span>
         </Button>
         {item.favorited && (
           <Badge className="ml-2" variant="outline">
@@ -192,9 +189,9 @@ export function TweetCard({ item }: TweetCardProps) {
       </div>
       <div className="flex w-full gap-2 justify-end items-center">
         <pre className="text-xs">{item.id}</pre>
-        <div className={"ml-auto text-xs"}>
+        <pre className={"ml-auto text-xs"}>
           {item.createdAt && new Date(item.createdAt).toLocaleString()}
-        </div>
+        </pre>
         <Button
           variant="outline"
           size="icon"
