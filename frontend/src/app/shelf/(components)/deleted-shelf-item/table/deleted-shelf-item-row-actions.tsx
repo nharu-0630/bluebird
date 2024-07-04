@@ -93,7 +93,7 @@ export function DeletedShelfItemRowActions<TData>({
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog {...restoreDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle>アイテムを復元しますか？</DialogTitle>
             <DialogDescription>アイテムを復元します。</DialogDescription>
@@ -123,7 +123,7 @@ export function DeletedShelfItemRowActions<TData>({
         </DialogContent>
       </Dialog>
       <Dialog {...forceDeleteDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle>アイテムを完全に削除しますか？</DialogTitle>
             <DialogDescription>

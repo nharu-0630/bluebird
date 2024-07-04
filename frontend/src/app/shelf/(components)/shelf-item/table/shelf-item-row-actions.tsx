@@ -109,7 +109,7 @@ export function ShelfItemRowActions<TData>({
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog {...editDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <ShelfItemEditForm
             shelfItem={item}
             onOpenChange={editDialog.props.onOpenChange}
@@ -117,7 +117,7 @@ export function ShelfItemRowActions<TData>({
         </DialogContent>
       </Dialog>
       <Dialog {...deleteDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle>アイテムを削除しますか？</DialogTitle>
             <DialogDescription>アイテムを削除します。</DialogDescription>
@@ -149,14 +149,14 @@ export function ShelfItemRowActions<TData>({
         </DialogContent>
       </Dialog>
       <Dialog {...qrCodeDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <div className="flex justify-center">
             <QRCodeSVG value={"https://nharu.dev/shelf/i/" + item.ulid} />
           </div>
         </DialogContent>
       </Dialog>
       <Dialog {...locationQRCodeDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <div className="flex justify-center">
             <QRCodeSVG
               value={"https://nharu.dev/shelf/l/" + item.location.ulid}

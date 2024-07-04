@@ -15,27 +15,25 @@ export function ShelfLocationToolbar<TData>({
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex items-center space-x-2">
-        <Input
-          placeholder=""
-          value={(table.getColumn("名前")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("名前")?.setFilterValue(event.target.value)
-          }
-          className="w-[150px] lg:w-[250px]"
-        />
-        {isFiltered && (
-          <Button
-            variant="ghost"
-            onClick={() => table.resetColumnFilters()}
-            className="px-2 lg:px-3"
-          >
-            リセット
-            <Cross2Icon className="ml-2 h-4 w-4" />
-          </Button>
-        )}
-      </div>
+    <div className="flex gap-2">
+      <Input
+        placeholder="検索"
+        value={(table.getColumn("名前")?.getFilterValue() as string) ?? ""}
+        onChange={(event) =>
+          table.getColumn("名前")?.setFilterValue(event.target.value)
+        }
+        className="w-full max-w-96"
+      />
+      {isFiltered && (
+        <Button
+          variant="ghost"
+          onClick={() => table.resetColumnFilters()}
+          className="px-2 lg:px-3"
+        >
+          リセット
+          <Cross2Icon className="ml-2 h-4 w-4" />
+        </Button>
+      )}
     </div>
   );
 }

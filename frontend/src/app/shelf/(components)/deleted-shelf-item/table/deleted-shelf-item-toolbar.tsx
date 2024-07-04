@@ -68,7 +68,7 @@ export function DeletedShelfItemToolbar<TData>({
         onChange={(event) =>
           table.getColumn("名前")?.setFilterValue(event.target.value)
         }
-        className="w-[150px] lg:w-[250px]"
+        className="w-full max-w-96"
       />
       {table.getColumn("カテゴリ") && (
         <TableFacetedFilter
@@ -101,7 +101,9 @@ export function DeletedShelfItemToolbar<TData>({
           <Cross2Icon className="ml-2 h-4 w-4" />
         </Button>
       )}
-      <TableViewOptions table={table} />
+      <div className="ml-auto">
+        <TableViewOptions table={table} />
+      </div>
     </div>
   );
 }

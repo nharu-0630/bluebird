@@ -110,16 +110,16 @@ export function TweetCard({ item }: TweetCardProps) {
                     </div>
                   </div>
                 </DialogTrigger>
-                <DialogContent className="overflow-y-scroll max-h-screen">
+                <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
                   <div className="flex items-center justify-center h-full">
                     {(media.type === "animated/gif" ||
                       media.type === "video") && (
-                      <video
-                        src={media.videoURL!}
-                        controls
-                        className="w-full h-auto"
-                      />
-                    )}
+                        <video
+                          src={media.videoURL!}
+                          controls
+                          className="w-full h-auto"
+                        />
+                      )}
                     {media.type === "photo" && (
                       <Image
                         src={media.thumbURL!}

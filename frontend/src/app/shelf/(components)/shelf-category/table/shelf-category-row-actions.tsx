@@ -82,7 +82,7 @@ export function ShelfCategoryRowActions<TData>({
         </DropdownMenuContent>
       </DropdownMenu>
       <Dialog {...editDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <ShelfCategoryEditForm
             shelfCategory={item}
             onOpenChange={editDialog.props.onOpenChange}
@@ -90,7 +90,7 @@ export function ShelfCategoryRowActions<TData>({
         </DialogContent>
       </Dialog>
       <Dialog {...deleteDialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <DialogHeader>
             <DialogTitle>カテゴリを削除しますか？</DialogTitle>
             <DialogDescription>

@@ -27,7 +27,7 @@ export function ShelfItemRowName<TData>({ row }: ShelfItemRowNameProps<TData>) {
         {item.name}
       </Button>
       <Dialog {...dialog.props}>
-        <DialogContent>
+        <DialogContent className="lg:max-w-screen-lg md:max-w-screen-md max-w-[90vw] max-h-[90vh] overflow-y-scroll">
           <ShelfItemForm
             shelfItem={item}
             onOpenChange={dialog.props.onOpenChange}
