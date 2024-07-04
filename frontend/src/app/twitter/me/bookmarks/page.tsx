@@ -11,7 +11,7 @@ import { z } from "zod";
 import { TweetCard } from "../../(components)/common/tweet-card";
 import { TwitterTweetSchema } from "../../(schema)/twitter-tweet";
 
-export default function BookmarksPage({ params }: { params: { id: string } }) {
+export default function BookmarksPage() {
   const [tweets, setTweets] = useState<z.infer<typeof TwitterTweetSchema>[]>(
     []
   );
@@ -27,8 +27,8 @@ export default function BookmarksPage({ params }: { params: { id: string } }) {
   );
 
   return (
-    <div className="max-w-xl h-full">
-      <h1 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
+    <div className="max-w-full mx-auto h-full">
+      <h1 className="scroll-m-20 text-xl font-semibold tracking-tight p-2">
         ブックマーク
       </h1>
       <InfiniteScroll

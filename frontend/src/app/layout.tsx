@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="ja">
       <WithApollo>
         <body className={inter.className}>
-          <div className="p-4 flex flex-col size-full">{children}</div>
+          {children}
           <Toaster />
         </body>
       </WithApollo>

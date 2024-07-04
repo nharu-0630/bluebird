@@ -28,8 +28,8 @@ export default function TweetsPage({ params }: { params: { id: string } }) {
   );
 
   return (
-    <div className="max-w-xl h-full">
-      <h1 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
+    <div className="max-w-full mx-auto h-full">
+      <h1 className="scroll-m-20 text-xl font-semibold tracking-tight p-2">
         ポスト
       </h1>
       <InfiniteScroll

@@ -2,7 +2,6 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Dialog } from "@radix-ui/react-dialog";
 import { saveAs } from "file-saver";
 import Image from "next/image";
@@ -20,10 +19,10 @@ export function TweetCard({ item }: TweetCardProps) {
     <div
       key={item.id}
       className={
-        "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent m-2"
+        "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all hover:bg-accent m-2 max-w-96"
       }
     >
-      <div className="flex w-full h-10 items-center justify-start space-x-4 text-sm">
+      <div className="flex flex-1 gap-2 flex-wrap items-center justify-start text-sm">
         <Button
           variant="link"
           className="flex gap-2 p-0"
@@ -37,28 +36,26 @@ export function TweetCard({ item }: TweetCardProps) {
             <div className="text-xs font-medium">@{item.user?.screenName}</div>
           </div>
         </Button>
-        <div className="flex w-full h-10 items-center justify-around space-x-4 text-sm">
-          <Separator orientation="vertical" />
+        <div className="flex flex-wrap items-center justify-around text-sm">
           <Button
             variant="link"
             onClick={() =>
               window.open(`https://x.com/${item.user?.screenName}/followers`)
             }
           >
-            <span>
+            <span className="text-xs">
               <span className="font-semibold">{item.user?.followersCount}</span>{" "}
               Followers
             </span>
           </Button>
           {item.user?.following && <Badge variant={"outline"}>Following</Badge>}
-          <Separator orientation="vertical" />
           <Button
             variant="link"
             onClick={() =>
               window.open(`https://x.com/${item.user?.screenName}/following `)
             }
           >
-            <span>
+            <span className="text-xs">
               <span className="font-semibold">{item.user?.friendsCount}</span>{" "}
               Friends
             </span>
@@ -68,13 +65,38 @@ export function TweetCard({ item }: TweetCardProps) {
           )}
         </div>
       </div>
-      <div className="my-2 text-s">{item.fullText}</div>
+      <div className="text-s">
+        {item.fullText!.split(" ").map((word, index) => {
+          const urlPattern = /https?:\/\/[^\s]+/;
+          return urlPattern.test(word) ? (
+            <a
+              key={index}
+              href={word}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline"
+            >
+              {word}
+            </a>
+          ) : (
+            <span key={index}>{word} </span>
+          );
+        })}
+      </div>
       {item.media!.length > 0 && (
-        <div className="flex flex-wrap gap-4">
-          {item.media?.map((media) => (
+        <div className="grid grid-cols-2 gap-4 w-full min-h-48 max-h-96">
+          {item.media?.map((media, index) => (
             <div
               key={media.id}
-              className="w-64 h-48 rounded-lg overflow-hidden flex-shrink-0 relative"
+              className={`${
+                item.media!.length === 1
+                  ? "col-span-2 row-span-2"
+                  : item.media!.length === 2
+                  ? "col-span-1"
+                  : item.media!.length === 3 && index === 0
+                  ? "col-span-2"
+                  : ""
+              } w-full h-auto rounded-lg overflow-hidden relative`}
             >
               <Dialog>
                 <DialogTrigger>
@@ -83,7 +105,7 @@ export function TweetCard({ item }: TweetCardProps) {
                     alt={media.id!}
                     fill
                     style={{ objectFit: "cover" }}
-                    className="rounded-lg"
+                    className="rounded-lg max-h-48"
                   />
                   <div className="absolute inset-0 flex items-end justify-end opacity-0 hover:opacity-100 transition-opacity duration-300">
                     <div className="flex gap-2 m-2">
@@ -114,19 +136,19 @@ export function TweetCard({ item }: TweetCardProps) {
                   <div className="flex items-center justify-center h-full">
                     {(media.type === "animated/gif" ||
                       media.type === "video") && (
-                        <video
-                          src={media.videoURL!}
-                          controls
-                          className="w-full h-auto"
-                        />
-                      )}
+                      <video
+                        src={media.videoURL!}
+                        controls
+                        className="w-full h-auto"
+                      />
+                    )}
                     {media.type === "photo" && (
                       <Image
                         src={media.thumbURL!}
                         alt={media.id!}
                         width={1920}
                         height={1080}
-                        className="w-auto h-full"
+                        className="w-auto h-auto"
                         style={{ maxWidth: "100%", height: "auto" }}
                       />
                     )}
@@ -137,7 +159,7 @@ export function TweetCard({ item }: TweetCardProps) {
           ))}
         </div>
       )}
-      <div className="flex w-full h-5 items-center justify-around space-x-4 text-sm">
+      <div className="flex flex-1 flex-wrap items-center justify-around text-sm w-full">
         <Button
           variant="link"
           onClick={() =>
@@ -149,7 +171,6 @@ export function TweetCard({ item }: TweetCardProps) {
           <FaReply />
           <span className="ml-2 font-semibold">{item.replyCount}</span>
         </Button>
-        <Separator orientation="vertical" />
         <Button
           variant="link"
           onClick={() =>
@@ -164,12 +185,7 @@ export function TweetCard({ item }: TweetCardProps) {
             <span className="font-semibold"> ({item.quoteCount})</span>
           )}
         </Button>
-        {item.retweeted && (
-          <Badge className="ml-2" variant="outline">
-            Retweeted
-          </Badge>
-        )}
-        <Separator orientation="vertical" />
+        {item.retweeted && <Badge variant="outline">Retweeted</Badge>}
         <Button
           variant="link"
           onClick={() =>
@@ -181,18 +197,17 @@ export function TweetCard({ item }: TweetCardProps) {
           <FaStar />
           <span className="ml-2 font-semibold">{item.favoriteCount}</span>
         </Button>
-        {item.favorited && (
-          <Badge className="ml-2" variant="outline">
-            Liked
-          </Badge>
-        )}
+        {item.favorited && <Badge variant="outline">Liked</Badge>}
       </div>
-      <div className="flex w-full gap-2 justify-end items-center">
-        <pre className="text-xs">{item.id}</pre>
-        <pre className={"ml-auto text-xs"}>
-          {item.createdAt && new Date(item.createdAt).toLocaleString()}
-        </pre>
+      <div className="flex flex-1 flex-wrap gap-2 justify-end items-center w-full">
+        <div>
+          <pre className="text-xs">{item.id}</pre>
+          <pre className="text-xs">
+            {item.createdAt && new Date(item.createdAt).toLocaleString()}
+          </pre>
+        </div>
         <Button
+          className="ml-auto"
           variant="outline"
           size="icon"
           onClick={() =>

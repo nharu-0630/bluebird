@@ -35,7 +35,7 @@ export default function ShelfPage() {
   const items = z.array(ShelfItemSchema).parse(data?.shelfItems ?? []);
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="max-w-7xl h-full">
+      <div className="max-w-7xl h-full p-4">
         <h1 className="mb-2 scroll-m-20 text-xl font-semibold tracking-tight">
           シェルフ
         </h1>
