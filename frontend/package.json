@@ -9,6 +9,7 @@
     "lint": "next lint",
     "codegen": "graphql-codegen"
   },
+  "packageManager": "yarn@4.3.1",
   "dependencies": {
     "@apollo/client": "^3.8.10",
     "@apollo/server": "^4.10.0",
@@ -50,6 +51,7 @@
     "tailwindcss-animate": "^1.0.7",
     "ulid": "^2.3.0",
     "yaml": "^2.4.5",
+    "yarn": "^1.22.22",
     "zod": "^3.22.4"
   },
   "devDependencies": {

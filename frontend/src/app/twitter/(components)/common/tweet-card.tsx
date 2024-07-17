@@ -5,6 +5,7 @@ import { DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Dialog } from "@radix-ui/react-dialog";
 import { saveAs } from "file-saver";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FaDownload, FaExternalLinkAlt, FaLink, FaStar } from "react-icons/fa";
 import { FaReply, FaRetweet } from "react-icons/fa6";
 import { z } from "zod";
@@ -15,6 +16,7 @@ interface TweetCardProps {
 }
 
 export function TweetCard({ item }: TweetCardProps) {
+  const router = useRouter();
   return (
     <div
       key={item.id}
@@ -26,7 +28,7 @@ export function TweetCard({ item }: TweetCardProps) {
         <Button
           variant="link"
           className="flex gap-2 p-0"
-          onClick={() => window.open(`https://x.com/${item.user?.screenName}`)}
+          onClick={() => router.push(`/twitter/${item.user?.screenName}`)}
         >
           <Avatar className="flex-shrink-0">
             <AvatarImage src={item.user?.profileImageURL!} />
@@ -44,7 +46,9 @@ export function TweetCard({ item }: TweetCardProps) {
             }
           >
             <span className="text-xs">
-              <span className="font-semibold">{item.user?.followersCount}</span>{" "}
+              <span className="font-semibold">
+                {item.user?.followersCount?.toLocaleString()}
+              </span>{" "}
               Followers
             </span>
           </Button>
@@ -56,7 +60,9 @@ export function TweetCard({ item }: TweetCardProps) {
             }
           >
             <span className="text-xs">
-              <span className="font-semibold">{item.user?.friendsCount}</span>{" "}
+              <span className="font-semibold">
+                {item.user?.friendsCount?.toLocaleString()}
+              </span>{" "}
               Friends
             </span>
           </Button>
@@ -66,9 +72,9 @@ export function TweetCard({ item }: TweetCardProps) {
         </div>
       </div>
       <div className="text-s">
-        <span>{item!.fullText}</span>
+        <span>{item.fullText}</span>
       </div>
-      {item.media!.length > 0 && (
+      {(item.media ?? []).length > 0 && (
         <div className="grid grid-cols-2 gap-4 w-full min-h-48 max-h-96">
           {item.media?.map((media, index) => (
             <div
@@ -154,7 +160,9 @@ export function TweetCard({ item }: TweetCardProps) {
           }
         >
           <FaReply />
-          <span className="ml-2 font-semibold">{item.replyCount}</span>
+          <span className="ml-2 font-semibold">
+            {item.replyCount?.toLocaleString()}
+          </span>
         </Button>
         <Button
           variant="link"
@@ -165,9 +173,14 @@ export function TweetCard({ item }: TweetCardProps) {
           }
         >
           <FaRetweet />
-          <span className="ml-2 font-semibold">{item.retweetCount}</span>
+          <span className="ml-2 font-semibold">
+            {item.retweetCount?.toLocaleString()}
+          </span>
           {(item.quoteCount ?? 0) > 0 && (
-            <span className="font-semibold"> ({item.quoteCount})</span>
+            <span className="font-semibold">
+              {" "}
+              ({item.quoteCount?.toLocaleString()})
+            </span>
           )}
         </Button>
         {item.retweeted && <Badge variant="outline">Retweeted</Badge>}
@@ -180,7 +193,9 @@ export function TweetCard({ item }: TweetCardProps) {
           }
         >
           <FaStar />
-          <span className="ml-2 font-semibold">{item.favoriteCount}</span>
+          <span className="ml-2 font-semibold">
+            {item.favoriteCount?.toLocaleString()}
+          </span>
         </Button>
         {item.favorited && <Badge variant="outline">Liked</Badge>}
       </div>

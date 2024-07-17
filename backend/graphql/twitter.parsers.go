@@ -64,7 +64,7 @@ func ParseUser(user model.User) (*TwitterUser, error) {
 	parsedBirthday := time.Time{}
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, user.Legacy.CreatedAt)
 	return &TwitterUser{
-		ID:                   &user.ID,
+		ID:                   &user.RestID,
 		Name:                 &user.Legacy.Name,
 		ScreenName:           &user.Legacy.ScreenName,
 		Verified:             &user.Legacy.Verified,

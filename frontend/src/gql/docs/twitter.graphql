@@ -1,5 +1,5 @@
-query GetTwitterUser($userID: String!) {
-  twitterUser(userID: $userID) {
+query GetTwitterUser($screenName: String!) {
+  twitterUser(screenName: $screenName) {
     id
     name
     screenName
