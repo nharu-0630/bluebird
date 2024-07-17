@@ -1,3 +1,30 @@
+query GetTwitterUser($userID: String!) {
+  twitterUser(userID: $userID) {
+    id
+    name
+    screenName
+    verified
+    blueVerified
+    description
+    location
+    birthday
+    createdAt
+    friendsCount
+    following
+    fastFollowersCount
+    followersCount
+    normalFollowersCount
+    followedBy
+    mediaCount
+    favouritesCount
+    listedCount
+    pinnedTweetIDs
+    profileBannerURL
+    profileImageURL
+    statusesCount
+  }
+}
+
 query GetTwitterTweets($userID: String!, $cursor: String) {
   twitterTweets(userID: $userID, cursor: $cursor) {
     cursor

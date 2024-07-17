@@ -66,22 +66,7 @@ export function TweetCard({ item }: TweetCardProps) {
         </div>
       </div>
       <div className="text-s">
-        {item.fullText!.split(" ").map((word, index) => {
-          const urlPattern = /https?:\/\/[^\s]+/;
-          return urlPattern.test(word) ? (
-            <a
-              key={index}
-              href={word}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 underline"
-            >
-              {word}
-            </a>
-          ) : (
-            <span key={index}>{word} </span>
-          );
-        })}
+        <span>{item!.fullText}</span>
       </div>
       {item.media!.length > 0 && (
         <div className="grid grid-cols-2 gap-4 w-full min-h-48 max-h-96">
