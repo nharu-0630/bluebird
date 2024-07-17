@@ -1,25 +1,36 @@
-FROM node:20.12.2-alpine as base
-WORKDIR /usr/src/app
+FROM node:20-alpine AS builder
+WORKDIR /app
 
-FROM base as deps
-
-RUN --mount=type=bind,source=package.json,target=package.json \
-    --mount=type=bind,source=yarn.lock,target=yarn.lock \
-    --mount=type=cache,target=/root/.yarn \
-    yarn install --production --frozen-lockfile
-
-FROM deps as build
-
-COPY . .
-RUN yarn run build
-
-FROM base as final
-ENV NODE_ENV production
-
-USER node
 COPY package.json .
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-COPY --from=build /usr/src/app/.next ./.next
-COPY ./public ./public
+COPY yarn.lock .
+COPY .yarnrc.yml .
+COPY tsconfig.json .
+COPY next.config.mjs .
+COPY postcss.config.mjs .
+COPY tailwind.config.ts .
+
+RUN corepack enable
+RUN yarn set version berry
+RUN yarn install --immutable
+
+COPY public ./public
+COPY src ./src
+
+RUN yarn build
+
+FROM node:20-alpine AS production
+WORKDIR /app
+
+COPY --from=builder /app/package.json .
+COPY --from=builder /app/yarn.lock .
+COPY --from=builder /app/.yarnrc.yml .
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
+RUN corepack enable
+RUN yarn set version berry
+RUN yarn workspaces focus --production
+
+EXPOSE 3000
 
 CMD yarn start

@@ -10,11 +10,11 @@ COPY next.config.mjs .
 COPY postcss.config.mjs .
 COPY tailwind.config.ts .
 
-RUN if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    else echo "Warning: Lockfile not found. It is recommended to commit lockfiles to version control." && yarn install; \
-    fi
+RUN corepack enable
+RUN yarn set version berry
+RUN yarn install --immutable
 
-COPY src ./src
 COPY public ./public
+COPY src ./src
 
 CMD yarn dev

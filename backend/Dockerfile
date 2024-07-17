@@ -27,7 +27,7 @@ RUN go build \
   -ldflags="-linkmode external -extldflags -static" \
   -tags netgo \
   -o server \
-  ./src/
+  ./
 
 FROM scratch
 
