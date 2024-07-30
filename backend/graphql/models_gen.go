@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+type File struct {
+	Bucket    string `json:"bucket"`
+	Key       string `json:"key"`
+	Name      string `json:"name"`
+	SignedURL string `json:"signedUrl"`
+}
+
 type Mutation struct {
 }
 
@@ -17,11 +24,6 @@ type ShelfCategory struct {
 	Name string `json:"name"`
 }
 
-type ShelfFile struct {
-	BaseURI string `json:"baseUri"`
-	Token   string `json:"token"`
-}
-
 type ShelfItem struct {
 	Ulid        string         `json:"ulid"`
 	Name        string         `json:"name"`
@@ -29,7 +31,7 @@ type ShelfItem struct {
 	Tags        []*ShelfTag    `json:"tags"`
 	Location    *ShelfLocation `json:"location"`
 	Description string         `json:"description"`
-	Images      []*ShelfFile   `json:"images"`
+	Images      []*File        `json:"images"`
 }
 
 type ShelfLocation struct {

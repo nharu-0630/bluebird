@@ -8,34 +8,8 @@ services:
       - ./backend:/app
     ports:
       - 4000:4000
-    depends_on:
-      db:
-        condition: service_healthy
     env_file:
       - .env
-  db:
-    container_name: bluebird-db-prod
-    image: postgres:14
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-db}
-      TZ: ${TZ:-Asia/Tokyo}
-    ports:
-      - 5432:5432
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
-      interval: 5s
-      retries: 3
-  frontend:
-    container_name: bluebird-frontend-prod
-    image: bluebird-frontend-prod
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-    restart: always
-    ports:
-      - 3000:3000
 
 volumes:
   node_modules:

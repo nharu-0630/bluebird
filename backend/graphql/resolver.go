@@ -2,14 +2,12 @@ package graphql
 
 import (
 	"github.com/nharu-0630/bluebird/api/twitter"
+	storage_go "github.com/supabase-community/storage-go"
 	"gorm.io/gorm"
 )
 
-// This file will not be regenerated automatically.
-//
-// It serves as dependency injection for your app, add any dependencies you require here.
-
 type Resolver struct {
 	DB            *gorm.DB
+	Storage       *storage_go.Client
 	TwitterClient *twitter.Client
 }

@@ -47,6 +47,13 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	File struct {
+		Bucket    func(childComplexity int) int
+		Key       func(childComplexity int) int
+		Name      func(childComplexity int) int
+		SignedURL func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateShelfCategory  func(childComplexity int, name string) int
 		CreateShelfItem      func(childComplexity int, name string, categoryUlid string, tagsUlid []string, locationUlid string, description string) int
@@ -62,7 +69,6 @@ type ComplexityRoot struct {
 		UpdateShelfItem      func(childComplexity int, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) int
 		UpdateShelfLocation  func(childComplexity int, ulid string, name *string) int
 		UpdateShelfTag       func(childComplexity int, ulid string, name *string) int
-		UploadShelfItemImage func(childComplexity int, ulid string, file graphql.Upload) int
 	}
 
 	Query struct {
@@ -87,11 +93,6 @@ type ComplexityRoot struct {
 	ShelfCategory struct {
 		Name func(childComplexity int) int
 		Ulid func(childComplexity int) int
-	}
-
-	ShelfFile struct {
-		BaseURI func(childComplexity int) int
-		Token   func(childComplexity int) int
 	}
 
 	ShelfItem struct {
@@ -186,7 +187,6 @@ type MutationResolver interface {
 	CreateShelfLocation(ctx context.Context, name string) (*ShelfLocation, error)
 	UpdateShelfLocation(ctx context.Context, ulid string, name *string) (*ShelfLocation, error)
 	DeleteShelfLocation(ctx context.Context, ulid string) (bool, error)
-	UploadShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*ShelfFile, error)
 }
 type QueryResolver interface {
 	ShelfItems(ctx context.Context) ([]*ShelfItem, error)
@@ -225,6 +225,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "File.bucket":
+		if e.complexity.File.Bucket == nil {
+			break
+		}
+
+		return e.complexity.File.Bucket(childComplexity), true
+
+	case "File.key":
+		if e.complexity.File.Key == nil {
+			break
+		}
+
+		return e.complexity.File.Key(childComplexity), true
+
+	case "File.name":
+		if e.complexity.File.Name == nil {
+			break
+		}
+
+		return e.complexity.File.Name(childComplexity), true
+
+	case "File.signedUrl":
+		if e.complexity.File.SignedURL == nil {
+			break
+		}
+
+		return e.complexity.File.SignedURL(childComplexity), true
 
 	case "Mutation.createShelfCategory":
 		if e.complexity.Mutation.CreateShelfCategory == nil {
@@ -393,18 +421,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateShelfTag(childComplexity, args["ulid"].(string), args["name"].(*string)), true
-
-	case "Mutation.uploadShelfItemImage":
-		if e.complexity.Mutation.UploadShelfItemImage == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_uploadShelfItemImage_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.UploadShelfItemImage(childComplexity, args["ulid"].(string), args["file"].(graphql.Upload)), true
 
 	case "Query.deletedShelfItem":
 		if e.complexity.Query.DeletedShelfItem == nil {
@@ -586,20 +602,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ShelfCategory.Ulid(childComplexity), true
-
-	case "ShelfFile.baseUri":
-		if e.complexity.ShelfFile.BaseURI == nil {
-			break
-		}
-
-		return e.complexity.ShelfFile.BaseURI(childComplexity), true
-
-	case "ShelfFile.token":
-		if e.complexity.ShelfFile.Token == nil {
-			break
-		}
-
-		return e.complexity.ShelfFile.Token(childComplexity), true
 
 	case "ShelfItem.category":
 		if e.complexity.ShelfItem.Category == nil {
@@ -1428,30 +1430,6 @@ func (ec *executionContext) field_Mutation_updateShelfTag_args(ctx context.Conte
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_uploadShelfItemImage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["ulid"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ulid"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["ulid"] = arg0
-	var arg1 graphql.Upload
-	if tmp, ok := rawArgs["file"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
-		arg1, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["file"] = arg1
-	return args, nil
-}
-
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1696,6 +1674,182 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_bucket(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Bucket, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_bucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_key(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_key(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_name(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _File_signedUrl(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_File_signedUrl(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SignedURL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_File_signedUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "File",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Mutation_createShelfItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createShelfItem(ctx, field)
@@ -2505,64 +2659,6 @@ func (ec *executionContext) fieldContext_Mutation_deleteShelfLocation(ctx contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteShelfLocation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Mutation_uploadShelfItemImage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_uploadShelfItemImage(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UploadShelfItemImage(rctx, fc.Args["ulid"].(string), fc.Args["file"].(graphql.Upload))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*ShelfFile)
-	fc.Result = res
-	return ec.marshalOShelfFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfFile(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_uploadShelfItemImage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "baseUri":
-				return ec.fieldContext_ShelfFile_baseUri(ctx, field)
-			case "token":
-				return ec.fieldContext_ShelfFile_token(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfFile", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_uploadShelfItemImage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3778,94 +3874,6 @@ func (ec *executionContext) fieldContext_ShelfCategory_name(ctx context.Context,
 	return fc, nil
 }
 
-func (ec *executionContext) _ShelfFile_baseUri(ctx context.Context, field graphql.CollectedField, obj *ShelfFile) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShelfFile_baseUri(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.BaseURI, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ShelfFile_baseUri(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ShelfFile",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _ShelfFile_token(ctx context.Context, field graphql.CollectedField, obj *ShelfFile) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ShelfFile_token(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Token, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_ShelfFile_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ShelfFile",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _ShelfItem_ulid(ctx context.Context, field graphql.CollectedField, obj *ShelfItem) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ShelfItem_ulid(ctx, field)
 	if err != nil {
@@ -4174,9 +4182,9 @@ func (ec *executionContext) _ShelfItem_images(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*ShelfFile)
+	res := resTmp.([]*File)
 	fc.Result = res
-	return ec.marshalNShelfFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ShelfItem_images(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4187,12 +4195,16 @@ func (ec *executionContext) fieldContext_ShelfItem_images(ctx context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "baseUri":
-				return ec.fieldContext_ShelfFile_baseUri(ctx, field)
-			case "token":
-				return ec.fieldContext_ShelfFile_token(ctx, field)
+			case "bucket":
+				return ec.fieldContext_File_bucket(ctx, field)
+			case "key":
+				return ec.fieldContext_File_key(ctx, field)
+			case "name":
+				return ec.fieldContext_File_name(ctx, field)
+			case "signedUrl":
+				return ec.fieldContext_File_signedUrl(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ShelfFile", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
 		},
 	}
 	return fc, nil
@@ -8049,6 +8061,60 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** object.gotpl ****************************
 
+var fileImplementors = []string{"File"}
+
+func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *File) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fileImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("File")
+		case "bucket":
+			out.Values[i] = ec._File_bucket(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "key":
+			out.Values[i] = ec._File_key(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._File_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "signedUrl":
+			out.Values[i] = ec._File_signedUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -8142,10 +8208,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "uploadShelfItemImage":
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_uploadShelfItemImage(ctx, field)
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8556,50 +8618,6 @@ func (ec *executionContext) _ShelfCategory(ctx context.Context, sel ast.Selectio
 			}
 		case "name":
 			out.Values[i] = ec._ShelfCategory_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var shelfFileImplementors = []string{"ShelfFile"}
-
-func (ec *executionContext) _ShelfFile(ctx context.Context, sel ast.SelectionSet, obj *ShelfFile) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, shelfFileImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("ShelfFile")
-		case "baseUri":
-			out.Values[i] = ec._ShelfFile_baseUri(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "token":
-			out.Values[i] = ec._ShelfFile_token(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -9348,6 +9366,60 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*File) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFile(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFile(ctx context.Context, sel ast.SelectionSet, v *File) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._File(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNShelfCategory2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfCategory) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -9400,60 +9472,6 @@ func (ec *executionContext) marshalNShelfCategory2ᚖgithubᚗcomᚋnharuᚑ0630
 		return graphql.Null
 	}
 	return ec._ShelfCategory(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNShelfFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfFile) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNShelfFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfFile(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-func (ec *executionContext) marshalNShelfFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfFile(ctx context.Context, sel ast.SelectionSet, v *ShelfFile) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ShelfFile(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNShelfItem2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfItem) graphql.Marshaler {
@@ -9663,21 +9681,6 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	}
 
 	return ret
-}
-
-func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (graphql.Upload, error) {
-	res, err := graphql.UnmarshalUpload(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
-	res := graphql.MarshalUpload(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -9996,13 +9999,6 @@ func (ec *executionContext) marshalOShelfCategory2ᚖgithubᚗcomᚋnharuᚑ0630
 		return graphql.Null
 	}
 	return ec._ShelfCategory(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOShelfFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfFile(ctx context.Context, sel ast.SelectionSet, v *ShelfFile) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._ShelfFile(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOShelfItem2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfItem(ctx context.Context, sel ast.SelectionSet, v *ShelfItem) graphql.Marshaler {

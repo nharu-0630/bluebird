@@ -18,7 +18,7 @@ type ShelfItem struct {
 	LocationUlid string         `gorm:"not null"`
 	Location     ShelfLocation  `gorm:"foreignKey:LocationUlid"`
 	Description  string         `gorm:"not null"`
-	Images       []ShelfFile    `gorm:"foreignKey:ItemUlid"`
+	Images       []File         `gorm:"foreignKey:ItemUlid"`
 }
 
 type ShelfCategory struct {
@@ -45,10 +45,12 @@ type ShelfLocation struct {
 	Name      string         `gorm:"unique;not null"`
 }
 
-type ShelfFile struct {
-	gorm.Model
-	ItemUlid    string `gorm:"not null"`
-	Item        ShelfItem
-	ContentType string `gorm:"not null"`
-	File        []byte `gorm:"not null;size:4294967295"`
+type File struct {
+	ItemUlid  string `gorm:"primaryKey;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Bucket    string         `gorm:"not null"`
+	Key       string         `gorm:"not null"`
+	Name      string         `gorm:"not null"`
 }

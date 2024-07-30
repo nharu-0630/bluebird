@@ -6,14 +6,7 @@ package graphql
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"os"
-	"slices"
-	"time"
 
-	"github.com/99designs/gqlgen/graphql"
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/model"
 	ulid "github.com/oklog/ulid/v2"
@@ -292,40 +285,6 @@ func (r *mutationResolver) DeleteShelfLocation(ctx context.Context, ulid string)
 	return true, nil
 }
 
-// UploadShelfItemImage is the resolver for the uploadShelfItemImage field.
-func (r *mutationResolver) UploadShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*ShelfFile, error) {
-	if !slices.Contains(config.AllowedShelfFileContentTypes, file.ContentType) {
-		return nil, fmt.Errorf("content type is not allowed")
-	}
-	bytes, err := io.ReadAll(file.File)
-	if err != nil {
-		return nil, err
-	}
-	var shelfItem model.ShelfItem
-	if err := r.DB.Where("ulid = ?", ulid).First(&shelfItem).Error; err != nil {
-		return nil, err
-	}
-	if r.DB.Model(&shelfItem).Association("Images").Count() >= 5 {
-		return nil, fmt.Errorf("the number of images is limited to 5")
-	}
-	shelfFile := model.ShelfFile{
-		ContentType: file.ContentType,
-		File:        bytes}
-	if err := r.DB.Model(&shelfItem).Association("Images").Append(&shelfFile); err != nil {
-		return nil, err
-	}
-	claims := jwt.MapClaims{
-		"id":  shelfFile.ID,
-		"exp": time.Now().Add(time.Hour * 24).Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		return nil, err
-	}
-	return &ShelfFile{Token: signedToken}, nil
-}
-
 // ShelfItems is the resolver for the shelfItems field.
 func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 	var shelfItems []model.ShelfItem
@@ -346,23 +305,16 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 			parsedTags[j] = &ShelfTag{Ulid: tag.Ulid, Name: tag.Name}
 		}
 		parsedShelfItems[i].Tags = parsedTags
-		parsedImages := make([]*ShelfFile, len(shelfItem.Images))
+		signedUrls := make([]*File, len(shelfItem.Images))
 		for j, image := range shelfItem.Images {
-			claims := jwt.MapClaims{
-				"id":  image.ID,
-				"exp": time.Now().Add(time.Hour * 24).Unix(),
-			}
-			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-			signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-			if err != nil {
-				return nil, err
-			}
-			parsedImages[j] = &ShelfFile{
-				BaseURI: config.ShelfFileResolverURI,
-				Token:   signedToken,
+			filename := image.Key + "/" + image.Name
+			signedUrls[j] = &File{
+				Bucket:    image.Bucket,
+				Key:       image.Key,
+				Name:      image.Name,
+				SignedURL: r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
 			}
 		}
-		parsedShelfItems[i].Images = parsedImages
 	}
 	return parsedShelfItems, nil
 }
@@ -370,7 +322,7 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 // ShelfItem is the resolver for the shelfItem field.
 func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem, error) {
 	var shelfItem model.ShelfItem
-	if err := r.DB.Where("ulid = ?", ulid).Preload("Category").Preload("Tags").Preload("Location").Preload("Images").First(&shelfItem).Error; err != nil {
+	if err := r.DB.Where("ulid = ?", ulid).Preload("Category").Preload("Tags").Preload("Location").First(&shelfItem).Error; err != nil {
 		return nil, err
 	}
 	parsedShelfItem := &ShelfItem{
@@ -385,23 +337,6 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 		parsedTags[i] = &ShelfTag{Ulid: tag.Ulid, Name: tag.Name}
 	}
 	parsedShelfItem.Tags = parsedTags
-	parsedImages := make([]*ShelfFile, len(shelfItem.Images))
-	for j, image := range shelfItem.Images {
-		claims := jwt.MapClaims{
-			"id":  image.ID,
-			"exp": time.Now().Add(time.Hour * 24).Unix(),
-		}
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-		signedToken, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
-		if err != nil {
-			return nil, err
-		}
-		parsedImages[j] = &ShelfFile{
-			BaseURI: config.ShelfFileResolverURI,
-			Token:   signedToken,
-		}
-	}
-	parsedShelfItem.Images = parsedImages
 	return parsedShelfItem, nil
 }
 

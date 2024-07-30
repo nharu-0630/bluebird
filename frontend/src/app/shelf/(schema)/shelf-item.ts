@@ -18,12 +18,6 @@ export const ShelfItemSchema = z.object({
     name: z.string(),
   }),
   description: z.string().optional(),
-  images: z.array(
-    z.object({
-      baseUri: z.string(),
-      token: z.string(),
-    })
-  ),
 });
 
 export type ShelfItem = z.infer<typeof ShelfItemSchema>;

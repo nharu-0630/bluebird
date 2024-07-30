@@ -15,10 +15,6 @@ query GetShelfItems {
       name
     }
     description
-    images {
-      baseUri
-      token
-    }
   }
 }
 
@@ -39,10 +35,6 @@ query GetShelfItem($ulid: String!) {
       name
     }
     description
-    images {
-      baseUri
-      token
-    }
   }
 }
 
@@ -63,10 +55,6 @@ query GetDeletedShelfItems {
       name
     }
     description
-    images {
-      baseUri
-      token
-    }
   }
 }
 
@@ -87,10 +75,6 @@ query GetDeletedShelfItem($ulid: String!) {
       name
     }
     description
-    images {
-      baseUri
-      token
-    }
   }
 }
 

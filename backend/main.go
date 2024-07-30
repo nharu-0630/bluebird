@@ -8,12 +8,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/lib/pq"
 	"github.com/nharu-0630/bluebird/api/twitter"
-	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/graphql"
 	"github.com/nharu-0630/bluebird/mock"
 	"github.com/nharu-0630/bluebird/model"
-	"github.com/nharu-0630/bluebird/resolver"
 	"github.com/rs/cors"
+	storage_go "github.com/supabase-community/storage-go"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gorm.io/driver/postgres"
@@ -25,16 +24,20 @@ const defaultPort = "4000"
 func main() {
 	zap.ReplaceGlobals(zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zapcore.DebugLevel)))
 	// Connect to the database
-	connectionString := "host=db port=5432 user=" + os.Getenv("POSTGRES_USER") + " password=" + os.Getenv("POSTGRES_PASSWORD") + " dbname=" + os.Getenv("POSTGRES_DB") + " sslmode=disable"
-	db, err := gorm.Open(postgres.Open(connectionString), &gorm.Config{})
+	dsn := os.Getenv("DATABASE_URL")
+	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dsn, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		zap.L().Sugar().Fatal(err)
 	}
 	// For shelf
-	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.ShelfFile{})
+	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{})
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
+	storage := storage_go.NewClient(os.Getenv("SUPABASE_URL")+"/storage/v1", os.Getenv("SUPABASE_TOKEN"), nil)
+	if err != nil {
+		zap.L().Sugar().Fatal(err)
+	}
 	// For twitter
 	db.AutoMigrate(&model.TwitterUser{}, &model.TwitterTweet{}, &model.TwitterMedia{})
 	twitterClient := twitter.NewClient(twitter.ClientConfig{
@@ -47,6 +50,7 @@ func main() {
 		port = defaultPort
 	}
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{DB: db,
+		Storage:       storage,
 		TwitterClient: twitterClient}}))
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
@@ -58,9 +62,5 @@ func main() {
 	zap.L().Sugar().Infof("connect to http://localhost:%s/ for GraphQL playground", port)
 	http.Handle("/query", srv)
 	zap.L().Sugar().Infof("connect to http://localhost:%s/query for GraphQL query", port)
-	// For shelf file resolver
-	shelfFileResolver := resolver.NewShelfFileResolver(db)
-	http.HandleFunc(config.ShelfFileResolverURI, shelfFileResolver.Resolver)
-	zap.L().Sugar().Infof("connect to http://localhost:%s%s for shelf file resolver", port, config.ShelfFileResolverURI)
 	zap.L().Sugar().Fatal(http.ListenAndServe(":"+port, handler))
 }
