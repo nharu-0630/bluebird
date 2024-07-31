@@ -47,7 +47,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	File struct {
+	BucketFile struct {
 		Bucket    func(childComplexity int) int
 		Key       func(childComplexity int) int
 		Name      func(childComplexity int) int
@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		AddShelfItemImage    func(childComplexity int, ulid string, file graphql.Upload) int
 		CreateShelfCategory  func(childComplexity int, name string) int
 		CreateShelfItem      func(childComplexity int, name string, categoryUlid string, tagsUlid []string, locationUlid string, description string) int
 		CreateShelfLocation  func(childComplexity int, name string) int
@@ -64,6 +65,7 @@ type ComplexityRoot struct {
 		DeleteShelfLocation  func(childComplexity int, ulid string) int
 		DeleteShelfTag       func(childComplexity int, ulid string) int
 		ForceDeleteShelfItem func(childComplexity int, ulid string) int
+		RemoveShelfItemImage func(childComplexity int, ulid string, fileKey string) int
 		RestoreShelfItem     func(childComplexity int, ulid string) int
 		UpdateShelfCategory  func(childComplexity int, ulid string, name *string) int
 		UpdateShelfItem      func(childComplexity int, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) int
@@ -187,6 +189,8 @@ type MutationResolver interface {
 	CreateShelfLocation(ctx context.Context, name string) (*ShelfLocation, error)
 	UpdateShelfLocation(ctx context.Context, ulid string, name *string) (*ShelfLocation, error)
 	DeleteShelfLocation(ctx context.Context, ulid string) (bool, error)
+	AddShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*BucketFile, error)
+	RemoveShelfItemImage(ctx context.Context, ulid string, fileKey string) (bool, error)
 }
 type QueryResolver interface {
 	ShelfItems(ctx context.Context) ([]*ShelfItem, error)
@@ -226,33 +230,45 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "File.bucket":
-		if e.complexity.File.Bucket == nil {
+	case "BucketFile.bucket":
+		if e.complexity.BucketFile.Bucket == nil {
 			break
 		}
 
-		return e.complexity.File.Bucket(childComplexity), true
+		return e.complexity.BucketFile.Bucket(childComplexity), true
 
-	case "File.key":
-		if e.complexity.File.Key == nil {
+	case "BucketFile.key":
+		if e.complexity.BucketFile.Key == nil {
 			break
 		}
 
-		return e.complexity.File.Key(childComplexity), true
+		return e.complexity.BucketFile.Key(childComplexity), true
 
-	case "File.name":
-		if e.complexity.File.Name == nil {
+	case "BucketFile.name":
+		if e.complexity.BucketFile.Name == nil {
 			break
 		}
 
-		return e.complexity.File.Name(childComplexity), true
+		return e.complexity.BucketFile.Name(childComplexity), true
 
-	case "File.signedUrl":
-		if e.complexity.File.SignedURL == nil {
+	case "BucketFile.signedUrl":
+		if e.complexity.BucketFile.SignedURL == nil {
 			break
 		}
 
-		return e.complexity.File.SignedURL(childComplexity), true
+		return e.complexity.BucketFile.SignedURL(childComplexity), true
+
+	case "Mutation.addShelfItemImage":
+		if e.complexity.Mutation.AddShelfItemImage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addShelfItemImage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddShelfItemImage(childComplexity, args["ulid"].(string), args["file"].(graphql.Upload)), true
 
 	case "Mutation.createShelfCategory":
 		if e.complexity.Mutation.CreateShelfCategory == nil {
@@ -361,6 +377,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ForceDeleteShelfItem(childComplexity, args["ulid"].(string)), true
+
+	case "Mutation.removeShelfItemImage":
+		if e.complexity.Mutation.RemoveShelfItemImage == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_removeShelfItemImage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RemoveShelfItemImage(childComplexity, args["ulid"].(string), args["fileKey"].(string)), true
 
 	case "Mutation.restoreShelfItem":
 		if e.complexity.Mutation.RestoreShelfItem == nil {
@@ -1112,6 +1140,30 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_addShelfItemImage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ulid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ulid"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ulid"] = arg0
+	var arg1 graphql.Upload
+	if tmp, ok := rawArgs["file"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		arg1, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["file"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createShelfCategory_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -1280,6 +1332,30 @@ func (ec *executionContext) field_Mutation_forceDeleteShelfItem_args(ctx context
 		}
 	}
 	args["ulid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_removeShelfItemImage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["ulid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ulid"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ulid"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["fileKey"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileKey"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["fileKey"] = arg1
 	return args, nil
 }
 
@@ -1675,8 +1751,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_bucket(ctx, field)
+func (ec *executionContext) _BucketFile_bucket(ctx context.Context, field graphql.CollectedField, obj *BucketFile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BucketFile_bucket(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1706,9 +1782,9 @@ func (ec *executionContext) _File_bucket(ctx context.Context, field graphql.Coll
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_File_bucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_BucketFile_bucket(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "File",
+		Object:     "BucketFile",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1719,8 +1795,8 @@ func (ec *executionContext) fieldContext_File_bucket(ctx context.Context, field 
 	return fc, nil
 }
 
-func (ec *executionContext) _File_key(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_key(ctx, field)
+func (ec *executionContext) _BucketFile_key(ctx context.Context, field graphql.CollectedField, obj *BucketFile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BucketFile_key(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1750,9 +1826,9 @@ func (ec *executionContext) _File_key(ctx context.Context, field graphql.Collect
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_File_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_BucketFile_key(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "File",
+		Object:     "BucketFile",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1763,8 +1839,8 @@ func (ec *executionContext) fieldContext_File_key(ctx context.Context, field gra
 	return fc, nil
 }
 
-func (ec *executionContext) _File_name(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_name(ctx, field)
+func (ec *executionContext) _BucketFile_name(ctx context.Context, field graphql.CollectedField, obj *BucketFile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BucketFile_name(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1794,9 +1870,9 @@ func (ec *executionContext) _File_name(ctx context.Context, field graphql.Collec
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_File_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_BucketFile_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "File",
+		Object:     "BucketFile",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1807,8 +1883,8 @@ func (ec *executionContext) fieldContext_File_name(ctx context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _File_signedUrl(ctx context.Context, field graphql.CollectedField, obj *File) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_File_signedUrl(ctx, field)
+func (ec *executionContext) _BucketFile_signedUrl(ctx context.Context, field graphql.CollectedField, obj *BucketFile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BucketFile_signedUrl(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1838,9 +1914,9 @@ func (ec *executionContext) _File_signedUrl(ctx context.Context, field graphql.C
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_File_signedUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_BucketFile_signedUrl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "File",
+		Object:     "BucketFile",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2659,6 +2735,126 @@ func (ec *executionContext) fieldContext_Mutation_deleteShelfLocation(ctx contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_deleteShelfLocation_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addShelfItemImage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addShelfItemImage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddShelfItemImage(rctx, fc.Args["ulid"].(string), fc.Args["file"].(graphql.Upload))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*BucketFile)
+	fc.Result = res
+	return ec.marshalNBucketFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐBucketFile(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addShelfItemImage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "bucket":
+				return ec.fieldContext_BucketFile_bucket(ctx, field)
+			case "key":
+				return ec.fieldContext_BucketFile_key(ctx, field)
+			case "name":
+				return ec.fieldContext_BucketFile_name(ctx, field)
+			case "signedUrl":
+				return ec.fieldContext_BucketFile_signedUrl(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type BucketFile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addShelfItemImage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeShelfItemImage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_removeShelfItemImage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveShelfItemImage(rctx, fc.Args["ulid"].(string), fc.Args["fileKey"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeShelfItemImage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeShelfItemImage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4182,9 +4378,9 @@ func (ec *executionContext) _ShelfItem_images(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*File)
+	res := resTmp.([]*BucketFile)
 	fc.Result = res
-	return ec.marshalNFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFileᚄ(ctx, field.Selections, res)
+	return ec.marshalNBucketFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐBucketFileᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_ShelfItem_images(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4196,15 +4392,15 @@ func (ec *executionContext) fieldContext_ShelfItem_images(ctx context.Context, f
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "bucket":
-				return ec.fieldContext_File_bucket(ctx, field)
+				return ec.fieldContext_BucketFile_bucket(ctx, field)
 			case "key":
-				return ec.fieldContext_File_key(ctx, field)
+				return ec.fieldContext_BucketFile_key(ctx, field)
 			case "name":
-				return ec.fieldContext_File_name(ctx, field)
+				return ec.fieldContext_BucketFile_name(ctx, field)
 			case "signedUrl":
-				return ec.fieldContext_File_signedUrl(ctx, field)
+				return ec.fieldContext_BucketFile_signedUrl(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type File", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type BucketFile", field.Name)
 		},
 	}
 	return fc, nil
@@ -8061,34 +8257,34 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** object.gotpl ****************************
 
-var fileImplementors = []string{"File"}
+var bucketFileImplementors = []string{"BucketFile"}
 
-func (ec *executionContext) _File(ctx context.Context, sel ast.SelectionSet, obj *File) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, fileImplementors)
+func (ec *executionContext) _BucketFile(ctx context.Context, sel ast.SelectionSet, obj *BucketFile) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bucketFileImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("File")
+			out.Values[i] = graphql.MarshalString("BucketFile")
 		case "bucket":
-			out.Values[i] = ec._File_bucket(ctx, field, obj)
+			out.Values[i] = ec._BucketFile_bucket(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "key":
-			out.Values[i] = ec._File_key(ctx, field, obj)
+			out.Values[i] = ec._BucketFile_key(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "name":
-			out.Values[i] = ec._File_name(ctx, field, obj)
+			out.Values[i] = ec._BucketFile_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "signedUrl":
-			out.Values[i] = ec._File_signedUrl(ctx, field, obj)
+			out.Values[i] = ec._BucketFile_signedUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -8204,6 +8400,20 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "deleteShelfLocation":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_deleteShelfLocation(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addShelfItemImage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addShelfItemImage(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "removeShelfItemImage":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeShelfItemImage(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -9366,7 +9576,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*File) graphql.Marshaler {
+func (ec *executionContext) marshalNBucketFile2githubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐBucketFile(ctx context.Context, sel ast.SelectionSet, v BucketFile) graphql.Marshaler {
+	return ec._BucketFile(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBucketFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐBucketFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*BucketFile) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -9390,7 +9604,7 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋblu
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFile(ctx, sel, v[i])
+			ret[i] = ec.marshalNBucketFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐBucketFile(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -9410,14 +9624,14 @@ func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋblu
 	return ret
 }
 
-func (ec *executionContext) marshalNFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐFile(ctx context.Context, sel ast.SelectionSet, v *File) graphql.Marshaler {
+func (ec *executionContext) marshalNBucketFile2ᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐBucketFile(ctx context.Context, sel ast.SelectionSet, v *BucketFile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._File(ctx, sel, v)
+	return ec._BucketFile(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNShelfCategory2ᚕᚖgithubᚗcomᚋnharuᚑ0630ᚋbluebirdᚋgraphqlᚐShelfCategoryᚄ(ctx context.Context, sel ast.SelectionSet, v []*ShelfCategory) graphql.Marshaler {
@@ -9681,6 +9895,21 @@ func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel
 	}
 
 	return ret
+}
+
+func (ec *executionContext) unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, v interface{}) (graphql.Upload, error) {
+	res, err := graphql.UnmarshalUpload(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx context.Context, sel ast.SelectionSet, v graphql.Upload) graphql.Marshaler {
+	res := graphql.MarshalUpload(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

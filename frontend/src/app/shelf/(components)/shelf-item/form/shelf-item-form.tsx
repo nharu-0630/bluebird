@@ -1,6 +1,5 @@
 "use client";
 
-import ImageLoading from "@/components/image-loading";
 import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
@@ -10,6 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { useToast } from "@/components/ui/use-toast";
+import Image from "next/image";
 import { ShelfItem } from "../../../(schema)/shelf-item";
 
 interface ShelfItemDialogProps {
@@ -58,7 +58,7 @@ export function ShelfItemForm(props: ShelfItemDialogProps) {
         <CarouselContent>
           {props.shelfItem.images.map((image, index) => (
             <CarouselItem key={index}>
-              <ImageLoading baseUri={image.baseUri} token={image.token} />
+              <Image src={image.signedUrl} width={400} height={400} alt={image.name} />
             </CarouselItem>
           ))}
         </CarouselContent>

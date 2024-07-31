@@ -29,6 +29,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import {
+  AddShelfItemImageDocument,
+  AddShelfItemImageMutation,
+  AddShelfItemImageMutationVariables,
   GetShelfCategoriesDocument,
   GetShelfCategoriesQuery,
   GetShelfItemsDocument,
@@ -36,6 +39,9 @@ import {
   GetShelfLocationsQuery,
   GetShelfTagsDocument,
   GetShelfTagsQuery,
+  RemoveShelfItemImageDocument,
+  RemoveShelfItemImageMutation,
+  RemoveShelfItemImageMutationVariables,
   UpdateShelfItemDocument,
   UpdateShelfItemMutation,
   UpdateShelfItemMutationVariables,
@@ -55,6 +61,14 @@ const ShelfItemEditFormSchema = z.object({
   tags: z.array(z.string()),
   location: z.string(),
   description: z.string().optional(),
+  images: z.array(
+    z.object({
+      bucket: z.string(),
+      key: z.string(),
+      name: z.string(),
+      signedUrl: z.string(),
+    })
+  ),
 });
 
 type ShelfItemEditForm = z.infer<typeof ShelfItemEditFormSchema>;
@@ -75,6 +89,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       tags: props.shelfItem.tags.map((tag) => tag.ulid),
       location: props.shelfItem.location.ulid,
       description: props.shelfItem.description,
+      images: props.shelfItem.images,
     },
   });
   const {
@@ -101,6 +116,9 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       refetchQueries: [{ query: GetShelfItemsDocument }],
     }
   );
+  const [addShelfItemImage] = useMutation<AddShelfItemImageMutation, AddShelfItemImageMutationVariables>(AddShelfItemImageDocument);
+  const [removeShelfItemImage] = useMutation<RemoveShelfItemImageMutation, RemoveShelfItemImageMutationVariables>(RemoveShelfItemImageDocument);
+
   const { toast } = useToast();
 
   if (categoryLoading || tagLoading || locationLoading)
@@ -123,8 +141,8 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       </Alert>
     );
 
-  function onSubmit(data: ShelfItemEditForm) {
-    updateShelfItem({
+  async function onSubmit(data: ShelfItemEditForm) {
+    await updateShelfItem({
       variables: {
         ulid: data.ulid,
         name: data.name,
@@ -141,8 +159,35 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
     });
   }
 
+
+  async function handleFileRemove(fileKey: string) {
+    await removeShelfItemImage({
+      variables: {
+        ulid: props.shelfItem.ulid,
+        fileKey,
+      },
+    });
+    form.setValue("images", form.getValues("images").filter((image) => image.key !== fileKey));
+  }
+
+  function handleFileUpload(files: FileList | null): void {
+    if (!files) return;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      addShelfItemImage({
+        variables: {
+          ulid: props.shelfItem.ulid,
+          file,
+        },
+      }).then((res) => {
+        // form.setValue("images", [...form.getValues("images"), res.data?.addShelfItemImage]);
+      });
+    }
+  }
+
   return (
-    <Form {...form}>
+    <><Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
@@ -154,8 +199,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 <Input {...field} readOnly />
               </FormControl>
             </FormItem>
-          )}
-        />
+          )} />
         <FormField
           control={form.control}
           name="name"
@@ -166,8 +210,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 <Input {...field} />
               </FormControl>
             </FormItem>
-          )}
-        />
+          )} />
         <FormField
           control={form.control}
           name="category"
@@ -194,8 +237,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 </Select>
               </FormControl>
             </FormItem>
-          )}
-        />
+          )} />
         <FormField
           control={form.control}
           name="tags"
@@ -206,18 +248,14 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 <MultiSelector
                   onValuesChange={field.onChange}
                   values={field.value}
-                  displayValues={
-                    field.value
-                      .map(
-                        (tag) =>
-                          tagData?.shelfTags.find((t) => t.ulid === tag)?.name
-                      )
-                      .filter(
-                        (item): item is Exclude<typeof item, undefined> =>
-                          item !== undefined
-                      ) ?? []
-                  }
-                  onDisplayValuesChange={() => {}}
+                  displayValues={field.value
+                    .map(
+                      (tag) => tagData?.shelfTags.find((t) => t.ulid === tag)?.name
+                    )
+                    .filter(
+                      (item): item is Exclude<typeof item, undefined> => item !== undefined
+                    ) ?? []}
+                  onDisplayValuesChange={() => { }}
                   loop
                   className="w-full"
                 >
@@ -240,8 +278,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 </MultiSelector>
               </FormControl>
             </FormItem>
-          )}
-        />
+          )} />
         <FormField
           control={form.control}
           name="location"
@@ -268,8 +305,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 </Select>
               </FormControl>
             </FormItem>
-          )}
-        />
+          )} />
         <FormField
           control={form.control}
           name="description"
@@ -280,10 +316,11 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 <Textarea {...field} />
               </FormControl>
             </FormItem>
-          )}
-        />
+          )} />
         <Button type="submit">変更</Button>
       </form>
     </Form>
+      <Input type="file" onChange={(e) => handleFileUpload(e.target.files)} />
+    </>
   );
 }

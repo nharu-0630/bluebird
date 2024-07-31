@@ -1,4 +1,5 @@
 scalar Upload
+scalar File
 
 type ShelfItem {
   ulid: String!
@@ -7,7 +8,7 @@ type ShelfItem {
   tags: [ShelfTag!]!
   location: ShelfLocation!
   description: String!
-  images: [File!]!
+  images: [BucketFile!]!
 }
 
 type ShelfCategory {
@@ -25,7 +26,7 @@ type ShelfLocation {
   name: String!
 }
 
-type File {
+type BucketFile {
   bucket: String!
   key: String!
   name: String!
@@ -73,4 +74,6 @@ type Mutation {
   createShelfLocation(name: String!): ShelfLocation
   updateShelfLocation(ulid: String!, name: String): ShelfLocation
   deleteShelfLocation(ulid: String!): Boolean!
+  addShelfItemImage(ulid: String!, file: Upload!): BucketFile!
+  removeShelfItemImage(ulid: String!, fileKey: String!): Boolean!
 }

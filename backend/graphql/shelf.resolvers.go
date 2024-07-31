@@ -7,6 +7,7 @@ package graphql
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/model"
 	ulid "github.com/oklog/ulid/v2"
@@ -285,6 +286,36 @@ func (r *mutationResolver) DeleteShelfLocation(ctx context.Context, ulid string)
 	return true, nil
 }
 
+// AddShelfItemImage is the resolver for the addShelfItemImage field.
+func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*BucketFile, error) {
+	filename := config.ShelfItemKeyName + "/" + ulid + "/" + file.Filename
+	_, err := r.Storage.UploadFile(config.ShelfBucketName, filename, file.File)
+	if err != nil {
+		return nil, err
+	}
+	if err := r.DB.Model(&model.ShelfItem{}).Where("ulid = ?", ulid).Association("Images").Append(&model.File{Bucket: config.ShelfBucketName, Key: config.ShelfItemKeyName, Name: file.Filename}); err != nil {
+		return nil, err
+	}
+	return &BucketFile{
+		Bucket:    config.ShelfBucketName,
+		Key:       config.ShelfItemKeyName,
+		Name:      file.Filename,
+		SignedURL: r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL,
+	}, nil
+}
+
+// RemoveShelfItemImage is the resolver for the removeShelfItemImage field.
+func (r *mutationResolver) RemoveShelfItemImage(ctx context.Context, ulid string, fileKey string) (bool, error) {
+	filename := config.ShelfItemKeyName + "/" + ulid + "/" + fileKey
+	if _, err := r.Storage.RemoveFile(config.ShelfBucketName, []string{filename}); err != nil {
+		return false, err
+	}
+	if err := r.DB.Model(&model.ShelfItem{}).Where("ulid = ?", ulid).Association("Images").Delete(&model.File{Key: config.ShelfItemKeyName, Name: fileKey}); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 // ShelfItems is the resolver for the shelfItems field.
 func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 	var shelfItems []model.ShelfItem
@@ -305,16 +336,16 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 			parsedTags[j] = &ShelfTag{Ulid: tag.Ulid, Name: tag.Name}
 		}
 		parsedShelfItems[i].Tags = parsedTags
-		signedUrls := make([]*File, len(shelfItem.Images))
+		parsedFiles := make([]*BucketFile, len(shelfItem.Images))
 		for j, image := range shelfItem.Images {
-			filename := image.Key + "/" + image.Name
-			signedUrls[j] = &File{
+			parsedFiles[j] = &BucketFile{
 				Bucket:    image.Bucket,
 				Key:       image.Key,
 				Name:      image.Name,
-				SignedURL: r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
+				SignedURL: r.Storage.GetPublicUrl(image.Bucket, image.Key+"/"+image.Name).SignedURL,
 			}
 		}
+		parsedShelfItems[i].Images = parsedFiles
 	}
 	return parsedShelfItems, nil
 }
@@ -322,7 +353,7 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 // ShelfItem is the resolver for the shelfItem field.
 func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem, error) {
 	var shelfItem model.ShelfItem
-	if err := r.DB.Where("ulid = ?", ulid).Preload("Category").Preload("Tags").Preload("Location").First(&shelfItem).Error; err != nil {
+	if err := r.DB.Where("ulid = ?", ulid).Preload("Category").Preload("Tags").Preload("Location").Preload("Images").First(&shelfItem).Error; err != nil {
 		return nil, err
 	}
 	parsedShelfItem := &ShelfItem{
@@ -337,6 +368,16 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 		parsedTags[i] = &ShelfTag{Ulid: tag.Ulid, Name: tag.Name}
 	}
 	parsedShelfItem.Tags = parsedTags
+	parsedFiles := make([]*BucketFile, len(shelfItem.Images))
+	for i, image := range shelfItem.Images {
+		parsedFiles[i] = &BucketFile{
+			Bucket:    image.Bucket,
+			Key:       image.Key,
+			Name:      image.Name,
+			SignedURL: r.Storage.GetPublicUrl(image.Bucket, image.Key+"/"+image.Name).SignedURL,
+		}
+	}
+	parsedShelfItem.Images = parsedFiles
 	return parsedShelfItem, nil
 }
 

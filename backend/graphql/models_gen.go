@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type File struct {
+type BucketFile struct {
 	Bucket    string `json:"bucket"`
 	Key       string `json:"key"`
 	Name      string `json:"name"`
@@ -31,7 +31,7 @@ type ShelfItem struct {
 	Tags        []*ShelfTag    `json:"tags"`
 	Location    *ShelfLocation `json:"location"`
 	Description string         `json:"description"`
-	Images      []*File        `json:"images"`
+	Images      []*BucketFile  `json:"images"`
 }
 
 type ShelfLocation struct {
