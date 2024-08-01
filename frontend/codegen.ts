@@ -7,6 +7,11 @@ const config: CodegenConfig = {
   documents: "src/gql/docs/*.graphql",
   generates: {
     "src/gql/gen/": {
+      config: {
+        scalars: {
+          Upload: "File",
+        },
+      },
       preset: "client",
       plugins: [],
       presetConfig: {

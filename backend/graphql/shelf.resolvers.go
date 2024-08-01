@@ -293,7 +293,16 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 	if err != nil {
 		return nil, err
 	}
-	if err := r.DB.Model(&model.ShelfItem{}).Where("ulid = ?", ulid).Association("Images").Append(&model.File{Bucket: config.ShelfBucketName, Key: config.ShelfItemKeyName, Name: file.Filename}); err != nil {
+	var shelfItem model.ShelfItem
+	if err := r.DB.Where("ulid = ?", ulid).First(&shelfItem).Error; err != nil {
+		return nil, err
+	}
+	newImage := model.File{
+		Bucket: config.ShelfBucketName,
+		Key:    config.ShelfItemKeyName,
+		Name:   file.Filename,
+	}
+	if err := r.DB.Model(&shelfItem).Association("Images").Append(&newImage); err != nil {
 		return nil, err
 	}
 	return &BucketFile{
@@ -338,11 +347,12 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 		parsedShelfItems[i].Tags = parsedTags
 		parsedFiles := make([]*BucketFile, len(shelfItem.Images))
 		for j, image := range shelfItem.Images {
+			filename := config.ShelfItemKeyName + "/" + shelfItem.Ulid + "/" + image.Name
 			parsedFiles[j] = &BucketFile{
 				Bucket:    image.Bucket,
 				Key:       image.Key,
 				Name:      image.Name,
-				SignedURL: r.Storage.GetPublicUrl(image.Bucket, image.Key+"/"+image.Name).SignedURL,
+				SignedURL: r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
 			}
 		}
 		parsedShelfItems[i].Images = parsedFiles
@@ -370,11 +380,12 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 	parsedShelfItem.Tags = parsedTags
 	parsedFiles := make([]*BucketFile, len(shelfItem.Images))
 	for i, image := range shelfItem.Images {
+		filename := config.ShelfItemKeyName + "/" + shelfItem.Ulid + "/" + image.Name
 		parsedFiles[i] = &BucketFile{
 			Bucket:    image.Bucket,
 			Key:       image.Key,
 			Name:      image.Name,
-			SignedURL: r.Storage.GetPublicUrl(image.Bucket, image.Key+"/"+image.Name).SignedURL,
+			SignedURL: r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
 		}
 	}
 	parsedShelfItem.Images = parsedFiles

@@ -15,11 +15,12 @@ export type Scalars = {
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
   DateTime: { input: any; output: any; }
-  Upload: { input: any; output: any; }
+  File: { input: any; output: any; }
+  Upload: { input: File; output: File; }
 };
 
-export type File = {
-  __typename?: 'File';
+export type BucketFile = {
+  __typename?: 'BucketFile';
   bucket: Scalars['String']['output'];
   key: Scalars['String']['output'];
   name: Scalars['String']['output'];
@@ -28,7 +29,7 @@ export type File = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  addShelfItemImage: File;
+  addShelfItemImage: BucketFile;
   createShelfCategory?: Maybe<ShelfCategory>;
   createShelfItem?: Maybe<ShelfItem>;
   createShelfLocation?: Maybe<ShelfLocation>;
@@ -228,7 +229,7 @@ export type ShelfItem = {
   __typename?: 'ShelfItem';
   category: ShelfCategory;
   description: Scalars['String']['output'];
-  images: Array<File>;
+  images: Array<BucketFile>;
   location: ShelfLocation;
   name: Scalars['String']['output'];
   tags: Array<ShelfTag>;
@@ -310,26 +311,26 @@ export type TwitterUser = {
 export type GetShelfItemsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetShelfItemsQuery = { __typename?: 'Query', shelfItems: Array<{ __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'File', bucket: string, key: string, name: string, signedUrl: string }> }> };
+export type GetShelfItemsQuery = { __typename?: 'Query', shelfItems: Array<{ __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'BucketFile', bucket: string, key: string, name: string, signedUrl: string }> }> };
 
 export type GetShelfItemQueryVariables = Exact<{
   ulid: Scalars['String']['input'];
 }>;
 
 
-export type GetShelfItemQuery = { __typename?: 'Query', shelfItem?: { __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'File', bucket: string, key: string, name: string, signedUrl: string }> } | null };
+export type GetShelfItemQuery = { __typename?: 'Query', shelfItem?: { __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'BucketFile', bucket: string, key: string, name: string, signedUrl: string }> } | null };
 
 export type GetDeletedShelfItemsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetDeletedShelfItemsQuery = { __typename?: 'Query', deletedShelfItems: Array<{ __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'File', bucket: string, key: string, name: string, signedUrl: string }> }> };
+export type GetDeletedShelfItemsQuery = { __typename?: 'Query', deletedShelfItems: Array<{ __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'BucketFile', bucket: string, key: string, name: string, signedUrl: string }> }> };
 
 export type GetDeletedShelfItemQueryVariables = Exact<{
   ulid: Scalars['String']['input'];
 }>;
 
 
-export type GetDeletedShelfItemQuery = { __typename?: 'Query', deletedShelfItem?: { __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'File', bucket: string, key: string, name: string, signedUrl: string }> } | null };
+export type GetDeletedShelfItemQuery = { __typename?: 'Query', deletedShelfItem?: { __typename?: 'ShelfItem', ulid: string, name: string, description: string, category: { __typename?: 'ShelfCategory', ulid: string, name: string }, tags: Array<{ __typename?: 'ShelfTag', ulid: string, name: string }>, location: { __typename?: 'ShelfLocation', ulid: string, name: string }, images: Array<{ __typename?: 'BucketFile', bucket: string, key: string, name: string, signedUrl: string }> } | null };
 
 export type GetShelfCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -375,7 +376,7 @@ export type AddShelfItemImageMutationVariables = Exact<{
 }>;
 
 
-export type AddShelfItemImageMutation = { __typename?: 'Mutation', addShelfItemImage: { __typename?: 'File', bucket: string, key: string, name: string, signedUrl: string } };
+export type AddShelfItemImageMutation = { __typename?: 'Mutation', addShelfItemImage: { __typename?: 'BucketFile', bucket: string, key: string, name: string, signedUrl: string } };
 
 export type RemoveShelfItemImageMutationVariables = Exact<{
   ulid: Scalars['String']['input'];

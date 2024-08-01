@@ -11,6 +11,8 @@ services:
       - 4000:4000
     env_file:
       - .env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   frontend:
     container_name: bluebird-frontend-dev
     image: bluebird-frontend-dev

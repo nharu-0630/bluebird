@@ -49,6 +49,7 @@ import {
 import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
@@ -116,8 +117,14 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       refetchQueries: [{ query: GetShelfItemsDocument }],
     }
   );
-  const [addShelfItemImage] = useMutation<AddShelfItemImageMutation, AddShelfItemImageMutationVariables>(AddShelfItemImageDocument);
-  const [removeShelfItemImage] = useMutation<RemoveShelfItemImageMutation, RemoveShelfItemImageMutationVariables>(RemoveShelfItemImageDocument);
+  const [addShelfItemImage] = useMutation<
+    AddShelfItemImageMutation,
+    AddShelfItemImageMutationVariables
+  >(AddShelfItemImageDocument);
+  const [removeShelfItemImage] = useMutation<
+    RemoveShelfItemImageMutation,
+    RemoveShelfItemImageMutationVariables
+  >(RemoveShelfItemImageDocument);
 
   const { toast } = useToast();
 
@@ -159,168 +166,234 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
     });
   }
 
-
-  async function handleFileRemove(fileKey: string) {
-    await removeShelfItemImage({
-      variables: {
-        ulid: props.shelfItem.ulid,
-        fileKey,
-      },
-    });
-    form.setValue("images", form.getValues("images").filter((image) => image.key !== fileKey));
-  }
-
-  function handleFileUpload(files: FileList | null): void {
-    if (!files) return;
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      addShelfItemImage({
-        variables: {
-          ulid: props.shelfItem.ulid,
-          file,
-        },
-      }).then((res) => {
-        // form.setValue("images", [...form.getValues("images"), res.data?.addShelfItemImage]);
-      });
+  async function handleAddImage(files: FileList | null) {
+    if (files) {
+      const newImages = [];
+      for (let i = 0; i < files.length; i++) {
+        const response = await addShelfItemImage({
+          variables: {
+            ulid: props.shelfItem.ulid,
+            file: files[i],
+          },
+        });
+        if (response.data) {
+          newImages.push(response.data.addShelfItemImage);
+        }
+      }
+      form.setValue("images", [...form.getValues("images"), ...newImages]);
     }
   }
 
+  async function handleRemoveImage(imageKey: string) {
+    await removeShelfItemImage({
+      variables: {
+        ulid: props.shelfItem.ulid,
+        fileKey: imageKey,
+      },
+    });
+    form.setValue(
+      "images",
+      form.getValues("images").filter((image) => image.key !== imageKey)
+    );
+  }
+
   return (
-    <><Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="ulid"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>ULID</FormLabel>
-              <FormControl>
-                <Input {...field} readOnly />
-              </FormControl>
-            </FormItem>
-          )} />
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>名前</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-            </FormItem>
-          )} />
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>カテゴリ</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                    <SelectContent>
-                      <SelectGroup>
-                        {categoryData?.shelfCategories.map((category) => (
-                          <SelectItem key={category.ulid} value={category.ulid}>
-                            {category.name}
-                          </SelectItem>
+    <>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="ulid"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>ULID</FormLabel>
+                <FormControl>
+                  <Input {...field} readOnly />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>名前</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="category"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>カテゴリ</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                      <SelectContent>
+                        <SelectGroup>
+                          {categoryData?.shelfCategories.map((category) => (
+                            <SelectItem
+                              key={category.ulid}
+                              value={category.ulid}
+                            >
+                              {category.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </SelectTrigger>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="tags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>タグ</FormLabel>
+                <FormControl>
+                  <MultiSelector
+                    onValuesChange={field.onChange}
+                    values={field.value}
+                    displayValues={
+                      field.value
+                        .map(
+                          (tag) =>
+                            tagData?.shelfTags.find((t) => t.ulid === tag)?.name
+                        )
+                        .filter(
+                          (item): item is Exclude<typeof item, undefined> =>
+                            item !== undefined
+                        ) ?? []
+                    }
+                    onDisplayValuesChange={() => {}}
+                    loop
+                    className="w-full"
+                  >
+                    <MultiSelectorTrigger>
+                      <MultiSelectorInput />
+                    </MultiSelectorTrigger>
+                    <MultiSelectorContent>
+                      <MultiSelectorList>
+                        {tagData?.shelfTags.map((tag) => (
+                          <MultiSelectorItem
+                            key={tag.ulid}
+                            value={tag.ulid}
+                            displayValue={tag.name}
+                          >
+                            {tag.name}
+                          </MultiSelectorItem>
                         ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </SelectTrigger>
-                </Select>
-              </FormControl>
-            </FormItem>
-          )} />
-        <FormField
-          control={form.control}
-          name="tags"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>タグ</FormLabel>
-              <FormControl>
-                <MultiSelector
-                  onValuesChange={field.onChange}
-                  values={field.value}
-                  displayValues={field.value
-                    .map(
-                      (tag) => tagData?.shelfTags.find((t) => t.ulid === tag)?.name
-                    )
-                    .filter(
-                      (item): item is Exclude<typeof item, undefined> => item !== undefined
-                    ) ?? []}
-                  onDisplayValuesChange={() => { }}
-                  loop
-                  className="w-full"
-                >
-                  <MultiSelectorTrigger>
-                    <MultiSelectorInput />
-                  </MultiSelectorTrigger>
-                  <MultiSelectorContent>
-                    <MultiSelectorList>
-                      {tagData?.shelfTags.map((tag) => (
-                        <MultiSelectorItem
-                          key={tag.ulid}
-                          value={tag.ulid}
-                          displayValue={tag.name}
+                      </MultiSelectorList>
+                    </MultiSelectorContent>
+                  </MultiSelector>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="location"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>保管場所</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                      <SelectContent>
+                        <SelectGroup>
+                          {locationData?.shelfLocations.map((location) => (
+                            <SelectItem
+                              key={location.ulid}
+                              value={location.ulid}
+                            >
+                              {location.name}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </SelectTrigger>
+                  </Select>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>詳細</FormLabel>
+                <FormControl>
+                  <Textarea {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="images"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>画像</FormLabel>
+                <FormControl>
+                  <div className="space-y-2">
+                    {field.value.map((image, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <Image
+                          src={image.signedUrl}
+                          width={100}
+                          height={100}
+                          alt={image.name}
+                        />
+                        <Button
+                          variant="destructive"
+                          onClick={() =>
+                            handleRemoveImage(
+                              image.bucket +
+                                "/" +
+                                image.key +
+                                "/" +
+                                props.shelfItem.ulid +
+                                "/" +
+                                image.name
+                            )
+                          }
                         >
-                          {tag.name}
-                        </MultiSelectorItem>
-                      ))}
-                    </MultiSelectorList>
-                  </MultiSelectorContent>
-                </MultiSelector>
-              </FormControl>
-            </FormItem>
-          )} />
-        <FormField
-          control={form.control}
-          name="location"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>保管場所</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                    <SelectContent>
-                      <SelectGroup>
-                        {locationData?.shelfLocations.map((location) => (
-                          <SelectItem key={location.ulid} value={location.ulid}>
-                            {location.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </SelectTrigger>
-                </Select>
-              </FormControl>
-            </FormItem>
-          )} />
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>詳細</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-            </FormItem>
-          )} />
-        <Button type="submit">変更</Button>
-      </form>
-    </Form>
-      <Input type="file" onChange={(e) => handleFileUpload(e.target.files)} />
+                          削除
+                        </Button>
+                      </div>
+                    ))}
+                    <Input
+                      type="file"
+                      multiple
+                      onChange={({ target: { validity, files } }) => {
+                        if (validity.valid) handleAddImage(files);
+                      }}
+                    />
+                  </div>
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <Button type="submit">変更</Button>
+        </form>
+      </Form>
     </>
   );
 }
