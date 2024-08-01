@@ -8,6 +8,7 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from "@/components/extension/multi-select";
+import { LoadingPage } from "@/components/loading-page";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -91,13 +92,17 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       refetchQueries: [{ query: GetShelfItemsDocument }],
     }
   );
-  const [addShelfItemImage] = useMutation<
+  const [addShelfItemImage,
+    { loading: addShelfItemImageLoading, error: addShelfItemImageError }
+  ] = useMutation<
     AddShelfItemImageMutation,
     AddShelfItemImageMutationVariables
   >(AddShelfItemImageDocument, {
     refetchQueries: [{ query: GetShelfItemsDocument }],
-  })
-  const [removeShelfItemImage] = useMutation<
+  });
+  const [removeShelfItemImage,
+    { loading: removeShelfItemImageLoading, error: removeShelfItemImageError }
+  ] = useMutation<
     RemoveShelfItemImageMutation,
     RemoveShelfItemImageMutationVariables
   >(RemoveShelfItemImageDocument, {
@@ -159,6 +164,12 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
     const updatedImages = images.filter((image) => image.ulid !== fileUlid);
     setImages(updatedImages);
     form.setValue("images", updatedImages.map((image) => image.ulid));
+  }
+
+  if (updateShelfItemLoading || addShelfItemImageLoading || removeShelfItemImageLoading) {
+    return (
+      <LoadingPage />
+    );
   }
 
   return (
