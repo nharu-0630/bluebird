@@ -363,10 +363,12 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 		for j, image := range shelfItem.Images {
 			filename := config.ShelfItemKeyName + "/" + shelfItem.Ulid + "/" + image.Name
 			parsedFiles[j] = &BucketFile{
-				Bucket:    image.Bucket,
-				Key:       image.Key,
-				Name:      image.Name,
-				SignedURL: r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
+				Ulid:         image.Ulid,
+				Bucket:       image.Bucket,
+				Key:          image.Key,
+				Name:         image.Name,
+				OriginalName: image.OriginalName,
+				SignedURL:    r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
 			}
 		}
 		parsedShelfItems[i].Images = parsedFiles

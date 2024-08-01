@@ -29,6 +29,9 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import {
+  AddShelfItemImageDocument,
+  AddShelfItemImageMutation,
+  AddShelfItemImageMutationVariables,
   CreateShelfItemDocument,
   CreateShelfItemMutation,
   CreateShelfItemMutationVariables,
@@ -43,6 +46,8 @@ import {
 import { useMutation, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
+import Image from "next/image";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
@@ -53,6 +58,7 @@ const ShelfItemCreateFormSchema = z.object({
   tags: z.array(z.string()),
   location: z.string(),
   description: z.string().optional(),
+  images: z.array(z.string()),
 });
 
 type ShelfItemCreateForm = z.infer<typeof ShelfItemCreateFormSchema>;
@@ -62,6 +68,7 @@ interface ShelfItemCreateDialogProps {
 }
 
 export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
+  const [newImages, setNewImages] = useState<File[]>([]);
   const form = useForm<ShelfItemCreateForm>({
     resolver: zodResolver(ShelfItemCreateFormSchema),
     mode: "onBlur",
@@ -71,6 +78,7 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
       tags: [],
       location: "",
       description: "",
+      images: [],
     },
   });
   const {
@@ -97,6 +105,13 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
       refetchQueries: [{ query: GetShelfItemsDocument }],
     }
   );
+  const [addShelfItemImage] = useMutation<
+    AddShelfItemImageMutation,
+    AddShelfItemImageMutationVariables
+  >(AddShelfItemImageDocument, {
+    refetchQueries: [{ query: GetShelfItemsDocument }],
+  });
+
   const { toast } = useToast();
 
   if (categoryLoading || tagsLoading || locationLoading)
@@ -119,8 +134,8 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
       </Alert>
     );
 
-  function onSubmit(data: ShelfItemCreateForm) {
-    createShelfItem({
+  async function onSubmit(data: ShelfItemCreateForm) {
+    const response = await createShelfItem({
       variables: {
         name: data.name,
         categoryUlid: data.category,
@@ -129,11 +144,33 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
         description: data.description ?? "",
       },
     });
+
+    const shelfItemUlid = response.data?.createShelfItem.ulid;
+
+    if (shelfItemUlid) {
+      for (const file of newImages) {
+        await addShelfItemImage({
+          variables: {
+            ulid: shelfItemUlid,
+            file: file,
+          },
+        });
+      }
+    }
+
     props.onOpenChange(false);
     toast({
       title: "アイテムを追加しました",
       description: data.name,
     });
+  }
+
+  function handleAddImage(files: FileList | null) {
+    if (files) {
+      for (let i = 0; i < files.length; i++) {
+        setNewImages((prev) => [...prev, files[i]]);
+      }
+    }
   }
 
   return (
@@ -200,7 +237,7 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
                           item !== undefined
                       ) ?? []
                   }
-                  onDisplayValuesChange={() => {}}
+                  onDisplayValuesChange={() => { }}
                   loop
                   className="w-full"
                 >
@@ -261,6 +298,46 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
               <FormLabel>詳細</FormLabel>
               <FormControl>
                 <Textarea {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="images"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>画像</FormLabel>
+              <FormControl>
+                <div className="space-y-2">
+                  {newImages.map((file, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        width={100}
+                        height={100}
+                        alt={file.name}
+                      />
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          setNewImages((prev) =>
+                            prev.filter((img) => img !== file)
+                          )
+                        }
+                      >
+                        削除
+                      </Button>
+                    </div>
+                  ))}
+                  <Input
+                    type="file"
+                    multiple
+                    onChange={({ target: { validity, files } }) => {
+                      if (validity.valid) handleAddImage(files);
+                    }}
+                  />
+                </div>
               </FormControl>
             </FormItem>
           )}

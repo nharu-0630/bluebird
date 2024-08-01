@@ -20,9 +20,11 @@ export const ShelfItemSchema = z.object({
   description: z.string().optional(),
   images: z.array(
     z.object({
+      ulid: z.string(),
       bucket: z.string(),
       key: z.string(),
       name: z.string(),
+      originalName: z.string(),
       signedUrl: z.string(),
     })
   ),

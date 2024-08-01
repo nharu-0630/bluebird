@@ -8,7 +8,6 @@ import {
   MultiSelectorList,
   MultiSelectorTrigger,
 } from "@/components/extension/multi-select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -32,13 +31,7 @@ import {
   AddShelfItemImageDocument,
   AddShelfItemImageMutation,
   AddShelfItemImageMutationVariables,
-  GetShelfCategoriesDocument,
-  GetShelfCategoriesQuery,
   GetShelfItemsDocument,
-  GetShelfLocationsDocument,
-  GetShelfLocationsQuery,
-  GetShelfTagsDocument,
-  GetShelfTagsQuery,
   RemoveShelfItemImageDocument,
   RemoveShelfItemImageMutation,
   RemoveShelfItemImageMutationVariables,
@@ -46,12 +39,11 @@ import {
   UpdateShelfItemMutation,
   UpdateShelfItemMutationVariables,
 } from "@/gql/gen/graphql";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import Image from "next/image";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { TailSpin } from "react-loader-spinner";
 import { z } from "zod";
 import { ShelfItem } from "../../../(schema)/shelf-item";
 
@@ -62,14 +54,7 @@ const ShelfItemEditFormSchema = z.object({
   tags: z.array(z.string()),
   location: z.string(),
   description: z.string().optional(),
-  images: z.array(
-    z.object({
-      bucket: z.string(),
-      key: z.string(),
-      name: z.string(),
-      signedUrl: z.string(),
-    })
-  ),
+  images: z.array(z.string()),
 });
 
 type ShelfItemEditForm = z.infer<typeof ShelfItemEditFormSchema>;
@@ -80,6 +65,9 @@ interface ShelfItemEditDialogProps {
 }
 
 export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
+  const [images, setImages] = useState(props.shelfItem.images);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [imagesToRemove, setImagesToRemove] = useState<string[]>([]);
   const form = useForm<ShelfItemEditForm>({
     resolver: zodResolver(ShelfItemEditFormSchema),
     mode: "onBlur",
@@ -90,24 +78,10 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       tags: props.shelfItem.tags.map((tag) => tag.ulid),
       location: props.shelfItem.location.ulid,
       description: props.shelfItem.description,
-      images: props.shelfItem.images,
+      images: props.shelfItem.images.map((image) => image.ulid),
     },
   });
-  const {
-    data: categoryData,
-    loading: categoryLoading,
-    error: categoryError,
-  } = useQuery<GetShelfCategoriesQuery>(GetShelfCategoriesDocument);
-  const {
-    data: tagData,
-    loading: tagLoading,
-    error: tagError,
-  } = useQuery<GetShelfTagsQuery>(GetShelfTagsDocument);
-  const {
-    data: locationData,
-    loading: locationLoading,
-    error: locationError,
-  } = useQuery<GetShelfLocationsQuery>(GetShelfLocationsDocument);
+
   const [
     updateShelfItem,
     { loading: updateShelfItemLoading, error: updateShelfItemError },
@@ -120,35 +94,28 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
   const [addShelfItemImage] = useMutation<
     AddShelfItemImageMutation,
     AddShelfItemImageMutationVariables
-  >(AddShelfItemImageDocument);
+  >(AddShelfItemImageDocument, {
+    refetchQueries: [{ query: GetShelfItemsDocument }],
+  })
   const [removeShelfItemImage] = useMutation<
     RemoveShelfItemImageMutation,
     RemoveShelfItemImageMutationVariables
-  >(RemoveShelfItemImageDocument);
+  >(RemoveShelfItemImageDocument, {
+    refetchQueries: [{ query: GetShelfItemsDocument }],
+  });
 
   const { toast } = useToast();
 
-  if (categoryLoading || tagLoading || locationLoading)
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <TailSpin />
-      </div>
-    );
-  if (categoryError || tagError || locationError)
-    return (
-      <Alert variant="destructive">
-        <ExclamationTriangleIcon className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
-        <AlertDescription>
-          {categoryError?.message ??
-            tagError?.message ??
-            locationError?.message ??
-            "エラーが発生しました"}
-        </AlertDescription>
-      </Alert>
-    );
-
   async function onSubmit(data: ShelfItemEditForm) {
+    for (const fileUlid of imagesToRemove) {
+      await removeShelfItemImage({
+        variables: {
+          ulid: props.shelfItem.ulid,
+          fileUlid: fileUlid,
+        },
+      });
+    }
+
     await updateShelfItem({
       variables: {
         ulid: data.ulid,
@@ -159,6 +126,16 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
         description: data.description ?? "",
       },
     });
+
+    for (const file of newImages) {
+      await addShelfItemImage({
+        variables: {
+          ulid: props.shelfItem.ulid,
+          file: file,
+        },
+      });
+    }
+
     props.onOpenChange(false);
     toast({
       title: "アイテムを変更しました",
@@ -166,35 +143,22 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
     });
   }
 
-  async function handleAddImage(files: FileList | null) {
+  function handleAddImage(files: FileList | null) {
     if (files) {
-      const newImages = [];
+      const newLoadingImages = [];
       for (let i = 0; i < files.length; i++) {
-        const response = await addShelfItemImage({
-          variables: {
-            ulid: props.shelfItem.ulid,
-            file: files[i],
-          },
-        });
-        if (response.data) {
-          newImages.push(response.data.addShelfItemImage);
-        }
+        const tempUlid = URL.createObjectURL(files[i]);
+        newLoadingImages.push(tempUlid);
+        setNewImages((prev) => [...prev, files[i]]);
       }
-      form.setValue("images", [...form.getValues("images"), ...newImages]);
     }
   }
 
-  async function handleRemoveImage(fileUlid: string) {
-    await removeShelfItemImage({
-      variables: {
-        ulid: props.shelfItem.ulid,
-        fileUlid: fileUlid,
-      },
-    });
-    form.setValue(
-      "images",
-      form.getValues("images").filter((image) => image.key !== imageKey)
-    );
+  function handleRemoveImage(fileUlid: string) {
+    setImagesToRemove((prev) => [...prev, fileUlid]);
+    const updatedImages = images.filter((image) => image.ulid !== fileUlid);
+    setImages(updatedImages);
+    form.setValue("images", updatedImages.map((image) => image.ulid));
   }
 
   return (
@@ -240,14 +204,12 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                       <SelectValue />
                       <SelectContent>
                         <SelectGroup>
-                          {categoryData?.shelfCategories.map((category) => (
-                            <SelectItem
-                              key={category.ulid}
-                              value={category.ulid}
-                            >
-                              {category.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem
+                            key={props.shelfItem.category.ulid}
+                            value={props.shelfItem.category.ulid}
+                          >
+                            {props.shelfItem.category.name}
+                          </SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </SelectTrigger>
@@ -270,14 +232,14 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                       field.value
                         .map(
                           (tag) =>
-                            tagData?.shelfTags.find((t) => t.ulid === tag)?.name
+                            props.shelfItem.tags.find((t) => t.ulid === tag)?.name
                         )
                         .filter(
                           (item): item is Exclude<typeof item, undefined> =>
                             item !== undefined
                         ) ?? []
                     }
-                    onDisplayValuesChange={() => {}}
+                    onDisplayValuesChange={() => { }}
                     loop
                     className="w-full"
                   >
@@ -286,7 +248,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                     </MultiSelectorTrigger>
                     <MultiSelectorContent>
                       <MultiSelectorList>
-                        {tagData?.shelfTags.map((tag) => (
+                        {props.shelfItem.tags.map((tag) => (
                           <MultiSelectorItem
                             key={tag.ulid}
                             value={tag.ulid}
@@ -317,14 +279,12 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                       <SelectValue />
                       <SelectContent>
                         <SelectGroup>
-                          {locationData?.shelfLocations.map((location) => (
-                            <SelectItem
-                              key={location.ulid}
-                              value={location.ulid}
-                            >
-                              {location.name}
-                            </SelectItem>
-                          ))}
+                          <SelectItem
+                            key={props.shelfItem.location.ulid}
+                            value={props.shelfItem.location.ulid}
+                          >
+                            {props.shelfItem.location.name}
+                          </SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </SelectTrigger>
@@ -353,22 +313,42 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 <FormLabel>画像</FormLabel>
                 <FormControl>
                   <div className="space-y-2">
-                    {field.value.map((image, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <Image
-                          src={image.signedUrl}
-                          width={100}
-                          height={100}
-                          alt={image.name}
-                        />
-                        <Button
-                          variant="destructive"
-                          onClick={() => handleRemoveImage(image.name)}
-                        >
-                          削除
-                        </Button>
-                      </div>
-                    ))}
+                    {
+                      images.map((image, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <Image
+                            src={image.signedUrl}
+                            width={100}
+                            height={100}
+                            alt={image.originalName}
+                          />
+                          <Button
+                            variant="destructive"
+                            onClick={() => handleRemoveImage(image.ulid)}
+                          >
+                            削除
+                          </Button>
+                        </div>
+                      ))
+                    }
+                    {
+                      newImages.map((file, index) => (
+                        <div key={index} className="flex items-center space-x-2">
+                          <Image
+                            src={URL.createObjectURL(file)}
+                            width={100}
+                            height={100}
+                            alt={file.name}
+                          />
+                          <Button
+                            variant="destructive"
+                            onClick={() => setNewImages((prev) => prev.filter((img) => img !== file))}
+                          >
+                            削除
+                          </Button>
+                        </div>
+                      ))
+                    }
                     <Input
                       type="file"
                       multiple
