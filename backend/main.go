@@ -30,7 +30,7 @@ func main() {
 		zap.L().Sugar().Fatal(err)
 	}
 	// For shelf
-	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.File{})
+	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.BucketFile{})
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())

@@ -27,9 +27,11 @@ type ShelfLocation {
 }
 
 type BucketFile {
+  ulid: String!
   bucket: String!
   key: String!
   name: String!
+  originalName: String!
   signedUrl: String!
 }
 
@@ -75,5 +77,5 @@ type Mutation {
   updateShelfLocation(ulid: String!, name: String): ShelfLocation
   deleteShelfLocation(ulid: String!): Boolean!
   addShelfItemImage(ulid: String!, file: Upload!): BucketFile!
-  removeShelfItemImage(ulid: String!, fileKey: String!): Boolean!
+  removeShelfItemImage(ulid: String!, fileUlid: String!): Boolean!
 }

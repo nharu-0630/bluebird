@@ -7,10 +7,12 @@ import (
 )
 
 type BucketFile struct {
-	Bucket    string `json:"bucket"`
-	Key       string `json:"key"`
-	Name      string `json:"name"`
-	SignedURL string `json:"signedUrl"`
+	Ulid         string `json:"ulid"`
+	Bucket       string `json:"bucket"`
+	Key          string `json:"key"`
+	Name         string `json:"name"`
+	OriginalName string `json:"originalName"`
+	SignedURL    string `json:"signedUrl"`
 }
 
 type Mutation struct {

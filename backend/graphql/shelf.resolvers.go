@@ -6,11 +6,12 @@ package graphql
 
 import (
 	"context"
+	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/model"
-	ulid "github.com/oklog/ulid/v2"
+	ulid_v2 "github.com/oklog/ulid/v2"
 )
 
 // CreateShelfItem is the resolver for the createShelfItem field.
@@ -40,7 +41,7 @@ func (r *mutationResolver) CreateShelfItem(ctx context.Context, name string, cat
 		tx.Rollback()
 		return nil, err
 	}
-	ulid := config.ShelfItemIDPrefix + ulid.Make().String()
+	ulid := config.ShelfItemIDPrefix + ulid_v2.Make().String()
 	shelfItem := model.ShelfItem{
 		Ulid:         ulid,
 		Name:         name,
@@ -177,7 +178,7 @@ func (r *mutationResolver) ForceDeleteShelfItem(ctx context.Context, ulid string
 
 // CreateShelfCategory is the resolver for the createShelfCategory field.
 func (r *mutationResolver) CreateShelfCategory(ctx context.Context, name string) (*ShelfCategory, error) {
-	ulid := config.ShelfCategoryIDPrefix + ulid.Make().String()
+	ulid := config.ShelfCategoryIDPrefix + ulid_v2.Make().String()
 	shelfCategory := model.ShelfCategory{Ulid: ulid, Name: name}
 	if err := r.DB.Create(&shelfCategory).Error; err != nil {
 		return nil, err
@@ -214,7 +215,7 @@ func (r *mutationResolver) DeleteShelfCategory(ctx context.Context, ulid string)
 
 // CreateShelfTag is the resolver for the createShelfTag field.
 func (r *mutationResolver) CreateShelfTag(ctx context.Context, name string) (*ShelfTag, error) {
-	ulid := config.ShelfTagIDPrefix + ulid.Make().String()
+	ulid := config.ShelfTagIDPrefix + ulid_v2.Make().String()
 	shelfTag := model.ShelfTag{Ulid: ulid, Name: name}
 	if err := r.DB.Create(&shelfTag).Error; err != nil {
 		return nil, err
@@ -251,7 +252,7 @@ func (r *mutationResolver) DeleteShelfTag(ctx context.Context, ulid string) (boo
 
 // CreateShelfLocation is the resolver for the createShelfLocation field.
 func (r *mutationResolver) CreateShelfLocation(ctx context.Context, name string) (*ShelfLocation, error) {
-	ulid := config.ShelfLocationIDPrefix + ulid.Make().String()
+	ulid := config.ShelfLocationIDPrefix + ulid_v2.Make().String()
 	shelfLocation := model.ShelfLocation{Ulid: ulid, Name: name}
 	if err := r.DB.Create(&shelfLocation).Error; err != nil {
 		return nil, err
@@ -288,7 +289,9 @@ func (r *mutationResolver) DeleteShelfLocation(ctx context.Context, ulid string)
 
 // AddShelfItemImage is the resolver for the addShelfItemImage field.
 func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*BucketFile, error) {
-	filename := config.ShelfItemKeyName + "/" + ulid + "/" + file.Filename
+	fileUlid := config.ShelfImageIDPrefix + ulid_v2.Make().String()
+	ext := file.Filename[strings.LastIndex(file.Filename, "."):]
+	filename := config.ShelfItemKeyName + "/" + ulid + "/" + fileUlid + ext
 	_, err := r.Storage.UploadFile(config.ShelfBucketName, filename, file.File)
 	if err != nil {
 		return nil, err
@@ -297,15 +300,18 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 	if err := r.DB.Where("ulid = ?", ulid).First(&shelfItem).Error; err != nil {
 		return nil, err
 	}
-	newImage := model.File{
-		Bucket: config.ShelfBucketName,
-		Key:    config.ShelfItemKeyName,
-		Name:   file.Filename,
+	newImage := model.BucketFile{
+		Ulid:         fileUlid,
+		Bucket:       config.ShelfBucketName,
+		Key:          config.ShelfItemKeyName,
+		Name:         fileUlid + ext,
+		OriginalName: file.Filename,
 	}
 	if err := r.DB.Model(&shelfItem).Association("Images").Append(&newImage); err != nil {
 		return nil, err
 	}
 	return &BucketFile{
+		Ulid:      fileUlid,
 		Bucket:    config.ShelfBucketName,
 		Key:       config.ShelfItemKeyName,
 		Name:      file.Filename,
@@ -314,12 +320,20 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 }
 
 // RemoveShelfItemImage is the resolver for the removeShelfItemImage field.
-func (r *mutationResolver) RemoveShelfItemImage(ctx context.Context, ulid string, fileKey string) (bool, error) {
-	filename := config.ShelfItemKeyName + "/" + ulid + "/" + fileKey
+func (r *mutationResolver) RemoveShelfItemImage(ctx context.Context, ulid string, fileUlid string) (bool, error) {
+	var shelfItem model.ShelfItem
+	if err := r.DB.Where("ulid = ?", ulid).First(&shelfItem).Error; err != nil {
+		return false, err
+	}
+	var image model.BucketFile
+	if err := r.DB.Model(&shelfItem).Association("Images").Find(&image, "ulid = ?", fileUlid); err != nil {
+		return false, err
+	}
+	filename := config.ShelfItemKeyName + "/" + ulid + "/" + image.Name
 	if _, err := r.Storage.RemoveFile(config.ShelfBucketName, []string{filename}); err != nil {
 		return false, err
 	}
-	if err := r.DB.Model(&model.ShelfItem{}).Where("ulid = ?", ulid).Association("Images").Delete(&model.File{Key: config.ShelfItemKeyName, Name: fileKey}); err != nil {
+	if err := r.DB.Model(&shelfItem).Association("Images").Delete(&image); err != nil {
 		return false, err
 	}
 	return true, nil

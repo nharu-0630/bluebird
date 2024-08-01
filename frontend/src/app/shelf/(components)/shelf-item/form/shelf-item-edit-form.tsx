@@ -184,11 +184,11 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
     }
   }
 
-  async function handleRemoveImage(imageKey: string) {
+  async function handleRemoveImage(fileUlid: string) {
     await removeShelfItemImage({
       variables: {
         ulid: props.shelfItem.ulid,
-        fileKey: imageKey,
+        fileUlid: fileUlid,
       },
     });
     form.setValue(
@@ -363,17 +363,7 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                         />
                         <Button
                           variant="destructive"
-                          onClick={() =>
-                            handleRemoveImage(
-                              image.bucket +
-                                "/" +
-                                image.key +
-                                "/" +
-                                props.shelfItem.ulid +
-                                "/" +
-                                image.name
-                            )
-                          }
+                          onClick={() => handleRemoveImage(image.name)}
                         >
                           削除
                         </Button>

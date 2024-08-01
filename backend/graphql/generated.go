@@ -48,10 +48,12 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	BucketFile struct {
-		Bucket    func(childComplexity int) int
-		Key       func(childComplexity int) int
-		Name      func(childComplexity int) int
-		SignedURL func(childComplexity int) int
+		Bucket       func(childComplexity int) int
+		Key          func(childComplexity int) int
+		Name         func(childComplexity int) int
+		OriginalName func(childComplexity int) int
+		SignedURL    func(childComplexity int) int
+		Ulid         func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -65,7 +67,7 @@ type ComplexityRoot struct {
 		DeleteShelfLocation  func(childComplexity int, ulid string) int
 		DeleteShelfTag       func(childComplexity int, ulid string) int
 		ForceDeleteShelfItem func(childComplexity int, ulid string) int
-		RemoveShelfItemImage func(childComplexity int, ulid string, fileKey string) int
+		RemoveShelfItemImage func(childComplexity int, ulid string, fileUlid string) int
 		RestoreShelfItem     func(childComplexity int, ulid string) int
 		UpdateShelfCategory  func(childComplexity int, ulid string, name *string) int
 		UpdateShelfItem      func(childComplexity int, ulid string, name *string, categoryUlid *string, tagsUlid []string, locationUlid *string, description *string) int
@@ -190,7 +192,7 @@ type MutationResolver interface {
 	UpdateShelfLocation(ctx context.Context, ulid string, name *string) (*ShelfLocation, error)
 	DeleteShelfLocation(ctx context.Context, ulid string) (bool, error)
 	AddShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*BucketFile, error)
-	RemoveShelfItemImage(ctx context.Context, ulid string, fileKey string) (bool, error)
+	RemoveShelfItemImage(ctx context.Context, ulid string, fileUlid string) (bool, error)
 }
 type QueryResolver interface {
 	ShelfItems(ctx context.Context) ([]*ShelfItem, error)
@@ -251,12 +253,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.BucketFile.Name(childComplexity), true
 
+	case "BucketFile.originalName":
+		if e.complexity.BucketFile.OriginalName == nil {
+			break
+		}
+
+		return e.complexity.BucketFile.OriginalName(childComplexity), true
+
 	case "BucketFile.signedUrl":
 		if e.complexity.BucketFile.SignedURL == nil {
 			break
 		}
 
 		return e.complexity.BucketFile.SignedURL(childComplexity), true
+
+	case "BucketFile.ulid":
+		if e.complexity.BucketFile.Ulid == nil {
+			break
+		}
+
+		return e.complexity.BucketFile.Ulid(childComplexity), true
 
 	case "Mutation.addShelfItemImage":
 		if e.complexity.Mutation.AddShelfItemImage == nil {
@@ -388,7 +404,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RemoveShelfItemImage(childComplexity, args["ulid"].(string), args["fileKey"].(string)), true
+		return e.complexity.Mutation.RemoveShelfItemImage(childComplexity, args["ulid"].(string), args["fileUlid"].(string)), true
 
 	case "Mutation.restoreShelfItem":
 		if e.complexity.Mutation.RestoreShelfItem == nil {
@@ -1348,14 +1364,14 @@ func (ec *executionContext) field_Mutation_removeShelfItemImage_args(ctx context
 	}
 	args["ulid"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["fileKey"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileKey"))
+	if tmp, ok := rawArgs["fileUlid"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fileUlid"))
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["fileKey"] = arg1
+	args["fileUlid"] = arg1
 	return args, nil
 }
 
@@ -1751,6 +1767,50 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _BucketFile_ulid(ctx context.Context, field graphql.CollectedField, obj *BucketFile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BucketFile_ulid(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ulid, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BucketFile_ulid(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BucketFile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _BucketFile_bucket(ctx context.Context, field graphql.CollectedField, obj *BucketFile) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_BucketFile_bucket(ctx, field)
 	if err != nil {
@@ -1871,6 +1931,50 @@ func (ec *executionContext) _BucketFile_name(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_BucketFile_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "BucketFile",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _BucketFile_originalName(ctx context.Context, field graphql.CollectedField, obj *BucketFile) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_BucketFile_originalName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.OriginalName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_BucketFile_originalName(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "BucketFile",
 		Field:      field,
@@ -2780,12 +2884,16 @@ func (ec *executionContext) fieldContext_Mutation_addShelfItemImage(ctx context.
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "ulid":
+				return ec.fieldContext_BucketFile_ulid(ctx, field)
 			case "bucket":
 				return ec.fieldContext_BucketFile_bucket(ctx, field)
 			case "key":
 				return ec.fieldContext_BucketFile_key(ctx, field)
 			case "name":
 				return ec.fieldContext_BucketFile_name(ctx, field)
+			case "originalName":
+				return ec.fieldContext_BucketFile_originalName(ctx, field)
 			case "signedUrl":
 				return ec.fieldContext_BucketFile_signedUrl(ctx, field)
 			}
@@ -2820,7 +2928,7 @@ func (ec *executionContext) _Mutation_removeShelfItemImage(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RemoveShelfItemImage(rctx, fc.Args["ulid"].(string), fc.Args["fileKey"].(string))
+		return ec.resolvers.Mutation().RemoveShelfItemImage(rctx, fc.Args["ulid"].(string), fc.Args["fileUlid"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4391,12 +4499,16 @@ func (ec *executionContext) fieldContext_ShelfItem_images(ctx context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "ulid":
+				return ec.fieldContext_BucketFile_ulid(ctx, field)
 			case "bucket":
 				return ec.fieldContext_BucketFile_bucket(ctx, field)
 			case "key":
 				return ec.fieldContext_BucketFile_key(ctx, field)
 			case "name":
 				return ec.fieldContext_BucketFile_name(ctx, field)
+			case "originalName":
+				return ec.fieldContext_BucketFile_originalName(ctx, field)
 			case "signedUrl":
 				return ec.fieldContext_BucketFile_signedUrl(ctx, field)
 			}
@@ -8268,6 +8380,11 @@ func (ec *executionContext) _BucketFile(ctx context.Context, sel ast.SelectionSe
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("BucketFile")
+		case "ulid":
+			out.Values[i] = ec._BucketFile_ulid(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "bucket":
 			out.Values[i] = ec._BucketFile_bucket(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -8280,6 +8397,11 @@ func (ec *executionContext) _BucketFile(ctx context.Context, sel ast.SelectionSe
 			}
 		case "name":
 			out.Values[i] = ec._BucketFile_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "originalName":
+			out.Values[i] = ec._BucketFile_originalName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

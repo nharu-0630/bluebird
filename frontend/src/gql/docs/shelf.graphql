@@ -16,9 +16,11 @@ query GetShelfItems {
     }
     description
     images {
+      ulid
       bucket
       key
       name
+      originalName
       signedUrl
     }
   }
@@ -42,9 +44,11 @@ query GetShelfItem($ulid: String!) {
     }
     description
     images {
+      ulid
       bucket
       key
       name
+      originalName
       signedUrl
     }
   }
@@ -68,9 +72,11 @@ query GetDeletedShelfItems {
     }
     description
     images {
+      ulid
       bucket
       key
       name
+      originalName
       signedUrl
     }
   }
@@ -94,9 +100,11 @@ query GetDeletedShelfItem($ulid: String!) {
     }
     description
     images {
+      ulid
       bucket
       key
       name
+      originalName
       signedUrl
     }
   }
@@ -191,15 +199,17 @@ mutation UpdateShelfItem(
 
 mutation AddShelfItemImage($ulid: String!, $file: Upload!) {
   addShelfItemImage(ulid: $ulid, file: $file) {
+    ulid
     bucket
     key
     name
+    originalName
     signedUrl
   }
 }
 
-mutation RemoveShelfItemImage($ulid: String!, $fileKey: String!) {
-  removeShelfItemImage(ulid: $ulid, fileKey: $fileKey)
+mutation RemoveShelfItemImage($ulid: String!, $fileUlid: String!) {
+  removeShelfItemImage(ulid: $ulid, fileUlid: $fileUlid)
 }
 
 mutation DeleteShelfItem($ulid: String!) {
