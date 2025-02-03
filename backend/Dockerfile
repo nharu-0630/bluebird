@@ -41,6 +41,6 @@ COPY --from=build-production /app/server server
 
 USER crocoder
 
-EXPOSE 3000
+EXPOSE 9999
 
 CMD ["/server"]

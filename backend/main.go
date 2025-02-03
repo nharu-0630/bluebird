@@ -19,12 +19,12 @@ import (
 	"gorm.io/gorm"
 )
 
-const defaultPort = "3030"
+const defaultPort = "9999"
 
 func main() {
 	zap.ReplaceGlobals(zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zapcore.DebugLevel)))
 	// Connect to the database
-	dsn := os.Getenv("DATABASE_URL")
+	dsn := "postgres://" + os.Getenv("POSTGRES_DB") + ":" + os.Getenv("POSTGRES_PASSWORD") + "@supabase-db:" + os.Getenv("POSTGRES_PORT") + "/" + os.Getenv("POSTGRES_DB")
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dsn, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		zap.L().Sugar().Fatal(err)
@@ -34,10 +34,27 @@ func main() {
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
-	storage := storage_go.NewClient(os.Getenv("SUPABASE_URL")+"/storage/v1", os.Getenv("SUPABASE_TOKEN"), nil)
-	if err != nil {
-		zap.L().Sugar().Fatal(err)
-	}
+	storage := storage_go.NewClient(os.Getenv("JWT_SECRET")+"/storage/v1", os.Getenv("SUPABASE_TOKEN"), nil)
+	// create bucket if not exists
+	// bucketName := os.Getenv("SUPABASE_BUCKET_NAME")
+	// _, err = storage.ListBuckets()
+	// if err != nil {
+	// 	zap.L().Sugar().Fatal(err)
+	// }
+	// bucketExists := false
+	// for _, bucket := range buckets {
+	// 	if bucket.Name == bucketName {
+	// 		bucketExists = true
+	// 		break
+	// 	}
+	// }
+	// if !bucketExists {
+	// 	if _, err = storage.CreateBucket(bucketName, storage_go.BucketOptions{
+	// 		Public: true,
+	// 	}); err != nil {
+	// 		zap.L().Sugar().Fatal(err)
+	// 	}
+	// }
 	// For twitter
 	db.AutoMigrate(&model.TwitterUser{}, &model.TwitterTweet{}, &model.TwitterMedia{})
 	twitterClient := twitter.NewClient(twitter.ClientConfig{

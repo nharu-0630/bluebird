@@ -9,9 +9,12 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - 3030:3030
+      - 9999:9999
     env_file:
       - .env
+    depends_on:
+      analytics:
+        condition: service_healthy
 
   frontend:
     container_name: bluebird-frontend-dev
@@ -20,9 +23,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     ports:
-      - 3000:3000
+      - 8888:8888
     env_file:
       - .env
+    environment:
+      PORT: 8888
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
@@ -30,6 +35,9 @@ services:
     restart: always
     tty: true
     stdin_open: true
+    depends_on:
+      backend:
+        condition: service_started
 
   studio:
     container_name: supabase-studio
