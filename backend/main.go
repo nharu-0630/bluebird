@@ -19,7 +19,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const defaultPort = "4000"
+const defaultPort = "3030"
 
 func main() {
 	zap.ReplaceGlobals(zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zapcore.DebugLevel)))

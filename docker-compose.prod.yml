@@ -1,3 +1,4 @@
+name: bluebird
 services:
   backend:
     container_name: bluebird-backend-prod
@@ -7,9 +8,18 @@ services:
     volumes:
       - ./backend:/app
     ports:
-      - 4000:4000
+      - 3030:3030
     env_file:
       - .env
-
+  frontend:
+    container_name: bluebird-frontend-prod
+    image: bluebird-frontend-prod
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - 3000:3000
+    env_file:
+      - .env
 volumes:
   node_modules:

@@ -5,5 +5,8 @@
   },
   "eslint.nodePath": "frontend/.yarn/sdks",
   "typescript.tsdk": "frontend/.yarn/sdks/typescript/lib",
-  "typescript.enablePromptUseWorkspaceTsdk": true
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "cSpell.words": [
+    "supabase"
+  ]
 }
