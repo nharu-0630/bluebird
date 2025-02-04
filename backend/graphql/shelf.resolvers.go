@@ -6,6 +6,7 @@ package graphql
 
 import (
 	"context"
+	"os"
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -315,7 +316,7 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 		Bucket:    config.ShelfBucketName,
 		Key:       config.ShelfItemKeyName,
 		Name:      file.Filename,
-		SignedURL: r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL,
+		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_URL"), "http://localhost/supabase"),
 	}, nil
 }
 
@@ -368,7 +369,7 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 				Key:          image.Key,
 				Name:         image.Name,
 				OriginalName: image.OriginalName,
-				SignedURL:    r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
+				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_URL"), "http://localhost/supabase"),
 			}
 		}
 		parsedShelfItems[i].Images = parsedFiles
@@ -401,7 +402,7 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 			Bucket:    image.Bucket,
 			Key:       image.Key,
 			Name:      image.Name,
-			SignedURL: r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL,
+			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_URL"), "http://localhost/supabase"),
 		}
 	}
 	parsedShelfItem.Images = parsedFiles

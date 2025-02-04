@@ -8,6 +8,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/lib/pq"
 	"github.com/nharu-0630/bluebird/api/twitter"
+	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/graphql"
 	"github.com/nharu-0630/bluebird/mock"
 	"github.com/nharu-0630/bluebird/model"
@@ -33,7 +34,27 @@ func main() {
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
 
-	storage := storage_go.NewClient("http://kong:"+os.Getenv("KONG_HTTP_PORT")+"/storage/v1", os.Getenv("SERVICE_ROLE_KEY"), nil)
+	storage := storage_go.NewClient(os.Getenv("SUPABASE_URL")+"/storage/v1", os.Getenv("ANON_KEY"), nil)
+	buckets, err := storage.ListBuckets()
+	if err != nil {
+		zap.L().Sugar().Fatal(err)
+	}
+	bucketExists := false
+	for _, bucket := range buckets {
+		if bucket.Name == config.ShelfBucketName {
+			bucketExists = true
+			break
+		}
+	}
+	if !bucketExists {
+		_, err = storage.CreateBucket(config.ShelfBucketName, storage_go.BucketOptions{
+			Public: true,
+		})
+		if err != nil {
+			zap.L().Sugar().Warn(err)
+		}
+	}
+
 	// For twitter
 	db.AutoMigrate(&model.TwitterUser{}, &model.TwitterTweet{}, &model.TwitterMedia{})
 	twitterClient := twitter.NewClient(twitter.ClientConfig{
