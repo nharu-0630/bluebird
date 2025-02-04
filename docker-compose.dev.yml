@@ -12,8 +12,7 @@ services:
       - backend
       - frontend
       - kong
-    networks:
-      - network
+    restart: always
 
   backend:
     container_name: backend-dev
@@ -27,11 +26,11 @@ services:
       - 9999:9999
     env_file:
       - .env
+    environment:
+      PORT: 9999
     depends_on:
-      analytics:
-        condition: service_healthy
-    networks:
-      - network
+      - kong
+      - db
 
   frontend:
     container_name: frontend-dev
@@ -52,11 +51,6 @@ services:
     restart: always
     tty: true
     stdin_open: true
-    depends_on:
-      backend:
-        condition: service_started
-    networks:
-      - network
 
   studio:
     container_name: supabase-studio
@@ -125,8 +119,6 @@ services:
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
     # https://unix.stackexchange.com/a/294837
     entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
-    networks:
-      - network
 
   auth:
     container_name: supabase-auth
@@ -540,13 +532,7 @@ services:
         "-c",
         '/app/bin/migrate && /app/bin/supavisor eval "$$(cat /etc/pooler/pooler.exs)" && /app/bin/server',
       ]
-    networks:
-      - network
 
 volumes:
   db-config:
   node_modules:
-
-networks:
-  network:
-    driver: bridge

@@ -19,12 +19,10 @@ import (
 	"gorm.io/gorm"
 )
 
-const defaultPort = "9999"
-
 func main() {
 	zap.ReplaceGlobals(zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zapcore.DebugLevel)))
 	// Connect to the database
-	dsn := "postgres://" + os.Getenv("POSTGRES_DB") + ":" + os.Getenv("POSTGRES_PASSWORD") + "@supabase-db:" + os.Getenv("POSTGRES_PORT") + "/" + os.Getenv("POSTGRES_DB")
+	dsn := "postgres://postgres:" + os.Getenv("POSTGRES_PASSWORD") + "@supabase-db:" + os.Getenv("POSTGRES_PORT") + "/" + os.Getenv("POSTGRES_DB")
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dsn, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		zap.L().Sugar().Fatal(err)
@@ -45,7 +43,7 @@ func main() {
 	// For GraphQL
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = defaultPort
+		port = "9999"
 	}
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{DB: db,
 		Storage:       storage,
