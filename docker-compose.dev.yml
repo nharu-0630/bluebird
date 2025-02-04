@@ -22,8 +22,6 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./backend:/app
-    ports:
-      - 9999:9999
     env_file:
       - .env
     environment:
@@ -37,12 +35,9 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    ports:
-      - 8888:8888
-    env_file:
-      - .env
     environment:
       PORT: 8888
+      NEXT_PUBLIC_INTERNAL_API_URL: ${INTERNAL_API_URL}
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public

@@ -13,6 +13,7 @@ import (
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/model"
 	ulid_v2 "github.com/oklog/ulid/v2"
+	storage_go "github.com/supabase-community/storage-go"
 )
 
 // CreateShelfItem is the resolver for the createShelfItem field.
@@ -293,7 +294,9 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 	fileUlid := config.ShelfImageIDPrefix + ulid_v2.Make().String()
 	ext := file.Filename[strings.LastIndex(file.Filename, "."):]
 	filename := config.ShelfItemKeyName + "/" + ulid + "/" + fileUlid + ext
-	_, err := r.Storage.UploadFile(config.ShelfBucketName, filename, file.File)
+	_, err := r.Storage.UploadFile(config.ShelfBucketName, filename, file.File, storage_go.FileOptions{
+		ContentType: &file.ContentType,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +319,7 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 		Bucket:    config.ShelfBucketName,
 		Key:       config.ShelfItemKeyName,
 		Name:      file.Filename,
-		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_URL"), "http://localhost/supabase"),
+		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("SUPABASE_EXTERNAL_URL")),
 	}, nil
 }
 
@@ -369,7 +372,7 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 				Key:          image.Key,
 				Name:         image.Name,
 				OriginalName: image.OriginalName,
-				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_URL"), "http://localhost/supabase"),
+				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("SUPABASE_EXTERNAL_URL")),
 			}
 		}
 		parsedShelfItems[i].Images = parsedFiles
@@ -402,7 +405,7 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 			Bucket:    image.Bucket,
 			Key:       image.Key,
 			Name:      image.Name,
-			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_URL"), "http://localhost/supabase"),
+			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("SUPABASE_EXTERNAL_URL")),
 		}
 	}
 	parsedShelfItem.Images = parsedFiles

@@ -50,7 +50,13 @@ export function ShelfItemForm(props: ShelfItemDialogProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {props.shelfItem.images.map((image, index) => (
             <div key={index} className="flex justify-center items-center">
-              <Image src={image.signedUrl} width={400} height={400} alt={image.name} />
+              <Image
+                src={image.signedUrl}
+                width={400}
+                height={400}
+                alt={image.name}
+                unoptimized
+              />
             </div>
           ))}
         </div>

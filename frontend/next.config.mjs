@@ -3,8 +3,8 @@ const nextConfig = {
     images: {
         remotePatterns: [
             { protocol: 'https', hostname: 'pbs.twimg.com' },
-            { protocol: 'http', hostname: 'localhost' },
-        ]
+            { protocol: 'http', hostname: 'localhost', },
+        ],
     },
 };
 

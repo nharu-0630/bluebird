@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/lib/pq"
 	"github.com/nharu-0630/bluebird/api/twitter"
 	"github.com/nharu-0630/bluebird/config"
@@ -23,7 +22,7 @@ import (
 func main() {
 	zap.ReplaceGlobals(zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zapcore.DebugLevel)))
 	// Connect to the database
-	dsn := "postgres://postgres:" + os.Getenv("POSTGRES_PASSWORD") + "@supabase-db:" + os.Getenv("POSTGRES_PORT") + "/" + os.Getenv("POSTGRES_DB")
+	dsn := "postgres://" + os.Getenv("SUPABASE_POSTGRES_USER") + ":" + os.Getenv("SUPABASE_POSTGRES_PASSWORD") + "@" + os.Getenv("SUPABASE_POSTGRES_HOST") + ":" + os.Getenv("SUPABASE_POSTGRES_PORT") + "/" + os.Getenv("SUPABASE_POSTGRES_DB")
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dsn, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		zap.L().Sugar().Fatal(err)
@@ -34,7 +33,7 @@ func main() {
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
 
-	storage := storage_go.NewClient(os.Getenv("SUPABASE_URL")+"/storage/v1", os.Getenv("ANON_KEY"), nil)
+	storage := storage_go.NewClient(os.Getenv("SUPABASE_INTERNAL_URL")+"/storage/v1", os.Getenv("SUPABASE_ANON_KEY"), nil)
 	buckets, err := storage.ListBuckets()
 	if err != nil {
 		zap.L().Sugar().Fatal(err)
@@ -75,9 +74,6 @@ func main() {
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: true})
 	handler := c.Handler(http.DefaultServeMux)
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	zap.L().Sugar().Infof("connect to http://localhost:%s/ for GraphQL playground", port)
-	http.Handle("/query", srv)
-	zap.L().Sugar().Infof("connect to http://localhost:%s/query for GraphQL query", port)
+	http.Handle("/", srv)
 	zap.L().Sugar().Fatal(http.ListenAndServe(":"+port, handler))
 }

@@ -31,6 +31,6 @@ RUN corepack enable
 RUN yarn set version berry
 RUN yarn workspaces focus --production
 
-EXPOSE 8888
+# EXPOSE 8888
 
 CMD yarn start
