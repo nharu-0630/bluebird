@@ -37,7 +37,7 @@ services:
       dockerfile: Dockerfile.dev
     environment:
       PORT: 8888
-      NEXT_PUBLIC_INTERNAL_API_URL: ${INTERNAL_API_URL}
+      NEXT_PUBLIC_HOST_NAME: ${HOST_NAME}
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public

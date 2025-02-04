@@ -319,7 +319,7 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 		Bucket:    config.ShelfBucketName,
 		Key:       config.ShelfItemKeyName,
 		Name:      file.Filename,
-		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("SUPABASE_EXTERNAL_URL")),
+		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+"/supabase"),
 	}, nil
 }
 
@@ -372,7 +372,7 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 				Key:          image.Key,
 				Name:         image.Name,
 				OriginalName: image.OriginalName,
-				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("SUPABASE_EXTERNAL_URL")),
+				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+"/supabase"),
 			}
 		}
 		parsedShelfItems[i].Images = parsedFiles
@@ -405,7 +405,7 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 			Bucket:    image.Bucket,
 			Key:       image.Key,
 			Name:      image.Name,
-			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("SUPABASE_EXTERNAL_URL")),
+			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+"/supabase"),
 		}
 	}
 	parsedShelfItem.Images = parsedFiles
