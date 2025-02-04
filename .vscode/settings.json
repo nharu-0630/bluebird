@@ -8,5 +8,6 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "cSpell.words": [
     "supabase"
-  ]
+  ],
+  "makefile.configureOnOpen": false
 }

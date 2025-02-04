@@ -34,27 +34,8 @@ func main() {
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
-	storage := storage_go.NewClient(os.Getenv("JWT_SECRET")+"/storage/v1", os.Getenv("SUPABASE_TOKEN"), nil)
-	// create bucket if not exists
-	// bucketName := os.Getenv("SUPABASE_BUCKET_NAME")
-	// _, err = storage.ListBuckets()
-	// if err != nil {
-	// 	zap.L().Sugar().Fatal(err)
-	// }
-	// bucketExists := false
-	// for _, bucket := range buckets {
-	// 	if bucket.Name == bucketName {
-	// 		bucketExists = true
-	// 		break
-	// 	}
-	// }
-	// if !bucketExists {
-	// 	if _, err = storage.CreateBucket(bucketName, storage_go.BucketOptions{
-	// 		Public: true,
-	// 	}); err != nil {
-	// 		zap.L().Sugar().Fatal(err)
-	// 	}
-	// }
+
+	storage := storage_go.NewClient("http://kong:"+os.Getenv("KONG_HTTP_PORT")+"/storage/v1", os.Getenv("SERVICE_ROLE_KEY"), nil)
 	// For twitter
 	db.AutoMigrate(&model.TwitterUser{}, &model.TwitterTweet{}, &model.TwitterMedia{})
 	twitterClient := twitter.NewClient(twitter.ClientConfig{
