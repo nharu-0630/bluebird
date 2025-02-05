@@ -237,7 +237,7 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
                           item !== undefined
                       ) ?? []
                   }
-                  onDisplayValuesChange={() => { }}
+                  onDisplayValuesChange={() => {}}
                   loop
                   className="w-full"
                 >
@@ -317,6 +317,7 @@ export function ShelfItemCreateForm(props: ShelfItemCreateDialogProps) {
                         width={100}
                         height={100}
                         alt={file.name}
+                        unoptimized
                       />
                       <Button
                         variant="destructive"

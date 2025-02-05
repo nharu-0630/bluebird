@@ -92,16 +92,18 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
       refetchQueries: [{ query: GetShelfItemsDocument }],
     }
   );
-  const [addShelfItemImage,
-    { loading: addShelfItemImageLoading, error: addShelfItemImageError }
+  const [
+    addShelfItemImage,
+    { loading: addShelfItemImageLoading, error: addShelfItemImageError },
   ] = useMutation<
     AddShelfItemImageMutation,
     AddShelfItemImageMutationVariables
   >(AddShelfItemImageDocument, {
     refetchQueries: [{ query: GetShelfItemsDocument }],
   });
-  const [removeShelfItemImage,
-    { loading: removeShelfItemImageLoading, error: removeShelfItemImageError }
+  const [
+    removeShelfItemImage,
+    { loading: removeShelfItemImageLoading, error: removeShelfItemImageError },
   ] = useMutation<
     RemoveShelfItemImageMutation,
     RemoveShelfItemImageMutationVariables
@@ -163,13 +165,18 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
     setImagesToRemove((prev) => [...prev, fileUlid]);
     const updatedImages = images.filter((image) => image.ulid !== fileUlid);
     setImages(updatedImages);
-    form.setValue("images", updatedImages.map((image) => image.ulid));
+    form.setValue(
+      "images",
+      updatedImages.map((image) => image.ulid)
+    );
   }
 
-  if (updateShelfItemLoading || addShelfItemImageLoading || removeShelfItemImageLoading) {
-    return (
-      <LoadingPage />
-    );
+  if (
+    updateShelfItemLoading ||
+    addShelfItemImageLoading ||
+    removeShelfItemImageLoading
+  ) {
+    return <LoadingPage />;
   }
 
   return (
@@ -243,14 +250,15 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                       field.value
                         .map(
                           (tag) =>
-                            props.shelfItem.tags.find((t) => t.ulid === tag)?.name
+                            props.shelfItem.tags.find((t) => t.ulid === tag)
+                              ?.name
                         )
                         .filter(
                           (item): item is Exclude<typeof item, undefined> =>
                             item !== undefined
                         ) ?? []
                     }
-                    onDisplayValuesChange={() => { }}
+                    onDisplayValuesChange={() => {}}
                     loop
                     className="w-full"
                   >
@@ -324,42 +332,44 @@ export function ShelfItemEditForm(props: ShelfItemEditDialogProps) {
                 <FormLabel>画像</FormLabel>
                 <FormControl>
                   <div className="space-y-2">
-                    {
-                      images.map((image, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <Image
-                            src={image.signedUrl}
-                            width={100}
-                            height={100}
-                            alt={image.originalName}
-                          />
-                          <Button
-                            variant="destructive"
-                            onClick={() => handleRemoveImage(image.ulid)}
-                          >
-                            削除
-                          </Button>
-                        </div>
-                      ))
-                    }
-                    {
-                      newImages.map((file, index) => (
-                        <div key={index} className="flex items-center space-x-2">
-                          <Image
-                            src={URL.createObjectURL(file)}
-                            width={100}
-                            height={100}
-                            alt={file.name}
-                          />
-                          <Button
-                            variant="destructive"
-                            onClick={() => setNewImages((prev) => prev.filter((img) => img !== file))}
-                          >
-                            削除
-                          </Button>
-                        </div>
-                      ))
-                    }
+                    {images.map((image, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <Image
+                          src={image.signedUrl}
+                          width={100}
+                          height={100}
+                          alt={image.originalName}
+                          unoptimized
+                        />
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleRemoveImage(image.ulid)}
+                        >
+                          削除
+                        </Button>
+                      </div>
+                    ))}
+                    {newImages.map((file, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <Image
+                          src={URL.createObjectURL(file)}
+                          width={100}
+                          height={100}
+                          alt={file.name}
+                          unoptimized
+                        />
+                        <Button
+                          variant="destructive"
+                          onClick={() =>
+                            setNewImages((prev) =>
+                              prev.filter((img) => img !== file)
+                            )
+                          }
+                        >
+                          削除
+                        </Button>
+                      </div>
+                    ))}
                     <Input
                       type="file"
                       multiple

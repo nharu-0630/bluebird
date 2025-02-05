@@ -114,8 +114,8 @@ func (c *Client) setHeaders(req *http.Request) {
 
 func (c *Client) setGuestHeaders(req *http.Request) {
 	req.Header.Add("authorization", "Bearer "+BEARER_TOKEN)
-	req.Header.Add("origin", "https://twitter.com")
-	req.Header.Add("referer", "https://twitter.com/")
+	req.Header.Add("origin", "https://x.com")
+	req.Header.Add("referer", "https://x.com/")
 	req.Header.Add("user-agent", USER_AGENT)
 	req.Header.Add("x-guest-token", c.guestToken)
 	req.Header.Add("x-twitter-active-user", "yes")
@@ -124,8 +124,8 @@ func (c *Client) setGuestHeaders(req *http.Request) {
 
 func (c *Client) setAuthorizedHeaders(req *http.Request) {
 	req.Header.Add("authorization", "Bearer "+BEARER_TOKEN)
-	req.Header.Add("origin", "https://twitter.com")
-	req.Header.Add("referer", "https://twitter.com/")
+	req.Header.Add("origin", "https://x.com")
+	req.Header.Add("referer", "https://x.com/")
 	req.Header.Add("user-agent", USER_AGENT)
 	req.AddCookie(&http.Cookie{Name: "auth_token", Value: c.config.AuthToken})
 	req.AddCookie(&http.Cookie{Name: "ct0", Value: c.config.CsrfToken})
