@@ -11,61 +11,49 @@ import (
 	"go.uber.org/zap"
 )
 
-type ClientConfig struct {
-	IsGuestTokenEnabled bool
-	AuthToken           string
-	CsrfToken           string
-}
-
 type Client struct {
-	config     ClientConfig
-	client     *http.Client
+	isGuest    bool
+	authToken  string
+	csrfToken  string
 	guestToken string
-	clientUUID string
+	client     *http.Client
+	uuid       string
 	rateLimits map[string]*RateLimit
 }
 
-type RateLimit struct {
-	limit     int
-	remaining int
-	interval  time.Duration
-	reset     time.Time
+func NewAuthorizedClient(authToken string, csrfToken string) *Client {
+	client := &Client{
+		isGuest:    false,
+		authToken:  authToken,
+		csrfToken:  csrfToken,
+		client:     &http.Client{Timeout: 10 * time.Second},
+		rateLimits: make(map[string]*RateLimit),
+	}
+	client.initializeClientUUID()
+	return client
 }
 
-func NewClient(config ClientConfig) *Client {
-	client := &Client{config: config,
-		client: &http.Client{
-			Timeout: 10 * time.Second,
-		},
+func NewGuestClient() *Client {
+	client := &Client{
+		isGuest:    true,
+		client:     &http.Client{Timeout: 10 * time.Second},
+		rateLimits: make(map[string]*RateLimit),
 	}
-	if config.IsGuestTokenEnabled {
-		client.initializeGuestToken()
-	} else {
-		client.initializeClientUUID()
-	}
-	client.rateLimits = make(map[string]*RateLimit)
-	client.rateLimits["TweetResultByRestId"] = NewRateLimit(100, 15*time.Minute)
-	client.rateLimits["UserByScreenName"] = NewRateLimit(100, 15*time.Minute)
-	client.rateLimits["UserTweets"] = NewRateLimit(50, 15*time.Minute)
-	client.rateLimits["TweetDetail"] = NewRateLimit(150, 15*time.Minute)
-	client.rateLimits["Following"] = NewRateLimit(50, 15*time.Minute)
-	client.rateLimits["Followers"] = NewRateLimit(50, 15*time.Minute)
+	client.initializeGuestToken()
 	return client
 }
 
 func (c *Client) gql(method string, queryID string, operation string, params map[string]interface{}) (map[string]interface{}, error) {
 	zap.L().Debug("GQL request", zap.String("operation", operation))
 	if _, ok := c.rateLimits[operation]; ok {
-		if c.config.IsGuestTokenEnabled {
-			if !c.rateLimits[operation].GuestCall() {
+		if c.isGuest {
+			if c.rateLimits[operation].remaining == 0 {
 				zap.L().Debug("Rate limit exceeded", zap.String("operation", operation))
 				c.initializeGuestToken()
-				c.rateLimits[operation].GuestCall()
 			}
 		} else {
-			c.rateLimits[operation].Call()
+			c.rateLimits[operation].wait()
 		}
-		zap.L().Debug("Rate limit", zap.Int("remaining", c.rateLimits[operation].remaining), zap.Int("limit", c.rateLimits[operation].limit))
 	}
 	if method == "POST" {
 		return nil, nil
@@ -90,6 +78,11 @@ func (c *Client) gql(method string, queryID string, operation string, params map
 			return nil, err
 		}
 		defer res.Body.Close()
+		if _, ok := c.rateLimits[operation]; !ok {
+			c.rateLimits[operation] = &RateLimit{}
+		}
+		c.rateLimits[operation].update(res.Header)
+		zap.L().Debug("Rate limit", zap.Int("limit", c.rateLimits[operation].limit), zap.Int("remaining", c.rateLimits[operation].remaining), zap.Int("reset", c.rateLimits[operation].reset))
 		var resData map[string]interface{}
 		err = json.NewDecoder(res.Body).Decode(&resData)
 		if err != nil {
@@ -105,7 +98,7 @@ func (c *Client) gql(method string, queryID string, operation string, params map
 }
 
 func (c *Client) setHeaders(req *http.Request) {
-	if c.config.IsGuestTokenEnabled {
+	if c.isGuest {
 		c.setGuestHeaders(req)
 	} else {
 		c.setAuthorizedHeaders(req)
@@ -127,10 +120,10 @@ func (c *Client) setAuthorizedHeaders(req *http.Request) {
 	req.Header.Add("origin", "https://x.com")
 	req.Header.Add("referer", "https://x.com/")
 	req.Header.Add("user-agent", USER_AGENT)
-	req.AddCookie(&http.Cookie{Name: "auth_token", Value: c.config.AuthToken})
-	req.AddCookie(&http.Cookie{Name: "ct0", Value: c.config.CsrfToken})
-	req.Header.Add("x-client-uuid", c.clientUUID)
-	req.Header.Add("x-csrf-token", c.config.CsrfToken)
+	req.AddCookie(&http.Cookie{Name: "auth_token", Value: c.authToken})
+	req.AddCookie(&http.Cookie{Name: "ct0", Value: c.csrfToken})
+	req.Header.Add("x-client-uuid", c.uuid)
+	req.Header.Add("x-csrf-token", c.csrfToken)
 	req.Header.Add("x-twitter-active-user", "yes")
 	req.Header.Add("x-twitter-auth-type", "OAuth2Session")
 	req.Header.Add("x-twitter-client-language", "ja")
@@ -157,9 +150,7 @@ func (c *Client) initializeGuestToken() {
 		panic(err)
 	}
 	c.guestToken = resData["guest_token"].(string)
-	for _, value := range c.rateLimits {
-		value.Reset()
-	}
+	c.rateLimits = make(map[string]*RateLimit)
 }
 
 func (c *Client) initializeClientUUID() {
@@ -168,5 +159,5 @@ func (c *Client) initializeClientUUID() {
 	if err != nil {
 		panic(err)
 	}
-	c.clientUUID = clientUUID.String()
+	c.uuid = clientUUID.String()
 }
