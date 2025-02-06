@@ -20,10 +20,10 @@ export default function TweetsPage({
   queryName,
   variables = {},
 }: TweetsPageProps) {
-  const [tweets, setTweets] = useState<z.infer<typeof TwTweetSchema>[]>([]);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const { fetchMore } = useQuery(queryDocument, {
+  let [tweets, setTweets] = useState<z.infer<typeof TwTweetSchema>[]>([]);
+  let [hasMore, setHasMore] = useState<boolean>(true);
+  let [cursor, setCursor] = useState<string | null>(null);
+  let { fetchMore } = useQuery(queryDocument, {
     variables: {
       ...variables,
       cursor,

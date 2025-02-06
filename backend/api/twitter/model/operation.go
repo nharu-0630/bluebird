@@ -2,6 +2,7 @@ package model
 
 type Operation struct {
 	Name          string
+	AllowGuest    bool
 	DefaultParams map[string]interface{}
 	Args          map[string]interface{}
 	Method        string

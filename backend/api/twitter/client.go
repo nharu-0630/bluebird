@@ -64,18 +64,18 @@ func (c *Client) Execute(o model.Operation, args map[string]interface{}) (map[st
 	return res, nil
 }
 
-func (c *Client) gql(method string, queryID string, operation string, params map[string]interface{}) (map[string]interface{}, error) {
-	zap.L().Debug("GQL request", zap.String("operation", operation))
-	if _, ok := c.rateLimits[operation]; ok {
-		if c.isGuest {
-			if c.rateLimits[operation].remaining == 0 {
-				zap.L().Debug("Rate limit exceeded", zap.String("operation", operation))
-				c.initializeGuestToken()
-			}
-		} else {
-			c.rateLimits[operation].wait()
-		}
-	}
+func (c *Client) gql(method string, endpoint string, name string, params map[string]interface{}) (map[string]interface{}, error) {
+	zap.L().Debug("GQL request", zap.String("operation", name))
+	// if _, ok := c.rateLimits[name]; ok {
+	// 	if c.isGuest {
+	// 		if c.rateLimits[name].remaining == 0 {
+	// 			zap.L().Debug("Rate limit exceeded", zap.String("operation", name))
+	// 			c.initializeGuestToken()
+	// 		}
+	// 	} else {
+	// 		c.rateLimits[name].wait()
+	// 	}
+	// }
 	if method == "POST" {
 		return nil, nil
 	} else if method == "GET" {
@@ -89,7 +89,7 @@ func (c *Client) gql(method string, queryID string, operation string, params map
 			encodedParams += key + "=" + escapedValue + "&"
 		}
 		encodedParams = encodedParams[:len(encodedParams)-1]
-		req, err := http.NewRequest("GET", GQL_API_ENDPOINT+"/"+queryID+"/"+operation+"?"+encodedParams, nil)
+		req, err := http.NewRequest("GET", GQL_API_ENDPOINT+"/"+endpoint+"/"+name+"?"+encodedParams, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -99,11 +99,11 @@ func (c *Client) gql(method string, queryID string, operation string, params map
 			return nil, err
 		}
 		defer res.Body.Close()
-		if _, ok := c.rateLimits[operation]; !ok {
-			c.rateLimits[operation] = &RateLimit{}
+		if _, ok := c.rateLimits[name]; !ok {
+			c.rateLimits[name] = &RateLimit{}
 		}
-		c.rateLimits[operation].update(res.Header)
-		zap.L().Debug("Rate limit", zap.Int("limit", c.rateLimits[operation].limit), zap.Int("remaining", c.rateLimits[operation].remaining), zap.Int("reset", c.rateLimits[operation].reset))
+		c.rateLimits[name].update(res.Header)
+		zap.L().Debug("Rate limit", zap.Int("limit", c.rateLimits[name].limit), zap.Int("remaining", c.rateLimits[name].remaining), zap.Int("reset", c.rateLimits[name].reset))
 		var resData map[string]interface{}
 		err = json.NewDecoder(res.Body).Decode(&resData)
 		if err != nil {

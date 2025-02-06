@@ -20,10 +20,10 @@ export default function UsersPage({
   queryName,
   variables = {},
 }: UsersPageProps) {
-  const [users, setUsers] = useState<z.infer<typeof TwUserSchema>[]>([]);
-  const [hasMore, setHasMore] = useState<boolean>(true);
-  const [cursor, setCursor] = useState<string | null>(null);
-  const { fetchMore } = useQuery(queryDocument, {
+  let [users, setUsers] = useState<z.infer<typeof TwUserSchema>[]>([]);
+  let [hasMore, setHasMore] = useState<boolean>(true);
+  let [cursor, setCursor] = useState<string | null>(null);
+  let { fetchMore } = useQuery(queryDocument, {
     variables: {
       ...variables,
       cursor,

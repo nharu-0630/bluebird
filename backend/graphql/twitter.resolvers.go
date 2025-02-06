@@ -16,7 +16,7 @@ import (
 
 // TwTweetByID is the resolver for the twTweetByID field.
 func (r *queryResolver) TwTweetByID(ctx context.Context, tweetID string) (*TwTweet, error) {
-	data, err := r.CachedTwClient.Execute(operation.TweetByID, map[string]interface{}{"tweetId": tweetID})
+	data, err := r.TwClient.Execute(operation.TweetByID, map[string]interface{}{"tweetId": tweetID})
 	if err != nil {
 		return nil, err
 	}
@@ -25,13 +25,13 @@ func (r *queryResolver) TwTweetByID(ctx context.Context, tweetID string) (*TwTwe
 		return nil, err
 	}
 	formattedTweet := FormatTweet(*tweet)
-	r.CachedTwClient.CacheTweet(formattedTweet)
+	r.TwClient.CacheTweet(formattedTweet)
 	return &formattedTweet, nil
 }
 
 // TwUserByScreenName is the resolver for the twUserByScreenName field.
 func (r *queryResolver) TwUserByScreenName(ctx context.Context, screenName string) (*TwUser, error) {
-	data, err := r.CachedTwClient.Execute(operation.UserByScreenName, map[string]interface{}{"screen_name": screenName})
+	data, err := r.TwClient.Execute(operation.UserByScreenName, map[string]interface{}{"screen_name": screenName})
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func (r *queryResolver) TwUserByScreenName(ctx context.Context, screenName strin
 		return nil, err
 	}
 	formattedUser := FormatUser(*user)
-	r.CachedTwClient.CacheUser(formattedUser)
+	r.TwClient.CacheUser(formattedUser)
 	return &formattedUser, nil
 }
 
@@ -49,7 +49,7 @@ func (r *queryResolver) TwLikes(ctx context.Context, userID string, cursor *stri
 	if cursor == nil {
 		cursor = new(string)
 	}
-	data, err := r.CachedTwClient.Execute(operation.Likes, map[string]interface{}{"userId": userID, "cursor": *cursor})
+	data, err := r.TwClient.Execute(operation.Likes, map[string]interface{}{"userId": userID, "cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func (r *queryResolver) TwLikes(ctx context.Context, userID string, cursor *stri
 	if err != nil {
 		return nil, err
 	}
-	r.CachedTwClient.CacheTweets(formattedTweets)
+	r.TwClient.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
 		Cursor: &resCursor.BottomCursor,
@@ -73,7 +73,7 @@ func (r *queryResolver) TwUserTweets(ctx context.Context, userID string, cursor 
 	if cursor == nil {
 		cursor = new(string)
 	}
-	data, err := r.CachedTwClient.Execute(operation.UserTweets, map[string]interface{}{"userId": userID, "cursor": *cursor})
+	data, err := r.TwClient.Execute(operation.UserTweets, map[string]interface{}{"userId": userID, "cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
@@ -83,10 +83,7 @@ func (r *queryResolver) TwUserTweets(ctx context.Context, userID string, cursor 
 		return nil, err
 	}
 	formattedTweets := tools.FormatItems(tweets, FormatTweet)
-	if err != nil {
-		return nil, err
-	}
-	r.CachedTwClient.CacheTweets(formattedTweets)
+	r.TwClient.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
 		Cursor: &resCursor.BottomCursor,
@@ -98,7 +95,7 @@ func (r *queryResolver) TwBookmarks(ctx context.Context, cursor *string) (*TwTwe
 	if cursor == nil {
 		cursor = new(string)
 	}
-	data, err := r.CachedTwClient.Execute(operation.Bookmarks, map[string]interface{}{"cursor": *cursor})
+	data, err := r.TwClient.Execute(operation.Bookmarks, map[string]interface{}{"cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +107,7 @@ func (r *queryResolver) TwBookmarks(ctx context.Context, cursor *string) (*TwTwe
 	if err != nil {
 		return nil, err
 	}
-	r.CachedTwClient.CacheTweets(formattedTweets)
+	r.TwClient.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
 		Cursor: &resCursor.BottomCursor,
@@ -122,7 +119,7 @@ func (r *queryResolver) TwFollowers(ctx context.Context, userID string, cursor *
 	if cursor == nil {
 		cursor = new(string)
 	}
-	data, err := r.CachedTwClient.Execute(operation.Followers, map[string]interface{}{"userId": userID, "cursor": *cursor})
+	data, err := r.TwClient.Execute(operation.Followers, map[string]interface{}{"userId": userID, "cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
@@ -134,7 +131,7 @@ func (r *queryResolver) TwFollowers(ctx context.Context, userID string, cursor *
 	if err != nil {
 		return nil, err
 	}
-	r.CachedTwClient.CacheUsers(formattedUsers)
+	r.TwClient.CacheUsers(formattedUsers)
 	return &TwUsers{
 		Users:  formattedUsers,
 		Cursor: &resCursor.BottomCursor,
@@ -146,7 +143,7 @@ func (r *queryResolver) TwFollowing(ctx context.Context, userID string, cursor *
 	if cursor == nil {
 		cursor = new(string)
 	}
-	data, err := r.CachedTwClient.Execute(operation.Following, map[string]interface{}{"userId": userID, "cursor": *cursor})
+	data, err := r.TwClient.Execute(operation.Following, map[string]interface{}{"userId": userID, "cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +155,7 @@ func (r *queryResolver) TwFollowing(ctx context.Context, userID string, cursor *
 	if err != nil {
 		return nil, err
 	}
-	r.CachedTwClient.CacheUsers(formattedUsers)
+	r.TwClient.CacheUsers(formattedUsers)
 	return &TwUsers{
 		Users:  formattedUsers,
 		Cursor: &resCursor.BottomCursor,
@@ -170,7 +167,7 @@ func (r *queryResolver) TwTweetDetail(ctx context.Context, tweetID string, curso
 	if cursor == nil {
 		cursor = new(string)
 	}
-	data, err := r.CachedTwClient.Execute(operation.TweetDetail, map[string]interface{}{"tweetId": tweetID, "cursor": *cursor})
+	data, err := r.TwClient.Execute(operation.TweetDetail, map[string]interface{}{"tweetId": tweetID, "cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
@@ -182,7 +179,7 @@ func (r *queryResolver) TwTweetDetail(ctx context.Context, tweetID string, curso
 	if err != nil {
 		return nil, err
 	}
-	r.CachedTwClient.CacheTweets(formattedTweets)
+	r.TwClient.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
 		Cursor: &resCursor.BottomCursor,

@@ -9,20 +9,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type CachedTwClient struct {
-	DB     *gorm.DB
-	Client *twitter.Client
+type TwPipe struct {
+	DB      *gorm.DB
+	Clients *twitter.Clients
 }
 
-func NewCachedClient(db *gorm.DB, client *twitter.Client) *CachedTwClient {
-	return &CachedTwClient{
-		DB:     db,
-		Client: client,
+func NewTwPipe(db *gorm.DB, clients *twitter.Clients) *TwPipe {
+	return &TwPipe{
+		DB:      db,
+		Clients: clients,
 	}
 }
 
-func (c *CachedTwClient) Execute(o api_model.Operation, args map[string]interface{}) (map[string]interface{}, error) {
-	data, err := c.Client.Execute(o, args)
+func (t *TwPipe) Execute(o api_model.Operation, args map[string]interface{}) (map[string]interface{}, error) {
+	data, err := t.Clients.Execute(o, args)
 	if err != nil {
 		return nil, err
 	}
@@ -31,13 +31,13 @@ func (c *CachedTwClient) Execute(o api_model.Operation, args map[string]interfac
 		Args:      datatypes.NewJSONType(args),
 		Response:  datatypes.NewJSONType(data),
 	}
-	if err := c.DB.Create(&queryCache).Error; err != nil {
+	if err := t.DB.Create(&queryCache).Error; err != nil {
 		return nil, err
 	}
 	return data, nil
 }
 
-func (c *CachedTwClient) CacheTweet(tweet TwTweet) error {
+func (t *TwPipe) CacheTweet(tweet TwTweet) error {
 	response, err := tools.EncodeItem(tweet)
 	if err != nil {
 		return err
@@ -46,22 +46,22 @@ func (c *CachedTwClient) CacheTweet(tweet TwTweet) error {
 		ID:       *tweet.ID,
 		Response: datatypes.NewJSONType(response),
 	}
-	if err := c.DB.Create(cachedTweet).Error; err != nil {
+	if err := t.DB.Create(cachedTweet).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *CachedTwClient) CacheTweets(tweets []*TwTweet) error {
+func (t *TwPipe) CacheTweets(tweets []*TwTweet) error {
 	for _, tweet := range tweets {
-		if err := c.CacheTweet(*tweet); err != nil {
+		if err := t.CacheTweet(*tweet); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (c *CachedTwClient) CacheUser(user TwUser) error {
+func (t *TwPipe) CacheUser(user TwUser) error {
 	response, err := tools.EncodeItem(user)
 	if err != nil {
 		return err
@@ -70,15 +70,15 @@ func (c *CachedTwClient) CacheUser(user TwUser) error {
 		ID:       *user.ID,
 		Response: datatypes.NewJSONType(response),
 	}
-	if err := c.DB.Create(cachedUser).Error; err != nil {
+	if err := t.DB.Create(cachedUser).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *CachedTwClient) CacheUsers(users []*TwUser) error {
+func (t *TwPipe) CacheUsers(users []*TwUser) error {
 	for _, user := range users {
-		if err := c.CacheUser(*user); err != nil {
+		if err := t.CacheUser(*user); err != nil {
 			return err
 		}
 	}

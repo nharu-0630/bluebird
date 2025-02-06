@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	_ "github.com/lib/pq"
@@ -56,17 +57,24 @@ func main() {
 
 	// For twitter
 	db.AutoMigrate(&model.TwTweet{}, &model.TwUser{}, &model.TwQueryCache{})
-	twClient := twitter.NewAuthorizedClient(os.Getenv("TWITTER_AUTH_TOKEN"),
-		os.Getenv("TWITTER_CSRF_TOKEN"))
-	cachedTwClient := graphql.NewCachedClient(db, twClient)
+	twAuthTokens := strings.Split(os.Getenv("TWITTER_AUTH_TOKEN"), ",")
+	twCsrfTokens := strings.Split(os.Getenv("TWITTER_CSRF_TOKEN"), ",")
+	if len(twAuthTokens) != len(twCsrfTokens) {
+		zap.L().Sugar().Fatal("TWITTER_AUTH_TOKEN and TWITTER_CSRF_TOKEN must have the same number of elements")
+	}
+	twClients := make([]*twitter.Client, len(twAuthTokens))
+	for i := range twAuthTokens {
+		twClients[i] = twitter.NewAuthorizedClient(twAuthTokens[i], twCsrfTokens[i])
+	}
+	twPipe := graphql.NewTwPipe(db, twitter.NewClients(twClients))
 	// For GraphQL
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "9999"
 	}
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{DB: db,
-		Storage:        storage,
-		CachedTwClient: cachedTwClient}}))
+		Storage:  storage,
+		TwClient: twPipe}}))
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},

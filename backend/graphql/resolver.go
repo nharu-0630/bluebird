@@ -6,7 +6,7 @@ import (
 )
 
 type Resolver struct {
-	DB             *gorm.DB
-	Storage        *storage_go.Client
-	CachedTwClient *CachedTwClient
+	DB       *gorm.DB
+	Storage  *storage_go.Client
+	TwClient *TwPipe
 }
