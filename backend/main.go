@@ -55,17 +55,18 @@ func main() {
 	}
 
 	// For twitter
-	db.AutoMigrate(&model.TwitterUser{}, &model.TwitterTweet{}, &model.TwitterMedia{})
-	twitterClient := twitter.NewAuthorizedClient(os.Getenv("TWITTER_AUTH_TOKEN"),
+	db.AutoMigrate(&model.TwTweet{}, &model.TwUser{}, &model.TwQueryCache{})
+	twClient := twitter.NewAuthorizedClient(os.Getenv("TWITTER_AUTH_TOKEN"),
 		os.Getenv("TWITTER_CSRF_TOKEN"))
+	cachedTwClient := graphql.NewCachedClient(db, twClient)
 	// For GraphQL
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "9999"
 	}
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{DB: db,
-		Storage:       storage,
-		TwitterClient: twitterClient}}))
+		Storage:        storage,
+		CachedTwClient: cachedTwClient}}))
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},

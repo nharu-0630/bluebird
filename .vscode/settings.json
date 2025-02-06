@@ -7,8 +7,10 @@
   "typescript.tsdk": "frontend/.yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "cSpell.words": [
+    "datatypes",
     "favorited",
     "favourites",
+    "gorm",
     "mapstructure",
     "mergo",
     "supabase"

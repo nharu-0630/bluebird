@@ -45,11 +45,11 @@ func NewGuestClient() *Client {
 	return client
 }
 
-func (c *Client) Execute(o model.Operation, variables map[string]interface{}) (map[string]interface{}, error) {
+func (c *Client) Execute(o model.Operation, args map[string]interface{}) (map[string]interface{}, error) {
 	zap.L().Info("Executing operation", zap.String("name", o.Name))
 	params := o.DefaultParams
 	if err := mergo.Merge(&params, map[string]interface{}{
-		"variables": variables,
+		"variables": args,
 	}); err != nil {
 		return nil, err
 	}

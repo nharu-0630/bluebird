@@ -6,7 +6,7 @@ import (
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
-func FormatTweet(tweet *model.Tweet) (*TwTweet, error) {
+func FormatTweet(tweet model.Tweet) TwTweet {
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, tweet.Legacy.CreatedAt)
 	parsedMedias := make([]*TwMedia, len(tweet.Legacy.Entities.Media))
 	for j, media := range tweet.Legacy.Entities.Media {
@@ -32,10 +32,10 @@ func FormatTweet(tweet *model.Tweet) (*TwTweet, error) {
 			VideoURL:    videoURL,
 		}
 	}
-	user, _ := FormatUser(&tweet.Core.UserResults.Result)
-	return &TwTweet{
+	user := FormatUser(tweet.Core.UserResults.Result)
+	return TwTweet{
 		ID:            &tweet.RestID,
-		User:          user,
+		User:          &user,
 		FullText:      &tweet.Legacy.FullText,
 		Media:         parsedMedias,
 		CreatedAt:     &parsedCreatedAt,
@@ -48,14 +48,14 @@ func FormatTweet(tweet *model.Tweet) (*TwTweet, error) {
 		BookmarkCount: &tweet.Legacy.BookmarkCount,
 		Bookmarked:    &tweet.Legacy.Bookmarked,
 		Lang:          &tweet.Legacy.Lang,
-	}, nil
+	}
 }
 
-func FormatUser(user *model.User) (*TwUser, error) {
+func FormatUser(user model.User) TwUser {
 	parsedBirthday := time.Time{}
 	// :TODO: Parse birthday
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, user.Legacy.CreatedAt)
-	return &TwUser{
+	return TwUser{
 		ID:                   &user.RestID,
 		Name:                 &user.Legacy.Name,
 		ScreenName:           &user.Legacy.ScreenName,
@@ -78,5 +78,5 @@ func FormatUser(user *model.User) (*TwUser, error) {
 		ProfileBannerURL:     &user.Legacy.ProfileBannerURL,
 		ProfileImageURL:      &user.Legacy.ProfileImageURLHTTPS,
 		StatusesCount:        &user.Legacy.StatusesCount,
-	}, nil
+	}
 }
