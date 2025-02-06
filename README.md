@@ -31,7 +31,7 @@ git clone --depth 1 https://github.com/nharu-0630/bluebird
 cd bluebird
 cp .env.example .env
 docker compose pull
-docker compose up -d
+docker compose -f docker-compose.prod.yml up --build -d
 ```
 
 ### 3. Access to bluebird
