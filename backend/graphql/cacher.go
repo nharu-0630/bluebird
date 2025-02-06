@@ -26,8 +26,7 @@ func (c *CachedTwClient) Execute(o api_model.Operation, args map[string]interfac
 	if err != nil {
 		return nil, err
 	}
-
-	queryCache := model.TwQueryCache{
+	queryCache := &model.TwQueryCache{
 		QueryName: o.Name,
 		Args:      datatypes.NewJSONType(args),
 		Response:  datatypes.NewJSONType(data),
@@ -43,7 +42,7 @@ func (c *CachedTwClient) CacheTweet(tweet TwTweet) error {
 	if err != nil {
 		return err
 	}
-	cachedTweet := model.TwTweet{
+	cachedTweet := &model.TwTweet{
 		ID:       *tweet.ID,
 		Response: datatypes.NewJSONType(response),
 	}
@@ -67,7 +66,7 @@ func (c *CachedTwClient) CacheUser(user TwUser) error {
 	if err != nil {
 		return err
 	}
-	cachedUser := model.TwUser{
+	cachedUser := &model.TwUser{
 		ID:       *user.ID,
 		Response: datatypes.NewJSONType(response),
 	}
