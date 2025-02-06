@@ -1,4 +1,4 @@
-query GetTwitterUser($screenName: String!) {
+query TwUserByScreenName($screenName: String!) {
   twUserByScreenName(screenName: $screenName) {
     id
     name
@@ -25,7 +25,7 @@ query GetTwitterUser($screenName: String!) {
   }
 }
 
-query GetTwitterTweets($userID: String!, $cursor: String) {
+query TwUserTweets($userID: String!, $cursor: String) {
   twUserTweets(userID: $userID, cursor: $cursor) {
     cursor
     tweets {
@@ -77,7 +77,7 @@ query GetTwitterTweets($userID: String!, $cursor: String) {
   }
 }
 
-query GetTwitterLikes($userID: String!, $cursor: String) {
+query TwLikes($userID: String!, $cursor: String) {
   twLikes(userID: $userID, cursor: $cursor) {
     cursor
     tweets {
@@ -129,7 +129,7 @@ query GetTwitterLikes($userID: String!, $cursor: String) {
   }
 }
 
-query GetTwitterBookmarks($cursor: String) {
+query TwBookmarks($cursor: String) {
   twBookmarks(cursor: $cursor) {
     cursor
     tweets {
@@ -177,6 +177,66 @@ query GetTwitterBookmarks($cursor: String) {
         thumbURL
         videoURL
       }
+    }
+  }
+}
+
+query TwFollowing($userID: String!, $cursor: String) {
+  twFollowing(userID: $userID, cursor: $cursor) {
+    cursor
+    users {
+      id
+      name
+      screenName
+      verified
+      blueVerified
+      description
+      location
+      birthday
+      createdAt
+      friendsCount
+      following
+      fastFollowersCount
+      followersCount
+      normalFollowersCount
+      followedBy
+      mediaCount
+      favouritesCount
+      listedCount
+      pinnedTweetIDs
+      profileBannerURL
+      profileImageURL
+      statusesCount
+    }
+  }
+}
+
+query TwFollowers($userID: String!, $cursor: String) {
+  twFollowers(userID: $userID, cursor: $cursor) {
+    cursor
+    users {
+      id
+      name
+      screenName
+      verified
+      blueVerified
+      description
+      location
+      birthday
+      createdAt
+      friendsCount
+      following
+      fastFollowersCount
+      followersCount
+      normalFollowersCount
+      followedBy
+      mediaCount
+      favouritesCount
+      listedCount
+      pinnedTweetIDs
+      profileBannerURL
+      profileImageURL
+      statusesCount
     }
   }
 }

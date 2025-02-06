@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const TwitterUserSchema = z.object({
+export const TwUserSchema = z.object({
   id: z.string().nullable(),
   name: z.string().nullable(),
   screenName: z.string().nullable(),

@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { TwitterMediaSchema } from "./twitter-media";
-import { TwitterUserSchema } from "./twitter-user";
+import { TwMediaSchema } from "./media";
+import { TwUserSchema } from "./user";
 
-export const TwitterTweetSchema = z.object({
+export const TwTweetSchema = z.object({
   id: z.string().nullable(),
-  user: TwitterUserSchema.nullable(),
+  user: TwUserSchema.nullable(),
   fullText: z.string().nullable(),
-  media: z.array(TwitterMediaSchema).nullable(),
+  media: z.array(TwMediaSchema).nullable(),
   createdAt: z.string().nullable(),
   replyCount: z.number().nullable(),
   retweetCount: z.number().nullable(),

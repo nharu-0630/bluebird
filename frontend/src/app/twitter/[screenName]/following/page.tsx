@@ -1,13 +1,13 @@
 "use client";
 
 import {
+  TwFollowingDocument,
   TwUserByScreenNameDocument,
-  TwUserTweetsDocument,
 } from "@/gql/gen/graphql";
 import { useQuery } from "@apollo/client";
-import TweetsPage from "../(components)/common/tweets-page";
+import UsersPage from "../../(components)/common/users-page";
 
-export default function ScreenNamePage({
+export default function ScreenNameFollowingPage({
   params,
 }: {
   params: { screenName: string };
@@ -20,10 +20,10 @@ export default function ScreenNamePage({
   if (error) return <p>Error: {error.message}</p>;
 
   return (
-    <TweetsPage
-      title="Tweets"
-      queryDocument={TwUserTweetsDocument}
-      queryName="twUserTweets"
+    <UsersPage
+      title="Following"
+      queryDocument={TwFollowingDocument}
+      queryName="twFollowing"
       variables={{ userID: data?.twUserByScreenName?.id }}
     />
   );

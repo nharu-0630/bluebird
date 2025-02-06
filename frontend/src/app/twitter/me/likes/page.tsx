@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  GetTwitterLikesDocument,
-  GetTwitterUserDocument,
-} from "@/gql/gen/graphql";
+import { TwLikesDocument, TwUserByScreenNameDocument } from "@/gql/gen/graphql";
 import { useQuery } from "@apollo/client";
 import TweetsPage from "../../(components)/common/tweets-page";
 
@@ -12,7 +9,7 @@ export default function ScreenNameLikesPage({
 }: {
   params: { screenName: string };
 }) {
-  const { data, loading, error } = useQuery(GetTwitterUserDocument, {
+  const { data, loading, error } = useQuery(TwUserByScreenNameDocument, {
     variables: { screenName: params.screenName },
   });
 
@@ -25,7 +22,7 @@ export default function ScreenNameLikesPage({
   return (
     <TweetsPage
       title="Likes"
-      queryDocument={GetTwitterLikesDocument}
+      queryDocument={TwLikesDocument}
       queryName="twLikes"
       variables={{ userID: userID }}
     />

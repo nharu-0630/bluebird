@@ -9,10 +9,10 @@ import { useRouter } from "next/navigation";
 import { FaDownload, FaExternalLinkAlt, FaLink, FaStar } from "react-icons/fa";
 import { FaReply, FaRetweet } from "react-icons/fa6";
 import { z } from "zod";
-import { TwitterTweetSchema } from "../../(schema)/twitter-tweet";
+import { TwTweetSchema } from "../../(schema)/tweet";
 
 interface TweetCardProps {
-  item: z.infer<typeof TwitterTweetSchema>;
+  item: z.infer<typeof TwTweetSchema>;
 }
 
 export function TweetCard({ item }: TweetCardProps) {
@@ -42,7 +42,7 @@ export function TweetCard({ item }: TweetCardProps) {
           <Button
             variant="link"
             onClick={() =>
-              window.open(`https://x.com/${item.user?.screenName}/followers`)
+              window.open(`/twitter/${item.user?.screenName}/followers`)
             }
           >
             <span className="text-xs">
@@ -56,7 +56,7 @@ export function TweetCard({ item }: TweetCardProps) {
           <Button
             variant="link"
             onClick={() =>
-              window.open(`https://x.com/${item.user?.screenName}/following `)
+              window.open(`/twitter/${item.user?.screenName}/following `)
             }
           >
             <span className="text-xs">

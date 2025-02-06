@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const TwitterMediaSchema = z.object({
+export const TwMediaSchema = z.object({
     id: z.string().nullable(),
     mediaKey: z.string().nullable(),
     expandedURL: z.string().nullable(),
