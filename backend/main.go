@@ -56,10 +56,8 @@ func main() {
 
 	// For twitter
 	db.AutoMigrate(&model.TwitterUser{}, &model.TwitterTweet{}, &model.TwitterMedia{})
-	twitterClient := twitter.NewClient(twitter.ClientConfig{
-		IsGuestTokenEnabled: false,
-		AuthToken:           os.Getenv("TWITTER_AUTH_TOKEN"),
-		CsrfToken:           os.Getenv("TWITTER_CSRF_TOKEN")})
+	twitterClient := twitter.NewAuthorizedClient(os.Getenv("TWITTER_AUTH_TOKEN"),
+		os.Getenv("TWITTER_CSRF_TOKEN"))
 	// For GraphQL
 	port := os.Getenv("PORT")
 	if port == "" {

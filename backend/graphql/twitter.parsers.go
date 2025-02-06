@@ -6,7 +6,7 @@ import (
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
-func PressTweet(tweet model.Tweet) (*TwitterTweet, error) {
+func FormatTweet(tweet *model.Tweet) (*TwitterTweet, error) {
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, tweet.Legacy.CreatedAt)
 	parsedMedias := make([]*TwitterMedia, len(tweet.Legacy.Entities.Media))
 	for j, media := range tweet.Legacy.Entities.Media {
@@ -32,7 +32,7 @@ func PressTweet(tweet model.Tweet) (*TwitterTweet, error) {
 			VideoURL:    videoURL,
 		}
 	}
-	user, _ := ParseUser(tweet.Core.UserResults.Result)
+	user, _ := FormatUser(&tweet.Core.UserResults.Result)
 	return &TwitterTweet{
 		ID:            &tweet.RestID,
 		User:          user,
@@ -51,18 +51,14 @@ func PressTweet(tweet model.Tweet) (*TwitterTweet, error) {
 	}, nil
 }
 
-func ParseTweets(tweets []model.Tweet) ([]*TwitterTweet, error) {
-	parsedTweets := make([]*TwitterTweet, len(tweets))
-	for i, tweet := range tweets {
-		parsedTweet, _ := PressTweet(tweet)
-		parsedTweets[i] = parsedTweet
-	}
-	return parsedTweets, nil
-}
-
-func ParseUser(user model.User) (*TwitterUser, error) {
+func FormatUser(user *model.User) (*TwitterUser, error) {
 	parsedBirthday := time.Time{}
+	// :TODO: Parse birthday
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, user.Legacy.CreatedAt)
+	parsedPinnedTweetIDs := make([]*string, len(user.Legacy.PinnedTweetIdsStr))
+	for i, id := range user.Legacy.PinnedTweetIdsStr {
+		parsedPinnedTweetIDs[i] = &id
+	}
 	return &TwitterUser{
 		ID:                   &user.RestID,
 		Name:                 &user.Legacy.Name,
@@ -82,7 +78,7 @@ func ParseUser(user model.User) (*TwitterUser, error) {
 		MediaCount:           &user.Legacy.MediaCount,
 		FavouritesCount:      &user.Legacy.FavouritesCount,
 		ListedCount:          &user.Legacy.ListedCount,
-		PinnedTweetIDs:       nil,
+		PinnedTweetIDs:       parsedPinnedTweetIDs,
 		ProfileBannerURL:     &user.Legacy.ProfileBannerURL,
 		ProfileImageURL:      &user.Legacy.ProfileImageURLHTTPS,
 		StatusesCount:        &user.Legacy.StatusesCount,

@@ -230,3 +230,4 @@ type Tweet struct {
 		Eligibility string `json:"eligibility,omitempty"`
 	} `json:"quick_promote_eligibility,omitempty"`
 }
+

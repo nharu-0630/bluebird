@@ -7,7 +7,9 @@ import (
 	"net/url"
 	"time"
 
+	"dario.cat/mergo"
 	"github.com/google/uuid"
+	"github.com/nharu-0630/bluebird/api/twitter/operation"
 	"go.uber.org/zap"
 )
 
@@ -41,6 +43,23 @@ func NewGuestClient() *Client {
 	}
 	client.initializeGuestToken()
 	return client
+}
+
+func (c *Client) Execute(o operation.Operation, args map[string]interface{}) (map[string]interface{}, error) {
+	zap.L().Info("Executing operation", zap.String("name", o.Name))
+	params := o.DefaultParams
+	if err := mergo.Merge(&params, o.Args); err != nil {
+		return nil, err
+	}
+	res, err := c.gql(o.Method, o.Endpoint, o.Name, params)
+	if err != nil {
+		return nil, err
+	}
+	res, err = o.Parser(res)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (c *Client) gql(method string, queryID string, operation string, params map[string]interface{}) (map[string]interface{}, error) {

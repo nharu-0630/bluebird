@@ -6,43 +6,34 @@ package graphql
 
 import (
 	"context"
+
+	"github.com/mitchellh/mapstructure"
+	"github.com/nharu-0630/bluebird/api/twitter"
+	"github.com/nharu-0630/bluebird/api/twitter/model"
+	"github.com/nharu-0630/bluebird/api/twitter/operation"
+	"github.com/nharu-0630/bluebird/tools"
 )
 
 // TwitterTweet is the resolver for the twitterTweet field.
 func (r *queryResolver) TwitterTweet(ctx context.Context, tweetID string) (*TwitterTweet, error) {
-	tweet, err := r.TwitterClient.TweetResultByRestId(tweetID)
+	data, err := r.TwitterClient.Execute(operation.TweetByID, map[string]interface{}{"tweetId": tweetID})
 	if err != nil {
 		return nil, err
 	}
-	return PressTweet(tweet)
+	var tweet model.Tweet
+	mapstructure.Decode(data, &tweet)
+	return FormatTweet(&tweet)
 }
 
 // TwitterUser is the resolver for the twitterUser field.
 func (r *queryResolver) TwitterUser(ctx context.Context, screenName string) (*TwitterUser, error) {
-	user, err := r.TwitterClient.UserByScreenName(screenName)
+	data, err := r.TwitterClient.Execute(operation.UserByScreenName, map[string]interface{}{"screen_name": screenName})
 	if err != nil {
 		return nil, err
 	}
-	return ParseUser(user)
-}
-
-// TwitterTweets is the resolver for the twitterTweets field.
-func (r *queryResolver) TwitterTweets(ctx context.Context, userID string, cursor *string) (*TweetConnection, error) {
-	if cursor == nil {
-		cursor = new(string)
-	}
-	tweets, resCursor, err := r.TwitterClient.UserTweets(userID, *cursor)
-	if err != nil {
-		return nil, err
-	}
-	parsedTweets, err := ParseTweets(tweets)
-	if err != nil {
-		return nil, err
-	}
-	return &TweetConnection{
-		Tweets: parsedTweets,
-		Cursor: &resCursor.BottomCursor,
-	}, nil
+	var user model.User
+	mapstructure.Decode(data, &user)
+	return FormatUser(&user)
 }
 
 // TwitterLikes is the resolver for the twitterLikes field.
@@ -50,16 +41,20 @@ func (r *queryResolver) TwitterLikes(ctx context.Context, userID string, cursor 
 	if cursor == nil {
 		cursor = new(string)
 	}
-	tweets, resCursor, err := r.TwitterClient.Likes(userID, *cursor)
+	data, err := r.TwitterClient.Execute(operation.Likes, map[string]interface{}{"userId": userID, "cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
-	parsedTweets, err := ParseTweets(tweets)
+	tweets, resCursor, err := twitter.InstructionsToTweets(data)
+	if err != nil {
+		return nil, err
+	}
+	formattedTweets, err := tools.FormatItems(tweets, FormatTweet)
 	if err != nil {
 		return nil, err
 	}
 	return &TweetConnection{
-		Tweets: parsedTweets,
+		Tweets: formattedTweets,
 		Cursor: &resCursor.BottomCursor,
 	}, nil
 }
@@ -69,16 +64,20 @@ func (r *queryResolver) TwitterUserTweets(ctx context.Context, userID string, cu
 	if cursor == nil {
 		cursor = new(string)
 	}
-	tweets, resCursor, err := r.TwitterClient.UserTweets(userID, *cursor)
+	data, err := r.TwitterClient.Execute(operation.UserTweets, map[string]interface{}{"userId": userID, "cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
-	parsedTweets, err := ParseTweets(tweets)
+	tweets, resCursor, err := twitter.InstructionsToTweets(data)
+	if err != nil {
+		return nil, err
+	}
+	formattedTweets, err := tools.FormatItems(tweets, FormatTweet)
 	if err != nil {
 		return nil, err
 	}
 	return &TweetConnection{
-		Tweets: parsedTweets,
+		Tweets: formattedTweets,
 		Cursor: &resCursor.BottomCursor,
 	}, nil
 }
@@ -88,16 +87,20 @@ func (r *queryResolver) TwitterBookmarks(ctx context.Context, cursor *string) (*
 	if cursor == nil {
 		cursor = new(string)
 	}
-	tweets, resCursor, err := r.TwitterClient.Bookmarks(*cursor)
+	data, err := r.TwitterClient.Execute(operation.Bookmarks, map[string]interface{}{"cursor": *cursor})
 	if err != nil {
 		return nil, err
 	}
-	parsedTweets, err := ParseTweets(tweets)
+	tweets, resCursor, err := twitter.InstructionsToTweets(data)
+	if err != nil {
+		return nil, err
+	}
+	formattedTweets, err := tools.FormatItems(tweets, FormatTweet)
 	if err != nil {
 		return nil, err
 	}
 	return &TweetConnection{
-		Tweets: parsedTweets,
+		Tweets: formattedTweets,
 		Cursor: &resCursor.BottomCursor,
 	}, nil
 }

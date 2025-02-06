@@ -3,6 +3,7 @@ module github.com/nharu-0630/bluebird
 go 1.22.2
 
 require (
+	dario.cat/mergo v1.0.1
 	github.com/99designs/gqlgen v0.17.45
 	github.com/lib/pq v1.10.9
 	github.com/oklog/ulid/v2 v2.1.0

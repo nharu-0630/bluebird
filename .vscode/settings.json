@@ -7,6 +7,10 @@
   "typescript.tsdk": "frontend/.yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "cSpell.words": [
+    "favorited",
+    "favourites",
+    "mapstructure",
+    "mergo",
     "supabase"
   ],
   "makefile.configureOnOpen": false
