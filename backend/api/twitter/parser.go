@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/nharu-0630/bluebird/api/twitter/model"
+	"github.com/nharu-0630/bluebird/tools"
 )
 
 func InstructionsToTweets(res map[string]interface{}) ([]model.Tweet, model.Cursor, error) {
@@ -35,9 +35,11 @@ func InstructionsToTweets(res map[string]interface{}) ([]model.Tweet, model.Curs
 				if tweetResults["result"] == nil {
 					continue
 				}
-				var tweet model.Tweet
-				mapstructure.Decode(tweetResults["result"], &tweet)
-				tweets = append(tweets, tweet)
+				tweet, err := tools.DecodeItem[model.Tweet](tweetResults["result"])
+				if err != nil {
+					continue
+				}
+				tweets = append(tweets, *tweet)
 			}
 			if strings.HasPrefix(entryID, "cursor-top") {
 				resCursor.TopCursor = content.(map[string]interface{})["value"].(string)
@@ -70,7 +72,7 @@ func InstructionsToTweetsWithInjections(res map[string]interface{}) (model.Tweet
 		return model.Tweet{}, nil, model.Cursor{}, errors.New("instruction not found")
 	}
 
-	tweets := model.Tweet{}
+	origin := &model.Tweet{}
 	conversation := make([]model.Tweet, 0)
 	resCursor := model.Cursor{}
 	entries := data["entries"].([]interface{})
@@ -84,7 +86,7 @@ func InstructionsToTweetsWithInjections(res map[string]interface{}) (model.Tweet
 				if tweetResults["result"] == nil {
 					continue
 				}
-				mapstructure.Decode(tweetResults["result"], &tweets)
+				origin, _ = tools.DecodeItem[model.Tweet](tweetResults["result"])
 			}
 			if strings.HasPrefix(entryID, "conversationthread-") {
 				items := content.(map[string]interface{})["items"].([]interface{})
@@ -97,9 +99,11 @@ func InstructionsToTweetsWithInjections(res map[string]interface{}) (model.Tweet
 					if tweetResults["result"] == nil {
 						continue
 					}
-					var tweet model.Tweet
-					mapstructure.Decode(tweetResults["result"], &tweet)
-					conversation = append(conversation, tweet)
+					tweet, err := tools.DecodeItem[model.Tweet](tweetResults["result"])
+					if err != nil {
+						continue
+					}
+					conversation = append(conversation, *tweet)
 				}
 			}
 			if strings.HasPrefix(entryID, "cursor-top") {
@@ -110,7 +114,7 @@ func InstructionsToTweetsWithInjections(res map[string]interface{}) (model.Tweet
 		}
 	}
 	resCursor.IsAfterLast = len(conversation) == 0 || resCursor.BottomCursor == ""
-	return tweets, conversation, resCursor, nil
+	return *origin, conversation, resCursor, nil
 }
 
 func InstructionsToUsers(res map[string]interface{}) ([]model.User, model.Cursor, error) {
@@ -128,9 +132,11 @@ func InstructionsToUsers(res map[string]interface{}) ([]model.User, model.Cursor
 			if userResults["result"] == nil {
 				continue
 			}
-			var user model.User
-			mapstructure.Decode(userResults["result"], &user)
-			users = append(users, user)
+			user, err := tools.DecodeItem[model.User](userResults["result"])
+			if err != nil {
+				continue
+			}
+			users = append(users, *user)
 		}
 		if strings.HasPrefix(entryID, "cursor-top") {
 			resCursor.TopCursor = content.(map[string]interface{})["value"].(string)

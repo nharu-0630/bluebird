@@ -1,6 +1,10 @@
 package operation
 
-import "github.com/nharu-0630/bluebird/api/twitter/model"
+import (
+	"errors"
+
+	"github.com/nharu-0630/bluebird/api/twitter/model"
+)
 
 var UserTweets = model.Operation{
 	Name: "UserTweets",
@@ -17,6 +21,18 @@ var UserTweets = model.Operation{
 	Method:   "GET",
 	Endpoint: "9zyyd1hebl7oNWIPdA8HRw",
 	Parser: func(data map[string]interface{}) (map[string]interface{}, error) {
-		return data, nil
+		if user, ok := data["user"].(map[string]interface{}); ok {
+			if result, ok := user["result"].(map[string]interface{}); ok {
+				if timeline_v2, ok := result["timeline_v2"].(map[string]interface{}); ok {
+					if timeline, ok := timeline_v2["timeline"].(map[string]interface{}); ok {
+						return timeline, nil
+					}
+					return nil, errors.New("user.result.timeline_v2.timeline not found")
+				}
+				return nil, errors.New("user.result.timeline_v2 not found")
+			}
+			return nil, errors.New("user.result not found")
+		}
+		return nil, errors.New("user not found")
 	},
 }

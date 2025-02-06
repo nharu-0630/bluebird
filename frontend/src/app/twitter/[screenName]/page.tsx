@@ -19,14 +19,12 @@ export default function ScreenNamePage({
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
-  const userID = data?.twitterUser?.id;
-
   return (
     <TweetsPage
       title="Tweets"
       queryDocument={GetTwitterTweetsDocument}
-      queryName="twitterTweets"
-      variables={{ userID: userID }}
+      queryName="twUserTweets"
+      variables={{ userID: data?.twUserByScreenName?.id }}
     />
   );
 }

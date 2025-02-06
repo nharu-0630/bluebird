@@ -8,7 +8,7 @@ export default function MeBookmarksPage() {
     <TweetsPage
       title="Bookmarks"
       queryDocument={GetTwitterBookmarksDocument}
-      queryName="twitterBookmarks"
+      queryName="twBookmarks"
     />
   );
 }

@@ -19,14 +19,14 @@ export default function ScreenNameLikesPage({
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error.message}</p>;
 
-  const userID = data?.twitterUser?.id;
+  const userID = data?.twUserByScreenName?.id;
 
   if (!userID) return <p>User not found</p>;
   return (
     <TweetsPage
       title="Likes"
       queryDocument={GetTwitterLikesDocument}
-      queryName="twitterLikes"
+      queryName="twLikes"
       variables={{ userID: userID }}
     />
   );

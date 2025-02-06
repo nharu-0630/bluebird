@@ -7,11 +7,11 @@ package graphql
 import (
 	"context"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/nharu-0630/bluebird/api/twitter"
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 	"github.com/nharu-0630/bluebird/api/twitter/operation"
 	"github.com/nharu-0630/bluebird/tools"
+	"go.uber.org/zap"
 )
 
 // TwTweetByID is the resolver for the twTweetByID field.
@@ -20,9 +20,11 @@ func (r *queryResolver) TwTweetByID(ctx context.Context, tweetID string) (*TwTwe
 	if err != nil {
 		return nil, err
 	}
-	var tweet model.Tweet
-	mapstructure.Decode(data, &tweet)
-	return FormatTweet(&tweet)
+	tweet, err := tools.DecodeItem[model.Tweet](data)
+	if err != nil {
+		return nil, err
+	}
+	return FormatTweet(tweet)
 }
 
 // TwUserByScreenName is the resolver for the twUserByScreenName field.
@@ -31,9 +33,11 @@ func (r *queryResolver) TwUserByScreenName(ctx context.Context, screenName strin
 	if err != nil {
 		return nil, err
 	}
-	var user model.User
-	mapstructure.Decode(data, &user)
-	return FormatUser(&user)
+	user, err := tools.DecodeItem[model.User](data)
+	if err != nil {
+		return nil, err
+	}
+	return FormatUser(user)
 }
 
 // TwLikes is the resolver for the twLikes field.
@@ -68,6 +72,7 @@ func (r *queryResolver) TwUserTweets(ctx context.Context, userID string, cursor 
 	if err != nil {
 		return nil, err
 	}
+	zap.L().Info("Data", zap.Any("data", data))
 	tweets, resCursor, err := twitter.InstructionsToTweets(data)
 	if err != nil {
 		return nil, err
