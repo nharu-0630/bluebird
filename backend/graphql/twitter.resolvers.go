@@ -58,9 +58,6 @@ func (r *queryResolver) TwLikes(ctx context.Context, userID string, cursor *stri
 		return nil, err
 	}
 	formattedTweets := tools.FormatItems(tweets, FormatTweet)
-	if err != nil {
-		return nil, err
-	}
 	r.TwClient.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
@@ -104,9 +101,6 @@ func (r *queryResolver) TwBookmarks(ctx context.Context, cursor *string) (*TwTwe
 		return nil, err
 	}
 	formattedTweets := tools.FormatItems(tweets, FormatTweet)
-	if err != nil {
-		return nil, err
-	}
 	r.TwClient.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
@@ -128,9 +122,6 @@ func (r *queryResolver) TwFollowers(ctx context.Context, userID string, cursor *
 		return nil, err
 	}
 	formattedUsers := tools.FormatItems(users, FormatUser)
-	if err != nil {
-		return nil, err
-	}
 	r.TwClient.CacheUsers(formattedUsers)
 	return &TwUsers{
 		Users:  formattedUsers,
@@ -152,9 +143,6 @@ func (r *queryResolver) TwFollowing(ctx context.Context, userID string, cursor *
 		return nil, err
 	}
 	formattedUsers := tools.FormatItems(users, FormatUser)
-	if err != nil {
-		return nil, err
-	}
 	r.TwClient.CacheUsers(formattedUsers)
 	return &TwUsers{
 		Users:  formattedUsers,
@@ -176,9 +164,6 @@ func (r *queryResolver) TwTweetDetail(ctx context.Context, tweetID string, curso
 		return nil, err
 	}
 	formattedTweets := tools.FormatItems(tweets, FormatTweet)
-	if err != nil {
-		return nil, err
-	}
 	r.TwClient.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
