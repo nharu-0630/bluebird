@@ -1,8 +1,12 @@
 package operation
 
-import "errors"
+import (
+	"errors"
 
-var Likes = Operation{
+	"github.com/nharu-0630/bluebird/api/twitter/model"
+)
+
+var Likes = model.Operation{
 	Name: "Likes",
 	DefaultParams: map[string]interface{}{
 		"variables":    map[string]interface{}{"count": 20, "includePromotedContent": false, "withClientEventToken": false, "withBirdwatchNotes": false, "withVoice": true, "withV2Timeline": true},

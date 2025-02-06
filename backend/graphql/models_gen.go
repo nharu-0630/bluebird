@@ -46,12 +46,7 @@ type ShelfTag struct {
 	Name string `json:"name"`
 }
 
-type TweetConnection struct {
-	Tweets []*TwitterTweet `json:"tweets,omitempty"`
-	Cursor *string         `json:"cursor,omitempty"`
-}
-
-type TwitterMedia struct {
+type TwMedia struct {
 	ID          *string `json:"id,omitempty"`
 	MediaKey    *string `json:"mediaKey,omitempty"`
 	ExpandedURL *string `json:"expandedURL,omitempty"`
@@ -60,24 +55,29 @@ type TwitterMedia struct {
 	VideoURL    *string `json:"videoURL,omitempty"`
 }
 
-type TwitterTweet struct {
-	ID            *string         `json:"id,omitempty"`
-	User          *TwitterUser    `json:"user,omitempty"`
-	FullText      *string         `json:"fullText,omitempty"`
-	Media         []*TwitterMedia `json:"media,omitempty"`
-	CreatedAt     *time.Time      `json:"createdAt,omitempty"`
-	ReplyCount    *int            `json:"replyCount,omitempty"`
-	RetweetCount  *int            `json:"retweetCount,omitempty"`
-	QuoteCount    *int            `json:"quoteCount,omitempty"`
-	Retweeted     *bool           `json:"retweeted,omitempty"`
-	FavoriteCount *int            `json:"favoriteCount,omitempty"`
-	Favorited     *bool           `json:"favorited,omitempty"`
-	BookmarkCount *int            `json:"bookmarkCount,omitempty"`
-	Bookmarked    *bool           `json:"bookmarked,omitempty"`
-	Lang          *string         `json:"lang,omitempty"`
+type TwTweet struct {
+	ID            *string    `json:"id,omitempty"`
+	User          *TwUser    `json:"user,omitempty"`
+	FullText      *string    `json:"fullText,omitempty"`
+	Media         []*TwMedia `json:"media"`
+	CreatedAt     *time.Time `json:"createdAt,omitempty"`
+	ReplyCount    *int       `json:"replyCount,omitempty"`
+	RetweetCount  *int       `json:"retweetCount,omitempty"`
+	QuoteCount    *int       `json:"quoteCount,omitempty"`
+	Retweeted     *bool      `json:"retweeted,omitempty"`
+	FavoriteCount *int       `json:"favoriteCount,omitempty"`
+	Favorited     *bool      `json:"favorited,omitempty"`
+	BookmarkCount *int       `json:"bookmarkCount,omitempty"`
+	Bookmarked    *bool      `json:"bookmarked,omitempty"`
+	Lang          *string    `json:"lang,omitempty"`
 }
 
-type TwitterUser struct {
+type TwTweets struct {
+	Tweets []*TwTweet `json:"tweets"`
+	Cursor *string    `json:"cursor,omitempty"`
+}
+
+type TwUser struct {
 	ID                   *string    `json:"id,omitempty"`
 	Name                 *string    `json:"name,omitempty"`
 	ScreenName           *string    `json:"screenName,omitempty"`
@@ -96,8 +96,13 @@ type TwitterUser struct {
 	MediaCount           *int       `json:"mediaCount,omitempty"`
 	FavouritesCount      *int       `json:"favouritesCount,omitempty"`
 	ListedCount          *int       `json:"listedCount,omitempty"`
-	PinnedTweetIDs       []*string  `json:"pinnedTweetIDs,omitempty"`
+	PinnedTweetIDs       []string   `json:"pinnedTweetIDs"`
 	ProfileBannerURL     *string    `json:"profileBannerURL,omitempty"`
 	ProfileImageURL      *string    `json:"profileImageURL,omitempty"`
 	StatusesCount        *int       `json:"statusesCount,omitempty"`
+}
+
+type TwUsers struct {
+	Users  []*TwUser `json:"users"`
+	Cursor *string   `json:"cursor,omitempty"`
 }

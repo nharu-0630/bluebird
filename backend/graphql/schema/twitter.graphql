@@ -1,10 +1,10 @@
 scalar DateTime
 
-type TwitterTweet {
+type TwTweet {
   id: String
-  user: TwitterUser
+  user: TwUser
   fullText: String
-  media: [TwitterMedia]
+  media: [TwMedia!]!
   createdAt: DateTime
   replyCount: Int
   retweetCount: Int
@@ -17,7 +17,7 @@ type TwitterTweet {
   lang: String
 }
 
-type TwitterMedia {
+type TwMedia {
   id: String
   mediaKey: String
   expandedURL: String
@@ -26,7 +26,7 @@ type TwitterMedia {
   videoURL: String
 }
 
-type TwitterUser {
+type TwUser {
   id: String
   name: String
   screenName: String
@@ -45,21 +45,29 @@ type TwitterUser {
   mediaCount: Int
   favouritesCount: Int
   listedCount: Int
-  pinnedTweetIDs: [String]
+  pinnedTweetIDs: [String!]!
   profileBannerURL: String
   profileImageURL: String
   statusesCount: Int
 }
 
-type TweetConnection {
-  tweets: [TwitterTweet]
+type TwTweets {
+  tweets: [TwTweet!]!
+  cursor: String
+}
+
+type TwUsers {
+  users: [TwUser!]!
   cursor: String
 }
 
 extend type Query {
-  twitterTweet(tweetID: String!): TwitterTweet
-  twitterUser(screenName: String!): TwitterUser
-  twitterLikes(userID: String!, cursor: String): TweetConnection
-  twitterUserTweets(userID: String!, cursor: String): TweetConnection
-  twitterBookmarks(cursor: String): TweetConnection
+  twTweetByID(tweetID: String!): TwTweet
+  twUserByScreenName(screenName: String!): TwUser
+  twLikes(userID: String!, cursor: String): TwTweets
+  twUserTweets(userID: String!, cursor: String): TwTweets
+  twBookmarks(cursor: String): TwTweets
+  twFollowers(userID: String!, cursor: String): TwUsers
+  twFollowing(userID: String!, cursor: String): TwUsers
+  twTweetDetail(tweetID: String!, cursor: String): TwTweets
 }

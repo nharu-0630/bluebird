@@ -6,9 +6,9 @@ import (
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
-func FormatTweet(tweet *model.Tweet) (*TwitterTweet, error) {
+func FormatTweet(tweet *model.Tweet) (*TwTweet, error) {
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, tweet.Legacy.CreatedAt)
-	parsedMedias := make([]*TwitterMedia, len(tweet.Legacy.Entities.Media))
+	parsedMedias := make([]*TwMedia, len(tweet.Legacy.Entities.Media))
 	for j, media := range tweet.Legacy.Entities.Media {
 		var videoURL *string
 		if media.Type == "animated_gif" || media.Type == "video" {
@@ -23,7 +23,7 @@ func FormatTweet(tweet *model.Tweet) (*TwitterTweet, error) {
 				}
 			}
 		}
-		parsedMedias[j] = &TwitterMedia{
+		parsedMedias[j] = &TwMedia{
 			ID:          &media.IDStr,
 			MediaKey:    &media.MediaKey,
 			ExpandedURL: &media.ExpandedURL,
@@ -33,7 +33,7 @@ func FormatTweet(tweet *model.Tweet) (*TwitterTweet, error) {
 		}
 	}
 	user, _ := FormatUser(&tweet.Core.UserResults.Result)
-	return &TwitterTweet{
+	return &TwTweet{
 		ID:            &tweet.RestID,
 		User:          user,
 		FullText:      &tweet.Legacy.FullText,
@@ -51,15 +51,11 @@ func FormatTweet(tweet *model.Tweet) (*TwitterTweet, error) {
 	}, nil
 }
 
-func FormatUser(user *model.User) (*TwitterUser, error) {
+func FormatUser(user *model.User) (*TwUser, error) {
 	parsedBirthday := time.Time{}
 	// :TODO: Parse birthday
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, user.Legacy.CreatedAt)
-	parsedPinnedTweetIDs := make([]*string, len(user.Legacy.PinnedTweetIdsStr))
-	for i, id := range user.Legacy.PinnedTweetIdsStr {
-		parsedPinnedTweetIDs[i] = &id
-	}
-	return &TwitterUser{
+	return &TwUser{
 		ID:                   &user.RestID,
 		Name:                 &user.Legacy.Name,
 		ScreenName:           &user.Legacy.ScreenName,
@@ -78,7 +74,7 @@ func FormatUser(user *model.User) (*TwitterUser, error) {
 		MediaCount:           &user.Legacy.MediaCount,
 		FavouritesCount:      &user.Legacy.FavouritesCount,
 		ListedCount:          &user.Legacy.ListedCount,
-		PinnedTweetIDs:       parsedPinnedTweetIDs,
+		PinnedTweetIDs:       user.Legacy.PinnedTweetIdsStr,
 		ProfileBannerURL:     &user.Legacy.ProfileBannerURL,
 		ProfileImageURL:      &user.Legacy.ProfileImageURLHTTPS,
 		StatusesCount:        &user.Legacy.StatusesCount,

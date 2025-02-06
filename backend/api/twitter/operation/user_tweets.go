@@ -1,6 +1,8 @@
 package operation
 
-var UserTweets = Operation{
+import "github.com/nharu-0630/bluebird/api/twitter/model"
+
+var UserTweets = model.Operation{
 	Name: "UserTweets",
 	DefaultParams: map[string]interface{}{
 		"variables":    map[string]interface{}{"count": 20, "includePromotedContent": false, "withQuickPromoteEligibilityTweetFields": true, "withVoice": true, "withV2Timeline": true},

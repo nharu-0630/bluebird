@@ -6,6 +6,7 @@ require (
 	dario.cat/mergo v1.0.1
 	github.com/99designs/gqlgen v0.17.45
 	github.com/lib/pq v1.10.9
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/rs/cors v1.10.1
 	github.com/supabase-community/storage-go v0.7.0
@@ -22,7 +23,6 @@ require (
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect

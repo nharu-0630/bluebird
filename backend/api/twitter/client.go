@@ -9,7 +9,7 @@ import (
 
 	"dario.cat/mergo"
 	"github.com/google/uuid"
-	"github.com/nharu-0630/bluebird/api/twitter/operation"
+	"github.com/nharu-0630/bluebird/api/twitter/model"
 	"go.uber.org/zap"
 )
 
@@ -45,7 +45,7 @@ func NewGuestClient() *Client {
 	return client
 }
 
-func (c *Client) Execute(o operation.Operation, args map[string]interface{}) (map[string]interface{}, error) {
+func (c *Client) Execute(o model.Operation, args map[string]interface{}) (map[string]interface{}, error) {
 	zap.L().Info("Executing operation", zap.String("name", o.Name))
 	params := o.DefaultParams
 	if err := mergo.Merge(&params, o.Args); err != nil {

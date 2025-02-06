@@ -1,2 +1,2 @@
 gen:
-	yarn codegen
+	npm run codegen

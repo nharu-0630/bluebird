@@ -1,8 +1,12 @@
 package operation
 
-import "errors"
+import (
+	"errors"
 
-var UserByScreenName = Operation{
+	"github.com/nharu-0630/bluebird/api/twitter/model"
+)
+
+var UserByScreenName = model.Operation{
 	Name: "UserByScreenName",
 	DefaultParams: map[string]interface{}{
 		"variables":    map[string]interface{}{"withSafetyModeUserFields": true},

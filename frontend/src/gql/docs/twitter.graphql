@@ -1,5 +1,5 @@
 query GetTwitterUser($screenName: String!) {
-  twitterUser(screenName: $screenName) {
+  twUserByScreenName(screenName: $screenName) {
     id
     name
     screenName
@@ -26,7 +26,7 @@ query GetTwitterUser($screenName: String!) {
 }
 
 query GetTwitterTweets($userID: String!, $cursor: String) {
-  twitterTweets(userID: $userID, cursor: $cursor) {
+  twUserTweets(userID: $userID, cursor: $cursor) {
     cursor
     tweets {
       id
@@ -78,7 +78,7 @@ query GetTwitterTweets($userID: String!, $cursor: String) {
 }
 
 query GetTwitterLikes($userID: String!, $cursor: String) {
-  twitterLikes(userID: $userID, cursor: $cursor) {
+  twLikes(userID: $userID, cursor: $cursor) {
     cursor
     tweets {
       id
@@ -130,7 +130,7 @@ query GetTwitterLikes($userID: String!, $cursor: String) {
 }
 
 query GetTwitterBookmarks($cursor: String) {
-  twitterBookmarks(cursor: $cursor) {
+  twBookmarks(cursor: $cursor) {
     cursor
     tweets {
       id

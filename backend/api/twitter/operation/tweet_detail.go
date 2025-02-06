@@ -1,8 +1,12 @@
 package operation
 
-import "errors"
+import (
+	"errors"
 
-var TweetDetail = Operation{
+	"github.com/nharu-0630/bluebird/api/twitter/model"
+)
+
+var TweetDetail = model.Operation{
 	Name: "TweetDetail",
 	DefaultParams: map[string]interface{}{
 		"variables":    map[string]interface{}{"count": 20, "with_rux_injections": false, "includePromotedContent": false, "withCommunity": true, "withQuickPromoteEligibilityTweetFields": true, "withBirdwatchNotes": true, "withVoice": true, "withV2Timeline": true},
