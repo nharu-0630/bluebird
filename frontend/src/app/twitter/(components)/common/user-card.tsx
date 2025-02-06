@@ -28,7 +28,7 @@ export function UserCard({ item }: UserCardProps) {
             <AvatarImage src={item?.profileImageURL!} />
           </Avatar>
           <div className="flex flex-col items-start justify-center">
-            <div className="font-semibold">{item?.name}</div>
+            <div className="font-semibold truncate">{item?.name}</div>
             <div className="text-xs font-medium">@{item?.screenName}</div>
           </div>
         </Button>
@@ -57,7 +57,7 @@ export function UserCard({ item }: UserCardProps) {
               <span className="font-semibold">
                 {item?.friendsCount?.toLocaleString()}
               </span>{" "}
-              Friends
+              Following
             </span>
           </Button>
           {item?.followedBy && <Badge variant={"outline"}>FollowedBy</Badge>}

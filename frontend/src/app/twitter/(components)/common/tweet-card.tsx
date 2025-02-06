@@ -34,7 +34,7 @@ export function TweetCard({ item }: TweetCardProps) {
             <AvatarImage src={item.user?.profileImageURL!} />
           </Avatar>
           <div className="flex flex-col items-start justify-center">
-            <div className="font-semibold">{item.user?.name}</div>
+            <div className="font-semibold truncate">{item.user?.name}</div>
             <div className="text-xs font-medium">@{item.user?.screenName}</div>
           </div>
         </Button>
@@ -63,7 +63,7 @@ export function TweetCard({ item }: TweetCardProps) {
               <span className="font-semibold">
                 {item.user?.friendsCount?.toLocaleString()}
               </span>{" "}
-              Friends
+              Following
             </span>
           </Button>
           {item.user?.followedBy && (
