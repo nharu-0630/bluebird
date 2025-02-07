@@ -12,6 +12,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/model"
+	"github.com/nharu-0630/bluebird/tools"
 	ulid_v2 "github.com/oklog/ulid/v2"
 	storage_go "github.com/supabase-community/storage-go"
 )
@@ -442,32 +443,27 @@ func (r *queryResolver) DeletedShelfItem(ctx context.Context, ulid string) (*She
 	if err := r.DB.Unscoped().Where("ulid = ?", ulid).Preload("Category").Preload("Tags").Preload("Location").First(&shelfItem).Error; err != nil {
 		return nil, err
 	}
-	parsedShelfItem := &ShelfItem{
-		Ulid:        shelfItem.Ulid,
-		Name:        shelfItem.Name,
-		Category:    &ShelfCategory{Ulid: shelfItem.Category.Ulid, Name: shelfItem.Category.Name},
+	return &ShelfItem{
+		Ulid:     shelfItem.Ulid,
+		Name:     shelfItem.Name,
+		Category: &ShelfCategory{Ulid: shelfItem.Category.Ulid, Name: shelfItem.Category.Name},
+		Tags: tools.FormatItems(shelfItem.Tags, func(tag model.ShelfTag) ShelfTag {
+			return ShelfTag{Ulid: tag.Ulid, Name: tag.Name}
+		}),
 		Description: shelfItem.Description,
 		Location:    &ShelfLocation{Ulid: shelfItem.Location.Ulid, Name: shelfItem.Location.Name},
-	}
-	parsedTags := make([]*ShelfTag, len(shelfItem.Tags))
-	for i, tag := range shelfItem.Tags {
-		parsedTags[i] = &ShelfTag{Ulid: tag.Ulid, Name: tag.Name}
-	}
-	parsedShelfItem.Tags = parsedTags
-	return parsedShelfItem, nil
+	}, nil
 }
 
 // ShelfCategories is the resolver for the shelfCategories field.
 func (r *queryResolver) ShelfCategories(ctx context.Context) ([]*ShelfCategory, error) {
-	shelfCategories := []*model.ShelfCategory{}
+	shelfCategories := []model.ShelfCategory{}
 	if err := r.DB.Find(&shelfCategories).Error; err != nil {
 		return nil, err
 	}
-	var parsedShelfCategories []*ShelfCategory
-	for _, shelfCategory := range shelfCategories {
-		parsedShelfCategories = append(parsedShelfCategories, &ShelfCategory{Ulid: shelfCategory.Ulid, Name: shelfCategory.Name})
-	}
-	return parsedShelfCategories, nil
+	return tools.FormatItems(shelfCategories, func(category model.ShelfCategory) ShelfCategory {
+		return ShelfCategory{Ulid: category.Ulid, Name: category.Name}
+	}), nil
 }
 
 // ShelfCategory is the resolver for the shelfCategory field.
@@ -485,11 +481,9 @@ func (r *queryResolver) ShelfTags(ctx context.Context) ([]*ShelfTag, error) {
 	if err := r.DB.Find(&shelfTags).Error; err != nil {
 		return nil, err
 	}
-	var parsedShelfTags []*ShelfTag
-	for _, shelfTag := range shelfTags {
-		parsedShelfTags = append(parsedShelfTags, &ShelfTag{Ulid: shelfTag.Ulid, Name: shelfTag.Name})
-	}
-	return parsedShelfTags, nil
+	return tools.FormatItems(shelfTags, func(tag model.ShelfTag) ShelfTag {
+		return ShelfTag{Ulid: tag.Ulid, Name: tag.Name}
+	}), nil
 }
 
 // ShelfTag is the resolver for the shelfTag field.
@@ -507,11 +501,9 @@ func (r *queryResolver) ShelfLocations(ctx context.Context) ([]*ShelfLocation, e
 	if err := r.DB.Find(&shelfLocations).Error; err != nil {
 		return nil, err
 	}
-	var parsedShelfLocations []*ShelfLocation
-	for _, shelfLocation := range shelfLocations {
-		parsedShelfLocations = append(parsedShelfLocations, &ShelfLocation{Ulid: shelfLocation.Ulid, Name: shelfLocation.Name})
-	}
-	return parsedShelfLocations, nil
+	return tools.FormatItems(shelfLocations, func(location model.ShelfLocation) ShelfLocation {
+		return ShelfLocation{Ulid: location.Ulid, Name: location.Name}
+	}), nil
 }
 
 // ShelfLocation is the resolver for the shelfLocation field.
