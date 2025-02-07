@@ -7,6 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	_ "github.com/lib/pq"
+	"github.com/nharu-0630/bluebird/api/poipiku"
 	"github.com/nharu-0630/bluebird/api/twitter"
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/graphql"
@@ -22,13 +23,13 @@ import (
 
 func main() {
 	zap.ReplaceGlobals(zap.New(zapcore.NewCore(zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()), zapcore.AddSync(os.Stdout), zapcore.DebugLevel)))
-	// Connect to the database
+
 	dsn := "postgres://" + os.Getenv("SUPABASE_POSTGRES_USER") + ":" + os.Getenv("SUPABASE_POSTGRES_PASSWORD") + "@" + os.Getenv("SUPABASE_POSTGRES_HOST") + ":" + os.Getenv("SUPABASE_POSTGRES_PORT") + "/" + os.Getenv("SUPABASE_POSTGRES_DB")
 	db, err := gorm.Open(postgres.New(postgres.Config{DSN: dsn, PreferSimpleProtocol: true}), &gorm.Config{})
 	if err != nil {
 		zap.L().Sugar().Fatal(err)
 	}
-	// For shelf
+
 	db.AutoMigrate(&model.ShelfItem{}, &model.ShelfCategory{}, &model.ShelfTag{}, &model.ShelfLocation{}, &model.BucketFile{})
 	db.Create(mock.MockShelfCategory())
 	db.Create(mock.MockShelfTag())
@@ -55,7 +56,6 @@ func main() {
 		}
 	}
 
-	// For twitter
 	db.AutoMigrate(&model.TwTweet{}, &model.TwUser{}, &model.TwQueryCache{})
 	twAuthTokens := strings.Split(os.Getenv("TWITTER_AUTH_TOKEN"), ",")
 	twCsrfTokens := strings.Split(os.Getenv("TWITTER_CSRF_TOKEN"), ",")
@@ -67,14 +67,17 @@ func main() {
 		twClients[i] = twitter.NewAuthorizedClient(twAuthTokens[i], twCsrfTokens[i])
 	}
 	twPipe := graphql.NewTwPipe(db, twitter.NewClients(twClients))
-	// For GraphQL
+
+	poClient := poipiku.NewClient(os.Getenv("POIPIKU_TOKEN"))
+
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "9999"
+		port = "4000"
 	}
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{DB: db,
 		Storage:  storage,
-		TwClient: twPipe}}))
+		TwPipe:   twPipe,
+		PoClient: poClient}}))
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},

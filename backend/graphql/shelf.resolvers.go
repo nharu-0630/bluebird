@@ -320,7 +320,7 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 		Bucket:    config.ShelfBucketName,
 		Key:       config.ShelfItemKeyName,
 		Name:      file.Filename,
-		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+"/supabase"),
+		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase"),
 	}, nil
 }
 
@@ -373,7 +373,7 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 				Key:          image.Key,
 				Name:         image.Name,
 				OriginalName: image.OriginalName,
-				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+"/supabase"),
+				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase"),
 			}
 		}
 		parsedShelfItems[i].Images = parsedFiles
@@ -406,7 +406,7 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 			Bucket:    image.Bucket,
 			Key:       image.Key,
 			Name:      image.Name,
-			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+"/supabase"),
+			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase"),
 		}
 	}
 	parsedShelfItem.Images = parsedFiles
@@ -518,8 +518,4 @@ func (r *queryResolver) ShelfLocation(ctx context.Context, ulid string) (*ShelfL
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
-// Query returns QueryResolver implementation.
-func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
-
 type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

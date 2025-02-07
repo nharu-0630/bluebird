@@ -18,6 +18,19 @@ type BucketFile struct {
 type Mutation struct {
 }
 
+type PoIllust struct {
+	UserID      string     `json:"userID"`
+	UserName    string     `json:"userName"`
+	IllustID    string     `json:"illustID"`
+	Password    string     `json:"password"`
+	Description string     `json:"description"`
+	Images      []*PoImage `json:"images"`
+}
+
+type PoImage struct {
+	URL string `json:"url"`
+}
+
 type Query struct {
 }
 

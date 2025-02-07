@@ -66,16 +66,6 @@ func (c *Client) Execute(o model.Cmd, args map[string]interface{}) (map[string]i
 
 func (c *Client) gql(method string, endpoint string, name string, params map[string]interface{}) (map[string]interface{}, error) {
 	zap.L().Debug("GQL request", zap.String("operation", name))
-	// if _, ok := c.rateLimits[name]; ok {
-	// 	if c.isGuest {
-	// 		if c.rateLimits[name].remaining == 0 {
-	// 			zap.L().Debug("Rate limit exceeded", zap.String("operation", name))
-	// 			c.initializeGuestToken()
-	// 		}
-	// 	} else {
-	// 		c.rateLimits[name].wait()
-	// 	}
-	// }
 	if method == "POST" {
 		return nil, nil
 	} else if method == "GET" {

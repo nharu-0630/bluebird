@@ -35,7 +35,7 @@ type BucketFile {
   signedUrl: String!
 }
 
-type Query {
+extend type Query {
   shelfItems: [ShelfItem!]!
   shelfItem(ulid: String!): ShelfItem
   deletedShelfItems: [ShelfItem!]!
@@ -48,7 +48,7 @@ type Query {
   shelfLocation(ulid: String!): ShelfLocation
 }
 
-type Mutation {
+extend type Mutation {
   createShelfItem(
     name: String!
     categoryUlid: String!

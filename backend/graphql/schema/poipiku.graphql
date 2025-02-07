@@ -1,0 +1,16 @@
+type PoIllust {
+  userID: String!
+  userName: String!
+  illustID: String!
+  password: String!
+  description: String!
+  images: [PoImage!]!
+}
+
+type PoImage {
+  url: String!
+}
+
+extend type Query {
+  poIllust(userID: String!, illustID: String!, password: String): PoIllust!
+}
