@@ -1,6 +1,6 @@
 package model
 
-type Operation struct {
+type Cmd struct {
 	Name          string
 	AllowGuest    bool
 	DefaultParams map[string]interface{}

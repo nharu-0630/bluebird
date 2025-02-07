@@ -1,4 +1,4 @@
-package operation
+package cmd
 
 import (
 	"errors"
@@ -6,8 +6,8 @@ import (
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
-var Followers = model.Operation{
-	Name:       "Followers",
+var Following = model.Cmd{
+	Name:       "Following",
 	AllowGuest: false,
 	DefaultParams: map[string]interface{}{
 		"variables": map[string]interface{}{"count": 20, "includePromotedContent": false},
@@ -19,7 +19,7 @@ var Followers = model.Operation{
 			"cursor": nil},
 	},
 	Method:   "GET",
-	Endpoint: "DMcBoZkXf9axSfV2XND0Ig",
+	Endpoint: "7FEKOPNAvxWASt6v9gfCXw",
 	Parser: func(data map[string]interface{}) (map[string]interface{}, error) {
 		if user, ok := data["user"].(map[string]interface{}); ok {
 			if result, ok := user["result"].(map[string]interface{}); ok {

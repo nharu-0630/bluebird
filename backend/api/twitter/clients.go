@@ -17,7 +17,7 @@ func NewClients(clients []*Client) *Clients {
 	}
 }
 
-func (c *Clients) Execute(o model.Operation, args map[string]interface{}) (map[string]interface{}, error) {
+func (c *Clients) Execute(o model.Cmd, args map[string]interface{}) (map[string]interface{}, error) {
 	clients := map[*Client]int{}
 	for _, client := range c.Clients {
 		if client.isGuest && !o.AllowGuest {

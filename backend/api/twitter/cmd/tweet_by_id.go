@@ -1,4 +1,4 @@
-package operation
+package cmd
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
-var TweetByID = model.Operation{
+var TweetByID = model.Cmd{
 	Name:       "TweetResultByRestId",
 	AllowGuest: true,
 	DefaultParams: map[string]interface{}{

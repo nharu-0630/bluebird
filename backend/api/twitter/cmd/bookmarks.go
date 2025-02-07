@@ -1,4 +1,4 @@
-package operation
+package cmd
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
-var Bookmarks = model.Operation{
+var Bookmarks = model.Cmd{
 	Name:       "Bookmarks",
 	AllowGuest: false,
 	DefaultParams: map[string]interface{}{

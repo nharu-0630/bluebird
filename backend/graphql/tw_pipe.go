@@ -21,13 +21,13 @@ func NewTwPipe(db *gorm.DB, clients *twitter.Clients) *TwPipe {
 	}
 }
 
-func (t *TwPipe) Execute(o api_model.Operation, args map[string]interface{}) (map[string]interface{}, error) {
-	data, err := t.Clients.Execute(o, args)
+func (t *TwPipe) Execute(c api_model.Cmd, args map[string]interface{}) (map[string]interface{}, error) {
+	data, err := t.Clients.Execute(c, args)
 	if err != nil {
 		return nil, err
 	}
 	queryCache := &model.TwQueryCache{
-		QueryName: o.Name,
+		QueryName: c.Name,
 		Args:      datatypes.NewJSONType(args),
 		Response:  datatypes.NewJSONType(data),
 	}
