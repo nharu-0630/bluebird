@@ -6,15 +6,13 @@ package graphql
 
 import (
 	"context"
-	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/model"
 	"github.com/nharu-0630/bluebird/tools"
 	ulid_v2 "github.com/oklog/ulid/v2"
-	storage_go "github.com/supabase-community/storage-go"
 )
 
 // CreateShelfItem is the resolver for the createShelfItem field.
@@ -292,12 +290,10 @@ func (r *mutationResolver) DeleteShelfLocation(ctx context.Context, ulid string)
 
 // AddShelfItemImage is the resolver for the addShelfItemImage field.
 func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, file graphql.Upload) (*BucketFile, error) {
-	fileUlid := config.ShelfImageIDPrefix + ulid_v2.Make().String()
-	ext := file.Filename[strings.LastIndex(file.Filename, "."):]
-	filename := config.ShelfItemKeyName + "/" + ulid + "/" + fileUlid + ext
-	_, err := r.Storage.UploadFile(config.ShelfBucketName, filename, file.File, storage_go.FileOptions{
-		ContentType: &file.ContentType,
-	})
+	ext := filepath.Ext(file.Filename)
+	basename := config.ShelfImageIDPrefix + ulid_v2.Make().String()
+	relativePath := config.ShelfItemKeyName + "/" + ulid + "/" + basename + ext
+	_, err := r.ShStorage.UploadGraphql(relativePath, file)
 	if err != nil {
 		return nil, err
 	}
@@ -306,21 +302,21 @@ func (r *mutationResolver) AddShelfItemImage(ctx context.Context, ulid string, f
 		return nil, err
 	}
 	newImage := model.BucketFile{
-		Ulid:         fileUlid,
+		Ulid:         basename,
 		Bucket:       config.ShelfBucketName,
 		Key:          config.ShelfItemKeyName,
-		Name:         fileUlid + ext,
+		Name:         basename + ext,
 		OriginalName: file.Filename,
 	}
 	if err := r.DB.Model(&shelfItem).Association("Images").Append(&newImage); err != nil {
 		return nil, err
 	}
 	return &BucketFile{
-		Ulid:      fileUlid,
+		Ulid:      basename,
 		Bucket:    config.ShelfBucketName,
 		Key:       config.ShelfItemKeyName,
 		Name:      file.Filename,
-		SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(config.ShelfBucketName, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase"),
+		SignedURL: r.ShStorage.GetPublicUrl(relativePath),
 	}, nil
 }
 
@@ -335,7 +331,7 @@ func (r *mutationResolver) RemoveShelfItemImage(ctx context.Context, ulid string
 		return false, err
 	}
 	filename := config.ShelfItemKeyName + "/" + ulid + "/" + image.Name
-	if _, err := r.Storage.RemoveFile(config.ShelfBucketName, []string{filename}); err != nil {
+	if err := r.ShStorage.RemoveFile([]string{filename}); err != nil {
 		return false, err
 	}
 	if err := r.DB.Model(&shelfItem).Association("Images").Delete(&image); err != nil {
@@ -373,7 +369,7 @@ func (r *queryResolver) ShelfItems(ctx context.Context) ([]*ShelfItem, error) {
 				Key:          image.Key,
 				Name:         image.Name,
 				OriginalName: image.OriginalName,
-				SignedURL:    strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase"),
+				SignedURL:    r.ShStorage.GetPublicUrl(filename),
 			}
 		}
 		parsedShelfItems[i].Images = parsedFiles
@@ -406,7 +402,7 @@ func (r *queryResolver) ShelfItem(ctx context.Context, ulid string) (*ShelfItem,
 			Bucket:    image.Bucket,
 			Key:       image.Key,
 			Name:      image.Name,
-			SignedURL: strings.ReplaceAll(r.Storage.GetPublicUrl(image.Bucket, filename).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase"),
+			SignedURL: r.ShStorage.GetPublicUrl(filename),
 		}
 	}
 	parsedShelfItem.Images = parsedFiles

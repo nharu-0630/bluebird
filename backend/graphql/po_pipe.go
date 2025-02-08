@@ -1,29 +1,28 @@
 package graphql
 
 import (
-	"bytes"
-	"mime"
-	"os"
+	"encoding/hex"
+	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/nharu-0630/bluebird/api/poipiku"
 	api_model "github.com/nharu-0630/bluebird/api/poipiku/model"
 	"github.com/nharu-0630/bluebird/config"
 	"github.com/nharu-0630/bluebird/model"
+	"github.com/nharu-0630/bluebird/pipe"
 	"github.com/nharu-0630/bluebird/tools"
-	storage_go "github.com/supabase-community/storage-go"
+	"golang.org/x/crypto/sha3"
 	"gorm.io/gorm"
 )
 
 type PoPipe struct {
 	DB      *gorm.DB
-	Storage *storage_go.Client
+	Storage *pipe.Storage
 	Client  *poipiku.Client
 }
 
-func NewPoPipe(db *gorm.DB, storage *storage_go.Client, client *poipiku.Client) *PoPipe {
+func NewPoPipe(db *gorm.DB, storage *pipe.Storage, client *poipiku.Client) *PoPipe {
 	return &PoPipe{
 		DB:      db,
 		Storage: storage,
@@ -32,17 +31,17 @@ func NewPoPipe(db *gorm.DB, storage *storage_go.Client, client *poipiku.Client) 
 }
 
 func (p *PoPipe) fetchUser(user api_model.User) (*model.PoUser, error) {
-	image, err := p.uploadIllustImage(&user.Image, config.PoipikuUserKeyName, user.ID+"_"+time.Now().Format("20060102150405"))
+	relativePath := config.PoipikuUserKeyName + "/" + user.ID + "_" + time.Now().Format("20060102150405") + filepath.Ext(user.Image.URL)
+	image, err := p.uploadIllustImage(relativePath, &user.Image)
 	if err != nil {
 		return nil, err
 	}
 	poUser := model.PoUser{
 		ID:                user.ID,
 		Name:              user.Name,
-		ImageBucket:       image.Bucket,
-		ImageKey:          image.Key,
-		ImageName:         image.Name,
+		ImageRelativePath: image.RelativePath,
 		ImageOriginalName: image.OriginalName,
+		ImageSHAKE256:     image.SHAKE256,
 		ExternalURL:       user.ExternalURL,
 		Description:       user.Description,
 		IsFollowing:       user.IsFollowing,
@@ -69,7 +68,8 @@ func (p *PoPipe) fetchIllust(illust api_model.Illust, poUser model.PoUser) (*mod
 	}
 	poIllust.Images = make([]model.PoIllustImage, len(*illust.Images))
 	for idx, illustImage := range *illust.Images {
-		image, err := p.uploadIllustImage(&illustImage, config.PoipikuIllustKeyName, illust.ID+"_"+poIllust.CreatedAt.Format("20060102150405")+"_"+strconv.Itoa(idx))
+		relativePath := config.PoipikuIllustKeyName + "/" + illust.ID + "_" + poIllust.CreatedAt.Format("20060102150405") + "_" + strconv.Itoa(idx) + filepath.Ext(illustImage.URL)
+		image, err := p.uploadIllustImage(relativePath, &illustImage)
 		if err != nil {
 			return nil, err
 		}
@@ -102,7 +102,7 @@ func (p *PoPipe) FetchIllust(userID string, illustID string, password string) (*
 	}
 	imageURLs := make([]string, len(poIllust.Images))
 	for i, image := range poIllust.Images {
-		imageURLs[i] = strings.ReplaceAll(p.Storage.GetPublicUrl(config.PoipikuBucketName, image.Key+"/"+image.Name).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase")
+		imageURLs[i] = p.Storage.GetPublicUrl(image.RelativePath)
 	}
 	return &PoIllust{
 			ID:          poIllust.ID,
@@ -112,21 +112,16 @@ func (p *PoPipe) FetchIllust(userID string, illustID string, password string) (*
 		nil
 }
 
-func (p *PoPipe) uploadIllustImage(illustImage *api_model.IllustImage, key string, name string) (*model.PoIllustImage, error) {
-	ext := "." + strings.Split(illustImage.URL, ".")[len(strings.Split(illustImage.URL, "."))-1]
-	filename := key + "/" + name + ext
-	contentType := mime.TypeByExtension(ext)
-	_, err := p.Storage.UploadFile(config.PoipikuBucketName, filename, bytes.NewReader(illustImage.Data), storage_go.FileOptions{
-		ContentType: &contentType,
-	})
+func (p *PoPipe) uploadIllustImage(relativePath string, illustImage *api_model.IllustImage) (*model.PoIllustImage, error) {
+	_, err := p.Storage.UploadBytes(relativePath, illustImage.Data)
 	if err != nil {
 		return nil, err
 	}
+	shake256 := sha3.Sum256(illustImage.Data)
 	return &model.PoIllustImage{
-		Bucket:       config.PoipikuBucketName,
-		Key:          key,
-		Name:         name + ext,
+		RelativePath: relativePath,
 		OriginalName: illustImage.URL,
+		SHAKE256:     hex.EncodeToString(shake256[:]),
 	}, nil
 }
 
@@ -143,7 +138,7 @@ func (p *PoPipe) FetchIllusts(userID string, pageIdx int) (*PoIllusts, error) {
 		User: &PoUser{
 			ID:          poUser.ID,
 			Name:        poUser.Name,
-			ImageURL:    strings.ReplaceAll(p.Storage.GetPublicUrl(config.PoipikuBucketName, poUser.ImageKey+"/"+poUser.ImageName).SignedURL, os.Getenv("SUPABASE_INTERNAL_URL"), os.Getenv("HOST_NAME")+":"+os.Getenv("HOST_PORT")+"/supabase"),
+			ImageURL:    p.Storage.GetPublicUrl(poUser.ImageRelativePath),
 			ExternalURL: poUser.ExternalURL,
 			Description: poUser.Description,
 			IsFollowing: poUser.IsFollowing,

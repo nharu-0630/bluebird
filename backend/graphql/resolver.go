@@ -1,13 +1,13 @@
 package graphql
 
 import (
-	storage_go "github.com/supabase-community/storage-go"
+	"github.com/nharu-0630/bluebird/pipe"
 	"gorm.io/gorm"
 )
 
 type Resolver struct {
-	DB      *gorm.DB
-	Storage *storage_go.Client
-	TwPipe  *TwPipe
-	PoPipe  *PoPipe
+	DB        *gorm.DB
+	ShStorage *pipe.Storage
+	TwPipe    *TwPipe
+	PoPipe    *PoPipe
 }

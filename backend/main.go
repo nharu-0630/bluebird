@@ -14,6 +14,7 @@ import (
 	"github.com/nharu-0630/bluebird/graphql"
 	"github.com/nharu-0630/bluebird/mock"
 	"github.com/nharu-0630/bluebird/model"
+	"github.com/nharu-0630/bluebird/pipe"
 	"github.com/rs/cors"
 	storage_go "github.com/supabase-community/storage-go"
 	"go.uber.org/zap"
@@ -71,16 +72,16 @@ func main() {
 
 	db.AutoMigrate(&model.PoIllust{}, &model.PoUser{}, &model.PoIllustImage{})
 	poClient := poipiku.NewClient(os.Getenv("POIPIKU_TOKEN"))
-	poPipe := graphql.NewPoPipe(db, storage, poClient)
+	poPipe := graphql.NewPoPipe(db, pipe.NewStorage(storage, config.PoipikuBucketName, true), poClient)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "4000"
 	}
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{DB: db,
-		Storage: storage,
-		TwPipe:  twPipe,
-		PoPipe:  poPipe}}))
+		ShStorage: pipe.NewStorage(storage, config.ShelfBucketName, true),
+		TwPipe:    twPipe,
+		PoPipe:    poPipe}}))
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},

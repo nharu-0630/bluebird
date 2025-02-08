@@ -25,10 +25,9 @@ type PoUser struct {
 	UpdatedAt         time.Time
 	DeletedAt         gorm.DeletedAt `gorm:"index"`
 	Name              string         `gorm:"not null"`
-	ImageBucket       string         `gorm:"not null"`
-	ImageKey          string         `gorm:"not null"`
-	ImageName         string         `gorm:"not null"`
+	ImageRelativePath string         `gorm:"not null"`
 	ImageOriginalName string         `gorm:"not null"`
+	ImageSHAKE256     string         `gorm:"not null"`
 	ExternalURL       string         `gorm:"not null"`
 	Description       string         `gorm:"not null"`
 	IsFollowing       bool           `gorm:"not null"`
@@ -42,8 +41,7 @@ type PoIllustImage struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt `gorm:"index"`
-	Bucket          string         `gorm:"not null"`
-	Key             string         `gorm:"not null"`
-	Name            string         `gorm:"not null"`
+	RelativePath    string         `gorm:"not null"`
 	OriginalName    string         `gorm:"not null"`
+	SHAKE256        string         `gorm:"not null"`
 }
