@@ -24,7 +24,7 @@ func (r *queryResolver) TwTweetByID(ctx context.Context, tweetID string) (*TwTwe
 	if err != nil {
 		return nil, err
 	}
-	formattedTweet := FormatTweet(*tweet)
+	formattedTweet := FormatTwTweet(*tweet)
 	r.TwPipe.CacheTweet(formattedTweet)
 	return &formattedTweet, nil
 }
@@ -39,7 +39,7 @@ func (r *queryResolver) TwUserByScreenName(ctx context.Context, screenName strin
 	if err != nil {
 		return nil, err
 	}
-	formattedUser := FormatUser(*user)
+	formattedUser := FormatTwUser(*user)
 	r.TwPipe.CacheUser(formattedUser)
 	return &formattedUser, nil
 }
@@ -57,7 +57,7 @@ func (r *queryResolver) TwLikes(ctx context.Context, userID string, cursor *stri
 	if err != nil {
 		return nil, err
 	}
-	formattedTweets := tools.FormatItems(tweets, FormatTweet)
+	formattedTweets := tools.FormatItems(tweets, FormatTwTweet)
 	r.TwPipe.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
@@ -79,7 +79,7 @@ func (r *queryResolver) TwUserTweets(ctx context.Context, userID string, cursor 
 	if err != nil {
 		return nil, err
 	}
-	formattedTweets := tools.FormatItems(tweets, FormatTweet)
+	formattedTweets := tools.FormatItems(tweets, FormatTwTweet)
 	r.TwPipe.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
@@ -100,7 +100,7 @@ func (r *queryResolver) TwBookmarks(ctx context.Context, cursor *string) (*TwTwe
 	if err != nil {
 		return nil, err
 	}
-	formattedTweets := tools.FormatItems(tweets, FormatTweet)
+	formattedTweets := tools.FormatItems(tweets, FormatTwTweet)
 	r.TwPipe.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,
@@ -121,7 +121,7 @@ func (r *queryResolver) TwFollowers(ctx context.Context, userID string, cursor *
 	if err != nil {
 		return nil, err
 	}
-	formattedUsers := tools.FormatItems(users, FormatUser)
+	formattedUsers := tools.FormatItems(users, FormatTwUser)
 	r.TwPipe.CacheUsers(formattedUsers)
 	return &TwUsers{
 		Users:  formattedUsers,
@@ -142,7 +142,7 @@ func (r *queryResolver) TwFollowing(ctx context.Context, userID string, cursor *
 	if err != nil {
 		return nil, err
 	}
-	formattedUsers := tools.FormatItems(users, FormatUser)
+	formattedUsers := tools.FormatItems(users, FormatTwUser)
 	r.TwPipe.CacheUsers(formattedUsers)
 	return &TwUsers{
 		Users:  formattedUsers,
@@ -163,7 +163,7 @@ func (r *queryResolver) TwTweetDetail(ctx context.Context, tweetID string, curso
 	if err != nil {
 		return nil, err
 	}
-	formattedTweets := tools.FormatItems(tweets, FormatTweet)
+	formattedTweets := tools.FormatItems(tweets, FormatTwTweet)
 	r.TwPipe.CacheTweets(formattedTweets)
 	return &TwTweets{
 		Tweets: formattedTweets,

@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -35,25 +36,25 @@ func main() {
 	db.Create(mock.MockShelfTag())
 	db.Create(mock.MockShelfLocation())
 
+	migrateBuckets := []string{config.ShelfBucketName, config.PoipikuBucketName}
 	storage := storage_go.NewClient(os.Getenv("SUPABASE_INTERNAL_URL")+"/storage/v1", os.Getenv("SUPABASE_ANON_KEY"), nil)
 	buckets, err := storage.ListBuckets()
 	if err != nil {
 		zap.L().Sugar().Fatal(err)
 	}
-	bucketExists := false
-	for _, bucket := range buckets {
-		if bucket.Name == config.ShelfBucketName {
-			bucketExists = true
-			break
-		}
+	bucketNames := make([]string, len(buckets))
+	for i, bucket := range buckets {
+		bucketNames[i] = bucket.Name
 	}
-	if !bucketExists {
-		_, err = storage.CreateBucket(config.ShelfBucketName, storage_go.BucketOptions{
-			Public: true,
-		})
-		if err != nil {
-			zap.L().Sugar().Warn(err)
+	for _, bucket := range migrateBuckets {
+		if !slices.Contains(bucketNames, bucket) {
+			_, err = storage.CreateBucket(bucket, storage_go.BucketOptions{
+				Public: true})
+			if err != nil {
+				zap.L().Sugar().Warn(err)
+			}
 		}
+
 	}
 
 	db.AutoMigrate(&model.TwTweet{}, &model.TwUser{}, &model.TwQueryCache{})
@@ -68,16 +69,18 @@ func main() {
 	}
 	twPipe := graphql.NewTwPipe(db, twitter.NewClients(twClients))
 
+	db.AutoMigrate(&model.PoIllust{}, &model.PoUser{}, &model.PoIllustImage{})
 	poClient := poipiku.NewClient(os.Getenv("POIPIKU_TOKEN"))
+	poPipe := graphql.NewPoPipe(db, storage, poClient)
 
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "4000"
 	}
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{DB: db,
-		Storage:  storage,
-		TwPipe:   twPipe,
-		PoClient: poClient}}))
+		Storage: storage,
+		TwPipe:  twPipe,
+		PoPipe:  poPipe}}))
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"*"},
 		AllowedMethods:   []string{"GET", "POST", "OPTIONS"},

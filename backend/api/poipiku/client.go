@@ -194,13 +194,18 @@ func (c *Client) fetchIllustImage(url string) (*model.IllustImage, error) {
 		return nil, err
 	}
 	defer res.Body.Close()
-	img, _, err := image.Decode(res.Body)
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	_, format, err := image.DecodeConfig(bytes.NewReader(data))
 	if err != nil {
 		return nil, err
 	}
 	return &model.IllustImage{
-		URL:   url,
-		Image: img,
+		URL:    url,
+		Format: format,
+		Data:   data,
 	}, nil
 }
 

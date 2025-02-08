@@ -13,12 +13,11 @@ func (r *queryResolver) PoIllustByID(ctx context.Context, userID string, illustI
 	if password == nil {
 		password = new(string)
 	}
-	illust, err := r.PoClient.FetchIllust(userID, illustID, *password)
+	illust, err := r.PoPipe.FetchIllust(userID, illustID, *password)
 	if err != nil {
 		return nil, err
 	}
-	formattedIllust := FormatIllust(*illust)
-	return &formattedIllust, nil
+	return illust, nil
 }
 
 // PoIllustsByID is the resolver for the poIllustsByID field.
@@ -26,12 +25,11 @@ func (r *queryResolver) PoIllustsByID(ctx context.Context, userID string, pageId
 	if pageIdx == nil {
 		pageIdx = new(int)
 	}
-	illusts, err := r.PoClient.FetchIllusts(userID, *pageIdx)
+	illusts, err := r.PoPipe.FetchIllusts(userID, *pageIdx)
 	if err != nil {
 		return nil, err
 	}
-	formattedIllusts := FormatIllusts(*illusts)
-	return &formattedIllusts, nil
+	return illusts, nil
 }
 
 // Query returns QueryResolver implementation.

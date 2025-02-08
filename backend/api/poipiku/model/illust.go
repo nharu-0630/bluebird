@@ -1,7 +1,5 @@
 package model
 
-import "image"
-
 type Illust struct {
 	ID          string
 	Password    string
@@ -23,8 +21,9 @@ type User struct {
 }
 
 type IllustImage struct {
-	URL   string
-	Image image.Image
+	URL    string
+	Format string
+	Data   []byte
 }
 
 type Illusts struct {

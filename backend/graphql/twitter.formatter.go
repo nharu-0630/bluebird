@@ -6,7 +6,7 @@ import (
 	"github.com/nharu-0630/bluebird/api/twitter/model"
 )
 
-func FormatTweet(tweet model.Tweet) TwTweet {
+func FormatTwTweet(tweet model.Tweet) TwTweet {
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, tweet.Legacy.CreatedAt)
 	parsedMedias := make([]*TwMedia, len(tweet.Legacy.Entities.Media))
 	for j, media := range tweet.Legacy.Entities.Media {
@@ -32,7 +32,7 @@ func FormatTweet(tweet model.Tweet) TwTweet {
 			VideoURL:    videoURL,
 		}
 	}
-	user := FormatUser(tweet.Core.UserResults.Result)
+	user := FormatTwUser(tweet.Core.UserResults.Result)
 	return TwTweet{
 		ID:            &tweet.RestID,
 		User:          &user,
@@ -51,7 +51,7 @@ func FormatTweet(tweet model.Tweet) TwTweet {
 	}
 }
 
-func FormatUser(user model.User) TwUser {
+func FormatTwUser(user model.User) TwUser {
 	parsedBirthday := time.Time{}
 	// :TODO: Parse birthday
 	parsedCreatedAt, _ := time.Parse(time.RubyDate, user.Legacy.CreatedAt)
