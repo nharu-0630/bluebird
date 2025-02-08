@@ -143,10 +143,41 @@ export type MutationUpdateShelfTagArgs = {
   ulid: Scalars['String']['input'];
 };
 
+export type PoIllust = {
+  __typename?: 'PoIllust';
+  category: Scalars['String']['output'];
+  description: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  imageURLs?: Maybe<Array<Scalars['String']['output']>>;
+  user?: Maybe<PoUser>;
+};
+
+export type PoIllusts = {
+  __typename?: 'PoIllusts';
+  hasNext: Scalars['Boolean']['output'];
+  illusts: Array<PoIllust>;
+  pinnedIllusts: Array<PoIllust>;
+  user: PoUser;
+};
+
+export type PoUser = {
+  __typename?: 'PoUser';
+  description: Scalars['String']['output'];
+  emojis: Array<Scalars['String']['output']>;
+  externalURL: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  imageURL: Scalars['String']['output'];
+  isFollowing: Scalars['Boolean']['output'];
+  itemCount: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+};
+
 export type Query = {
   __typename?: 'Query';
   deletedShelfItem?: Maybe<ShelfItem>;
   deletedShelfItems: Array<ShelfItem>;
+  poIllustByID: PoIllust;
+  poIllustsByID: PoIllusts;
   shelfCategories: Array<ShelfCategory>;
   shelfCategory?: Maybe<ShelfCategory>;
   shelfItem?: Maybe<ShelfItem>;
@@ -168,6 +199,19 @@ export type Query = {
 
 export type QueryDeletedShelfItemArgs = {
   ulid: Scalars['String']['input'];
+};
+
+
+export type QueryPoIllustByIdArgs = {
+  illustID: Scalars['String']['input'];
+  password?: InputMaybe<Scalars['String']['input']>;
+  userID: Scalars['String']['input'];
+};
+
+
+export type QueryPoIllustsByIdArgs = {
+  pageIdx?: InputMaybe<Scalars['Int']['input']>;
+  userID: Scalars['String']['input'];
 };
 
 
@@ -329,6 +373,23 @@ export type TwUsers = {
   cursor?: Maybe<Scalars['String']['output']>;
   users: Array<TwUser>;
 };
+
+export type PoIllustByIdQueryVariables = Exact<{
+  userID: Scalars['String']['input'];
+  illustID: Scalars['String']['input'];
+  password?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PoIllustByIdQuery = { __typename?: 'Query', poIllustByID: { __typename?: 'PoIllust', id: string, category: string, description: string, imageURLs?: Array<string> | null, user?: { __typename?: 'PoUser', id: string, name: string, imageURL: string, externalURL: string, description: string, isFollowing: boolean, emojis: Array<string>, itemCount: number } | null } };
+
+export type PoIllustsByIdQueryVariables = Exact<{
+  userID: Scalars['String']['input'];
+  pageIdx?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type PoIllustsByIdQuery = { __typename?: 'Query', poIllustsByID: { __typename?: 'PoIllusts', hasNext: boolean, user: { __typename?: 'PoUser', id: string, name: string, imageURL: string, externalURL: string, description: string, isFollowing: boolean, emojis: Array<string>, itemCount: number }, pinnedIllusts: Array<{ __typename?: 'PoIllust', id: string, category: string, description: string }>, illusts: Array<{ __typename?: 'PoIllust', id: string, category: string, description: string }> } };
 
 export type GetShelfItemsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -542,6 +603,8 @@ export type TwFollowersQueryVariables = Exact<{
 export type TwFollowersQuery = { __typename?: 'Query', twFollowers?: { __typename?: 'TwUsers', cursor?: string | null, users: Array<{ __typename?: 'TwUser', id?: string | null, name?: string | null, screenName?: string | null, verified?: boolean | null, blueVerified?: boolean | null, description?: string | null, location?: string | null, birthday?: any | null, createdAt?: any | null, friendsCount?: number | null, following?: boolean | null, fastFollowersCount?: number | null, followersCount?: number | null, normalFollowersCount?: number | null, followedBy?: boolean | null, mediaCount?: number | null, favouritesCount?: number | null, listedCount?: number | null, pinnedTweetIDs: Array<string>, profileBannerURL?: string | null, profileImageURL?: string | null, statusesCount?: number | null }> } | null };
 
 
+export const PoIllustByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PoIllustByID"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userID"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"illustID"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"password"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"poIllustByID"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userID"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userID"}}},{"kind":"Argument","name":{"kind":"Name","value":"illustID"},"value":{"kind":"Variable","name":{"kind":"Name","value":"illustID"}}},{"kind":"Argument","name":{"kind":"Name","value":"password"},"value":{"kind":"Variable","name":{"kind":"Name","value":"password"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"imageURLs"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"imageURL"}},{"kind":"Field","name":{"kind":"Name","value":"externalURL"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isFollowing"}},{"kind":"Field","name":{"kind":"Name","value":"emojis"}},{"kind":"Field","name":{"kind":"Name","value":"itemCount"}}]}}]}}]}}]} as unknown as DocumentNode<PoIllustByIdQuery, PoIllustByIdQueryVariables>;
+export const PoIllustsByIdDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PoIllustsByID"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"userID"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"pageIdx"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"Int"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"poIllustsByID"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"userID"},"value":{"kind":"Variable","name":{"kind":"Name","value":"userID"}}},{"kind":"Argument","name":{"kind":"Name","value":"pageIdx"},"value":{"kind":"Variable","name":{"kind":"Name","value":"pageIdx"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"hasNext"}},{"kind":"Field","name":{"kind":"Name","value":"user"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"imageURL"}},{"kind":"Field","name":{"kind":"Name","value":"externalURL"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isFollowing"}},{"kind":"Field","name":{"kind":"Name","value":"emojis"}},{"kind":"Field","name":{"kind":"Name","value":"itemCount"}}]}},{"kind":"Field","name":{"kind":"Name","value":"pinnedIllusts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}},{"kind":"Field","name":{"kind":"Name","value":"illusts"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"category"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]}}]} as unknown as DocumentNode<PoIllustsByIdQuery, PoIllustsByIdQueryVariables>;
 export const GetShelfItemsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetShelfItems"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shelfItems"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"category"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"tags"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"images"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"bucket"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"originalName"}},{"kind":"Field","name":{"kind":"Name","value":"signedUrl"}}]}}]}}]}}]} as unknown as DocumentNode<GetShelfItemsQuery, GetShelfItemsQueryVariables>;
 export const GetShelfItemDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetShelfItem"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ulid"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"shelfItem"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ulid"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ulid"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"category"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"tags"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"images"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"bucket"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"originalName"}},{"kind":"Field","name":{"kind":"Name","value":"signedUrl"}}]}}]}}]}}]} as unknown as DocumentNode<GetShelfItemQuery, GetShelfItemQueryVariables>;
 export const GetDeletedShelfItemsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetDeletedShelfItems"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletedShelfItems"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"category"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"tags"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"location"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"images"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"ulid"}},{"kind":"Field","name":{"kind":"Name","value":"bucket"}},{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"originalName"}},{"kind":"Field","name":{"kind":"Name","value":"signedUrl"}}]}}]}}]}}]} as unknown as DocumentNode<GetDeletedShelfItemsQuery, GetDeletedShelfItemsQueryVariables>;

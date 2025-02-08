@@ -1,0 +1,44 @@
+query PoIllustByID($userID: String!, $illustID: String!, $password: String) {
+  poIllustByID(userID: $userID, illustID: $illustID, password: $password) {
+    id
+    category
+    description
+    imageURLs
+    user {
+      id
+      name
+      imageURL
+      externalURL
+      description
+      isFollowing
+      emojis
+      itemCount
+    }
+  }
+}
+
+query PoIllustsByID($userID: String!, $pageIdx: Int) {
+  poIllustsByID(userID: $userID, pageIdx: $pageIdx) {
+    hasNext
+    user {
+      id
+      name
+      imageURL
+      externalURL
+      description
+      isFollowing
+      emojis
+      itemCount
+    }
+    pinnedIllusts {
+      id
+      category
+      description
+    }
+    illusts {
+      id
+      category
+      description
+    }
+  }
+}
