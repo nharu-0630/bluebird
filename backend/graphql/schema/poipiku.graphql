@@ -1,16 +1,30 @@
 type PoIllust {
-  userID: String!
-  userName: String!
-  illustID: String!
-  password: String!
+  id: String!
+  user: PoUser
+  category: String!
   description: String!
-  images: [PoImage!]!
+  imageURLs: [String!]
 }
 
-type PoImage {
-  url: String!
+type PoUser {
+  id: String!
+  name: String!
+  imageURL: String!
+  externalURL: String!
+  description: String!
+  isFollowing: Boolean!
+  emojis: [String!]!
+  itemCount: Int!
+}
+
+type PoIllusts {
+  user: PoUser!
+  pinnedIllusts: [PoIllust!]!
+  illusts: [PoIllust!]!
+  hasNext: Boolean!
 }
 
 extend type Query {
-  poIllust(userID: String!, illustID: String!, password: String): PoIllust!
+  poIllustByID(userID: String!, illustID: String!, password: String): PoIllust!
+  poIllustsByID(userID: String!, pageIdx: Int): PoIllusts!
 }

@@ -8,8 +8,8 @@ import (
 	"context"
 )
 
-// PoIllust is the resolver for the poIllust field.
-func (r *queryResolver) PoIllust(ctx context.Context, userID string, illustID string, password *string) (*PoIllust, error) {
+// PoIllustByID is the resolver for the poIllustByID field.
+func (r *queryResolver) PoIllustByID(ctx context.Context, userID string, illustID string, password *string) (*PoIllust, error) {
 	if password == nil {
 		password = new(string)
 	}
@@ -17,20 +17,21 @@ func (r *queryResolver) PoIllust(ctx context.Context, userID string, illustID st
 	if err != nil {
 		return nil, err
 	}
-	parsedImages := []*PoImage{}
-	for _, image := range illust.Images {
-		parsedImages = append(parsedImages, &PoImage{
-			URL: image.ImageURL,
-		})
+	formattedIllust := FormatIllust(*illust)
+	return &formattedIllust, nil
+}
+
+// PoIllustsByID is the resolver for the poIllustsByID field.
+func (r *queryResolver) PoIllustsByID(ctx context.Context, userID string, pageIdx *int) (*PoIllusts, error) {
+	if pageIdx == nil {
+		pageIdx = new(int)
 	}
-	return &PoIllust{
-		UserID:      illust.UserID,
-		UserName:    illust.UserName,
-		IllustID:    illust.IllustID,
-		Password:    illust.Password,
-		Description: illust.Description,
-		Images:      parsedImages,
-	}, nil
+	illusts, err := r.PoClient.FetchIllusts(userID, *pageIdx)
+	if err != nil {
+		return nil, err
+	}
+	formattedIllusts := FormatIllusts(*illusts)
+	return &formattedIllusts, nil
 }
 
 // Query returns QueryResolver implementation.

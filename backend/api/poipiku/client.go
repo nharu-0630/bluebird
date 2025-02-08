@@ -11,9 +11,11 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/nharu-0630/bluebird/api/poipiku/model"
 )
 
@@ -29,13 +31,84 @@ func NewClient(token string) *Client {
 	}
 }
 
-func (c *Client) FetchIllust(userID string, illustID string, password string) (*model.Illust, error) {
-	illust := &model.Illust{
-		UserID:   userID,
-		IllustID: illustID,
-		Password: password,
-		Images:   []model.IllustImage{},
+func (c *Client) FetchIllusts(userID string, pageIdx int) (*model.Illusts, error) {
+	payload := "PG=" + strconv.Itoa(pageIdx) + "&ID=" + userID + "&KWD="
+	req, err := http.NewRequest("GET", "https://poipiku.com/IllustListPcV.jsp?"+payload, nil)
+	if err != nil {
+		return nil, err
 	}
+	req.Header.Add("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+	req.Header.Add("accept-language", "ja")
+	req.Header.Add("referer", "https://poipiku.com/"+userID+"/")
+	req.Header.Add("user-agent", USER_AGENT)
+	req.AddCookie(&http.Cookie{Name: "POIPIKU_LK", Value: c.token})
+	req.AddCookie(&http.Cookie{Name: "POIPIKU_CONTENTS_VIEW_MODE", Value: "1"})
+	res, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	text := string(bytes.ToValidUTF8(body, []byte("�")))
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(text))
+	if err != nil {
+		return nil, err
+	}
+
+	illusts := &model.Illusts{}
+	user, err := c.fetchUser(doc)
+	if err != nil {
+		return nil, err
+	}
+	illusts.User = *user
+	illusts.User.ID = userID
+	illusts.PinnedIllusts = []model.Illust{}
+	illusts.Illusts = []model.Illust{}
+	doc.Find("div.IllustThumb").Each(func(i int, s *goquery.Selection) {
+		illust := model.Illust{
+			ID:          strings.ReplaceAll(strings.Split(s.Find("a.IllustInfo").AttrOr("href", ""), "/")[2], ".html", ""),
+			Category:    s.Find("a.CategoryInfo").Text(),
+			Description: s.Find("span.IllustInfoDesc").Text(),
+		}
+		if strings.Contains(s.AttrOr("class", ""), "Pined") {
+			illusts.PinnedIllusts = append(illusts.PinnedIllusts, illust)
+		} else {
+			illusts.Illusts = append(illusts.Illusts, illust)
+		}
+	})
+	illusts.HasNext = doc.Find("a.PageBarItem").Last().AttrOr("href", "") != "/IllustListPcV.jsp?PG="+strconv.Itoa(pageIdx)+"&ID="+userID+"&KWD="
+	return illusts, nil
+}
+
+func (c *Client) fetchUser(doc *goquery.Document) (*model.User, error) {
+	user := &model.User{}
+	user.Name = doc.Find("h2.UserInfoUserName").Text()
+	userImageURL := strings.ReplaceAll(strings.ReplaceAll(doc.Find("a.UserInfoUserThumb").AttrOr("style", ""), "background-image: url('", ""), "')", "")
+	userImage, err := c.fetchIllustImage("https:" + userImageURL)
+	if err != nil {
+		return nil, err
+	}
+	user.Image = *userImage
+	user.ExternalURL = doc.Find("h3.UserInfoProfile").First().Find("a").AttrOr("href", "")
+	user.Description = doc.Find("h3.UserInfoProfile").Eq(1).Text()
+	user.IsFollowing = doc.Find("span.UserInfoCmdFollow.Selected").Length() > 0
+	emojis := []string{}
+	doc.Find("span.WaveButton").Each(func(i int, s *goquery.Selection) {
+		emojis = append(emojis, s.AttrOr("alt", ""))
+	})
+	user.Emojis = emojis
+	itemCount, err := strconv.Atoi(doc.Find("span.UserInfoStateItemNum").Text())
+	if err != nil {
+		return nil, err
+	}
+	user.ItemCount = itemCount
+	return user, nil
+}
+
+func (c *Client) FetchIllust(userID string, illustID string, password string) (*model.Illust, error) {
 	req, err := http.NewRequest("GET", "https://poipiku.com/"+userID+"/"+illustID+".html", nil)
 	if err != nil {
 		return nil, err
@@ -56,18 +129,27 @@ func (c *Client) FetchIllust(userID string, illustID string, password string) (*
 		return nil, err
 	}
 	text := string(bytes.ToValidUTF8(body, []byte("�")))
-	userNameRegex := regexp.MustCompile(`class="IllustUserName">(.+?)</h2>`)
-	if userNameRegex.MatchString(text) {
-		illust.UserName = userNameRegex.FindStringSubmatch(text)[1]
-	} else {
-		return nil, errors.New("user name not found")
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(text))
+	if err != nil {
+		return nil, err
 	}
-	descRegex := regexp.MustCompile(`class="IllustItemDesc" >(.+?)</h1>`)
-	if descRegex.MatchString(text) {
-		illust.Description = strings.ReplaceAll(descRegex.FindStringSubmatch(text)[1], "<br />", "\n")
-	} else {
-		return nil, errors.New("description not found")
+
+	illust := &model.Illust{
+		ID:       illustID,
+		Password: password,
+		Images:   &[]model.IllustImage{},
 	}
+
+	user, err := c.fetchUser(doc)
+	if err != nil {
+		return nil, err
+	}
+	illust.User = user
+	illust.User.ID = userID
+
+	illust.Category = doc.Find("h2.IllustItemCategory").Text()
+	illust.Description = doc.Find("h1.IllustItemDesc").Text()
+
 	file, err := c.fetchAppendFile(userID, illustID, password)
 	if err != nil {
 		return nil, errors.New("failed to fetch append file, maybe password is incorrect")
@@ -92,7 +174,7 @@ func (c *Client) FetchIllust(userID string, illustID string, password string) (*
 		if err != nil {
 			continue
 		}
-		illust.Images = append(illust.Images, *img)
+		*illust.Images = append(*illust.Images, *img)
 	}
 	return illust, nil
 }
@@ -117,8 +199,8 @@ func (c *Client) fetchIllustImage(url string) (*model.IllustImage, error) {
 		return nil, err
 	}
 	return &model.IllustImage{
-		ImageURL: url,
-		Image:    img,
+		URL:   url,
+		Image: img,
 	}, nil
 }
 

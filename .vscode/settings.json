@@ -7,14 +7,19 @@
   "typescript.tsdk": "frontend/.yarn/sdks/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "cSpell.words": [
+    "apng",
     "datatypes",
     "favorited",
     "favourites",
+    "goquery",
     "gorm",
+    "Illusts",
     "mapstructure",
     "mergo",
+    "nharu",
     "poipiku",
-    "supabase"
+    "supabase",
+    "webp"
   ],
   "makefile.configureOnOpen": false
 }

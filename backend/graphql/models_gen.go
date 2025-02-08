@@ -19,16 +19,29 @@ type Mutation struct {
 }
 
 type PoIllust struct {
-	UserID      string     `json:"userID"`
-	UserName    string     `json:"userName"`
-	IllustID    string     `json:"illustID"`
-	Password    string     `json:"password"`
-	Description string     `json:"description"`
-	Images      []*PoImage `json:"images"`
+	ID          string   `json:"id"`
+	User        *PoUser  `json:"user,omitempty"`
+	Category    string   `json:"category"`
+	Description string   `json:"description"`
+	ImageURLs   []string `json:"imageURLs,omitempty"`
 }
 
-type PoImage struct {
-	URL string `json:"url"`
+type PoIllusts struct {
+	User          *PoUser     `json:"user"`
+	PinnedIllusts []*PoIllust `json:"pinnedIllusts"`
+	Illusts       []*PoIllust `json:"illusts"`
+	HasNext       bool        `json:"hasNext"`
+}
+
+type PoUser struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	ImageURL    string   `json:"imageURL"`
+	ExternalURL string   `json:"externalURL"`
+	Description string   `json:"description"`
+	IsFollowing bool     `json:"isFollowing"`
+	Emojis      []string `json:"emojis"`
+	ItemCount   int      `json:"itemCount"`
 }
 
 type Query struct {
